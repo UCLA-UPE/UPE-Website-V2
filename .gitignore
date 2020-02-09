@@ -1,2 +1,2 @@
-export.csv
-db.json
+node_modules
+db_data
