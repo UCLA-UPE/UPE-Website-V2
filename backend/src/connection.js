@@ -1,8 +1,9 @@
 // connection.js
-const mongoose = require("mongoose")
-const User = require("./User.model")
+const mongoose = require('mongoose')
+const User = require('./User.model')
 
-const connection = "mongodb://mongo:27017/mongo-test"
+const host = process.env.PRODUCTION ? 'mongo' : 'localhost'
+const connection = 'mongodb://' + host + ':27017/upe-web'
 
 const connectDb = () => {
   return mongoose.connect(connection)

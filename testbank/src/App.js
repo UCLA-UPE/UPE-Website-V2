@@ -1,5 +1,7 @@
 import React from 'react'
+import ReactDOM from 'react-dom'
 import axios from 'axios'
+import Button from '@material-ui/core/Button'
 import './App.css'
 
 const apiUrl = `http://localhost:8080`
@@ -33,6 +35,9 @@ class App extends React.Component {
     return (
       <div className="App">
         <header className="App-header">
+          <Button variant="contained" color="primary">
+            Hello World
+          </Button>
           <button onClick={() => this.createUser()}>Create User</button>
           <p>Users liast:</p>
           <ul>
