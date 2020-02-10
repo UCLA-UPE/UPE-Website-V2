@@ -1,12 +1,18 @@
-version: "2"
+version: '3.7'
 services:
-  web:
-    build: .
+  testbank:
+    build: ./testbank
     ports:
-      - "8080:8080"
+      - '3000:3000'
+    depends_on:
+      - backend
+  backend:
+    build: ./backend
+    ports:
+      - '8080:8080'
     depends_on:
       - mongo
   mongo:
     image: mongo
     ports:
-      - "27017:27017"
+      - '27017:27017'

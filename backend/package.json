@@ -1,6 +1,7 @@
 {
   "name": "upe-website-v2-backend",
   "version": "1.0.0",
+  "private": true,
   "description": "UPE Website V2 - Backend",
   "main": "server.js",
   "scripts": {
@@ -11,6 +12,7 @@
   "author": "Michael Liu",
   "license": "ISC",
   "dependencies": {
+    "cors": "^2.8.5",
     "express": "^4.17.1",
     "mongoose": "^5.8.11"
   },
