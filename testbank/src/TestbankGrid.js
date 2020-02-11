@@ -1,5 +1,6 @@
 import React from 'react'
 import { makeStyles } from '@material-ui/core/styles'
+import Typography from '@material-ui/core/Typography'
 import Grid from '@material-ui/core/Grid'
 import axios from 'axios'
 
@@ -37,17 +38,25 @@ export default function TestbankGrid(props) {
   }
 
   return (
-    <Grid container spacing={2} className={classes.grid}>
-      {gridItems.map(subject => (
-        <Grid item key={subject.course_subject} md={4}>
-          <GridCard
-            title={subject.course_subject}
-            subItems={subject.course_numbers}
-            documentCount={subject.count}
-            handleClick={props.handleClick(subject.course_subject)}
-          />
-        </Grid>
-        ))}
-    </Grid>
+    <>
+      <Typography variant="h2" component="h2">
+        
+      </Typography>
+      <Grid container spacing={2} className={classes.grid}>
+        {gridItems.map(subject => (
+          <Grid item
+            onClick={props.handleClick(subject.course_subject)}
+            key={subject.course_subject}
+            md={4}
+          >
+            <GridCard
+              title={subject.course_subject}
+              subItems={subject.course_numbers}
+              documentCount={subject.count}
+            />
+          </Grid>
+          ))}
+      </Grid>
+    </>
   )
 }

@@ -1,5 +1,4 @@
 import React from 'react'
-import {hot} from 'react-hot-loader'
 import ReactDOM from 'react-dom'
 import axios from 'axios'
 
@@ -8,7 +7,7 @@ import CssBaseline from '@material-ui/core/CssBaseline'
 import Button from '@material-ui/core/Button'
 
 // custom components
-import ButtonAppBar from './ButtonAppBar'
+import TestbankAppBar from './TestbankAppBar'
 import TestbankBody from './TestbankBody'
 import InfoBar from './InfoBar'
 
@@ -67,11 +66,11 @@ function App() {
     <>
       <link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap' />
       <CssBaseline />
-      <ButtonAppBar token={authToken} apiUrl={apiUrl} authCB={authCB} />
+      <TestbankAppBar token={authToken} apiUrl={apiUrl} authCB={authCB} />
       <TestbankBody token={authToken} apiUrl={apiUrl} />
       <InfoBar open={sbOpen} setOpen={setSbOpen} severity={sbSeverity} message={sbMessage} />
     </>
   )
 }
 
-export default hot(module)(App)
+export default App

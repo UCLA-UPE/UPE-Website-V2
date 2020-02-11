@@ -29,7 +29,7 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-export default function ButtonAppBar(props) {
+export default function TestbankAppBar(props) {
   const classes = useStyles();
 
   return (

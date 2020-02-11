@@ -1,6 +1,5 @@
 import React from 'react'
 import { makeStyles } from '@material-ui/core/styles'
-import Container from '@material-ui/core/Container'
 import Typography from '@material-ui/core/Typography'
 import Grid from '@material-ui/core/Grid'
 import axios from 'axios'
@@ -26,7 +25,6 @@ export default function SubjectGrid(props) {
   const [gridItems, setGridItems] = React.useState([])
   const loadGrid = async () => {
     try {
-      console.log(props.subject)
       const res = await axios.post(props.apiUrl + '/get-subject-numbers', {
         token: props.token,
         subject: props.subject
@@ -47,12 +45,15 @@ export default function SubjectGrid(props) {
       </Typography>
       <Grid container spacing={2} className={classes.grid}>
         {gridItems.map(courseNumber => (
-          <Grid item key={courseNumber.course_number} md={4}>
+          <Grid item
+            onClick={props.handleClick(props.subject, courseNumber.course_number)}
+            key={courseNumber.course_number}
+            md={4}
+          >
             <GridCard 
               title={courseNumber.course_number} 
               subItems={[]} 
               documentCount={courseNumber.count} 
-              handleClick={props.handleClick(props.subject, courseNumber.course_number)} 
             />
           </Grid>
           ))}

@@ -33,10 +33,8 @@ module.exports = {
     historyApiFallback: {
       index: 'index.html'
     },
-    hotOnly: true
   },
   plugins: [
     new HtmlWebpackPlugin({ template: './src/index.html' }),
-    new webpack.HotModuleReplacementPlugin()
   ]
 };

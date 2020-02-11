@@ -40,7 +40,7 @@ export default function GridCard(props) {
 
   return (
     <Card className={classes.root}>
-      <CardActionArea onClick={props.handleClick}>
+      <CardActionArea>
         <CardContent>
           <Typography variant="h5" component="h2">
             {props.title}
@@ -49,7 +49,7 @@ export default function GridCard(props) {
             {listBulleted(7)}
           </Typography>
           <Typography variant="body2" component="p">
-            {props.documentCount} Tests
+            {props.documentCount} Documents
           </Typography>
         </CardContent>
       </CardActionArea>
