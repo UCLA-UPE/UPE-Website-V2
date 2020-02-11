@@ -2,13 +2,6 @@ import React from 'react'
 import { makeStyles } from '@material-ui/core/styles'
 import Grid from '@material-ui/core/Grid'
 import axios from 'axios'
-import {
-  BrowserRouter as Router,
-  Switch,
-  Route,
-  Link,
-  useParams
-} from 'react-router-dom'
 
 import SubjectCard from './SubjectCard'
 

@@ -2,13 +2,7 @@ import React from 'react'
 import { makeStyles } from '@material-ui/core/styles'
 import Container from '@material-ui/core/Container'
 import axios from 'axios'
-import {
-  BrowserRouter as Router,
-  Switch,
-  Route,
-  Link,
-  useParams
-} from 'react-router-dom'
+import { useRouter } from 'hookrouter'
 
 import TestSubject from './TestSubject'
 import TestSubjects from './TestSubjects'
@@ -26,17 +20,8 @@ export default function TestbankBody(props) {
   const classes = useStyles()
 
   return (
-    <Router>
-      <Container maxWidth='md' className={classes.root}>
-        <Switch>
-          <Route path='/tests/:test'>
-            <TestSubject />
-          </Route>
-          <Route path='/tests'>
-            <TestSubjects />
-          </Route>
-        </Switch>
-      </Container>
-    </Router>
+    <Container maxWidth='md' className={classes.root}>
+      <TestSubjects {...props} />
+    </Container>
   )
 }

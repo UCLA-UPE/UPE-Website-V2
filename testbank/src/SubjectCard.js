@@ -6,14 +6,6 @@ import CardActions from '@material-ui/core/CardActions'
 import CardContent from '@material-ui/core/CardContent'
 import Button from '@material-ui/core/Button'
 import Typography from '@material-ui/core/Typography'
-import {
-  BrowserRouter as Router,
-  Switch,
-  Route,
-  Link,
-  useRouteMatch,
-  useParams
-} from 'react-router-dom'
 
 const useStyles = makeStyles({
   root: {
@@ -35,7 +27,6 @@ const useStyles = makeStyles({
 export default function SubjectCard(props) {
   const classes = useStyles()
   const bull = <span className={classes.bullet}>•</span>
-  const match = useRouteMatch()
 
   const listBulleted = (max_overflow) => {
     let s = props.subItems.slice(0, max_overflow).map((number, i) => (
@@ -51,21 +42,19 @@ export default function SubjectCard(props) {
 
   return (
     <Card className={classes.root}>
-      <Link to={`${match.url}/${props.title}`} onClick={props.handleClick} style={{ textDecoration: 'none' }}>
-        <CardActionArea>
-          <CardContent>
-            <Typography variant="h5" component="h2">
-              {props.title}
-            </Typography>
-            <Typography className={classes.pos} color="textSecondary">
-              {listBulleted(7)}
-            </Typography>
-            <Typography variant="body2" component="p">
-              {props.documentCount} Tests
-            </Typography>
-          </CardContent>
-        </CardActionArea>
-      </Link>
+      <CardActionArea>
+        <CardContent>
+          <Typography variant="h5" component="h2">
+            {props.title}
+          </Typography>
+          <Typography className={classes.pos} color="textSecondary">
+            {listBulleted(7)}
+          </Typography>
+          <Typography variant="body2" component="p">
+            {props.documentCount} Tests
+          </Typography>
+        </CardContent>
+      </CardActionArea>
     </Card>
   )
 }

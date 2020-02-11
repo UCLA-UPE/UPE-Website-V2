@@ -4,14 +4,6 @@ import Container from '@material-ui/core/Container'
 import Typography from '@material-ui/core/Typography'
 import Grid from '@material-ui/core/Grid'
 import axios from 'axios'
-import {
-  BrowserRouter as Router,
-  Switch,
-  Route,
-  Link,
-  useParams
-} from 'react-router-dom'
-
 import SubjectCard from './SubjectCard'
 
 const useStyles = makeStyles(theme => ({
@@ -22,32 +14,13 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-/**
- * 3 views: Subjects > Numbers > Tests
- */
-export default function TestbankBody(props) {
+export default function TestSubject(props) {
   
   const classes = useStyles()
 
   React.useEffect(() => {
-    loadSubjects()
-    // console.log(props.nav)
+    loadSubject()
   }, [props.nav.length])
-
-  const [courseSubjects, setCourseSubjects] = React.useState([])
-  const loadSubjects = async () => {
-    try {
-      const res = await axios.post(props.apiUrl + '/get-subjects', {
-        token: props.token
-      })
-      setCourseSubjects(res.data)
-      // console.log(res.data)
-    } catch(e) {
-      if (e.response) {
-        console.log(e.response)
-      }
-    }
-  }
 
   const [courseSubjectNumbers, setCourseSubjectNumbers] = React.useState([])
   const loadSubject = async (subjectToLoad) => {
@@ -65,15 +38,8 @@ export default function TestbankBody(props) {
     }
   }
 
-  const [selectedCourseSubject, setSelectedCourseSubject] = React.useState()
-  const handleCourseSubjectClick = (clickedCourseSubject) => async () => {
-    // console.log(clickedCourseSubject)
-    setSelectedCourseSubject(clickedCourseSubject)
-    await loadSubject(clickedCourseSubject)
-  }
-
-  const handleCourseNumberClick = async (clickedCourseNumber) => () => {
-    // console.log(clickedCourseNumber)
+  const handleClick = async (courseNumber) => () => {
+    // console.log(courseNumber)
   }
 
   return (

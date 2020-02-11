@@ -19,6 +19,7 @@
     "@material-ui/lab": "^4.0.0-alpha.42",
     "@types/react": "^15.6.28",
     "axios": "^0.19.2",
+    "hookrouter": "^1.2.3",
     "react": "^16.12.0",
     "react-dom": "^16.12.0",
     "react-hot-loader": "^4.12.19",
