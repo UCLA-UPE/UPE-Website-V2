@@ -77,7 +77,7 @@ TestSchema.statics.getSubjects = async function() {
   return ret
 }
 
-TestSchema.statics.getSubject = async function(subject) {
+TestSchema.statics.getSubjectNumbers = async function(subject) {
   const thisSubject = this.find({ 'course.subject': subject })
   const uniqueNumbers = await thisSubject.distinct('course.number')
   let ret = []
@@ -89,6 +89,11 @@ TestSchema.statics.getSubject = async function(subject) {
   }
   ret.sort((a, b) => b['count'] - a['count'])
   return ret
+}
+
+TestSchema.statics.getSubjectNumberTests = async function(subject, number) {
+  const tests = await this.find({ 'course.subject': subject, 'course.number': number }, '_id term.quarter term.year professor.name course.subject course.number kind.name kind.number')
+  return tests
 }
 
 const Test = mongoose.model('Test', TestSchema)

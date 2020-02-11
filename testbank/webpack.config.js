@@ -29,13 +29,14 @@ module.exports = {
   devServer: {
     contentBase: path.join(__dirname, 'public/'),
     port: 3000,
-    // publicPath: 'http://localhost:3000/dist/',
     publicPath: '/dist/',
     historyApiFallback: {
       index: 'index.html'
-    }
+    },
+    hotOnly: true
   },
   plugins: [
-    new HtmlWebpackPlugin({ template: './src/index.html' })
+    new HtmlWebpackPlugin({ template: './src/index.html' }),
+    new webpack.HotModuleReplacementPlugin()
   ]
 };

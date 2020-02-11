@@ -1,4 +1,5 @@
 import React from 'react'
+import {hot} from 'react-hot-loader'
 import ReactDOM from 'react-dom'
 import axios from 'axios'
 
@@ -19,7 +20,7 @@ const apiUrl = `http://localhost:8080`
 
 
 
-export default function App() {
+function App() {
 
   // state hooks
   const [authToken,  setAuthToken]  = React.useState()
@@ -64,7 +65,7 @@ export default function App() {
   
   return (
     <>
-      <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" />
+      <link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap' />
       <CssBaseline />
       <ButtonAppBar token={authToken} apiUrl={apiUrl} authCB={authCB} />
       <TestbankBody token={authToken} apiUrl={apiUrl} />
@@ -72,3 +73,5 @@ export default function App() {
     </>
   )
 }
+
+export default hot(module)(App)

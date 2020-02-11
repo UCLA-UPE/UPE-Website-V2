@@ -27,7 +27,7 @@ export default function SubjectGrid(props) {
   const loadGrid = async () => {
     try {
       console.log(props.subject)
-      const res = await axios.post(props.apiUrl + '/get-subject', {
+      const res = await axios.post(props.apiUrl + '/get-subject-numbers', {
         token: props.token,
         subject: props.subject
       })

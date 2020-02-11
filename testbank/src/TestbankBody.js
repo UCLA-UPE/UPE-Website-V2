@@ -1,50 +1,61 @@
 import React from 'react'
 import Container from '@material-ui/core/Container'
+import Box from '@material-ui/core/Box'
 import axios from 'axios'
-import { useRoutes, navigate } from 'hookrouter'
+import { useRoutes, useRedirect, navigate } from 'hookrouter'
 
 import TestbankGrid from './TestbankGrid'
 import SubjectGrid from './SubjectGrid'
+import SubjectNumberTestList from './SubjectNumberTestList'
 
 const routes = {
-  '/testbank': () => (p)                     =>                 <TestbankGrid 
+  '/testbank': () => (p) =>                                     <TestbankGrid 
                                                                   token={p.token} 
                                                                   apiUrl={p.apiUrl} 
-                                                                  handleClick={p.handleClickTestbank} 
+                                                                  handleClick={p.handleClickSubject} 
                                                                 />,
   '/testbank/:subject': ({ subject }) => (p) =>                 <SubjectGrid 
                                                                   token={p.token} 
                                                                   apiUrl={p.apiUrl} 
                                                                   subject={subject} 
-                                                                  handleClick={p.handleClickSubject}
+                                                                  handleClick={p.handleClickNumber}
                                                                 />,
-  '/testbank/:subject/:number': ({ subject, number }) => (p) => <TestList
+  '/testbank/:subject/:number': ({ subject, number }) => (p) => <SubjectNumberTestList
                                                                   token={p.token} 
                                                                   apiUrl={p.apiUrl} 
                                                                   subject={subject} 
-                                                                  handleClick={p.handleClickSubject} 
+                                                                  number={number} 
+                                                                  handleClick={p.handleClickTest} 
                                                                 />
 }
 
 export default function TestbankBody(props) {
   
+  useRedirect('/', '/testbank')
   const match = useRoutes(routes)
 
-  const handleClickTestbank = (courseSubject) => () => {
+  const handleClickSubject = (courseSubject) => () => {
     navigate(`/testbank/${courseSubject}`)
   }
 
-  const handleClickSubject = (courseSubject, courseNumber) => () => {
+  const handleClickNumber = (courseSubject, courseNumber) => () => {
     navigate(`/testbank/${courseSubject}/${courseNumber}`)
   }
 
+  const handleClickTest = (courseSubject, courseNumber, testID) => () => {
+    navigate(`/testbank/test/${testID}`)
+  }
+
   return (
-    <Container maxWidth='md' >
-      {typeof(match) == 'function' && match({
-        ...props,
-        handleClickTestbank: handleClickTestbank,
-        handleClickSubject: handleClickSubject,
-      }) || navigate(`/`)}
+    <Container maxWidth='md' mb='15px' >
+      <Box m={3}>
+        {typeof(match) == 'function' && match({
+          ...props,
+          handleClickSubject: handleClickSubject,
+          handleClickNumber: handleClickNumber,
+          handleClickTest: handleClickTest,
+        }) || navigate(`/`)}
+      </Box>
     </Container>
   )
 }

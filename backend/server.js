@@ -81,13 +81,22 @@ app.post('/get-subjects', async (req, res) => {
   res.status(200).json(subjects)
 })
 
-app.post('/get-subject', async (req, res) => {
+app.post('/get-subject-numbers', async (req, res) => {
   if (!req.body.subject) {
     res.sendStatus(400)
     return
   }
-  const subject = await Test.getSubject(req.body.subject)
-  res.status(200).json(subject)
+  const subject_numbers = await Test.getSubjectNumbers(req.body.subject)
+  res.status(200).json(subject_numbers)
+})
+
+app.post('/get-subject-number-tests', async (req, res) => {
+  if (!req.body.subject || !req.body.number) {
+    res.sendStatus(400)
+    return
+  }
+  const tests = await Test.getSubjectNumberTests(req.body.subject, req.body.number)
+  res.status(200).json(tests)
 })
 
 app.get('/tests', async (req, res) => {
