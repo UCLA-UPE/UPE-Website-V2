@@ -133,7 +133,7 @@ export default function Login(props) {
               <Button
                 onClick={handleSignup}
                 variant="contained"
-                color="primary"
+                color="secondary"
                 className={classes.popover_button}
               >
                 Sign Up

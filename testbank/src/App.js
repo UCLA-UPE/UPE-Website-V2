@@ -22,14 +22,14 @@ const apiUrl = `http://localhost:8080`
 export default function App() {
 
   // state hooks
-  const [authToken,  setAuthToken]  = React.useState(null)
+  const [authToken,  setAuthToken]  = React.useState()
   const [sbOpen,     setSbOpen]     = React.useState(false)
   const [sbSeverity, setSbSeverity] = React.useState()
   const [sbMessage,  setSbMessage]  = React.useState()
 
   // effect hooks
   React.useEffect(() => {
-    console.log(authToken)
+    console.log('authToken: ' + authToken)
   })
 
   // routines
@@ -67,7 +67,7 @@ export default function App() {
       <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" />
       <CssBaseline />
       <ButtonAppBar token={authToken} apiUrl={apiUrl} authCB={authCB} />
-      <TestbankBody />
+      <TestbankBody token={authToken} apiUrl={apiUrl} />
       <InfoBar open={sbOpen} setOpen={setSbOpen} severity={sbSeverity} message={sbMessage} />
     </>
   )

@@ -15,6 +15,7 @@ const SECRET_PRIVATE_KEY = 'lmao'
 
 // mongoose models
 const User = require('./src/User.model')
+const Test = require('./src/Test.model')
 
 
 
@@ -41,16 +42,7 @@ app.get('/', (req, res) => {
 
 app.get('/users', async (req, res) => {
   const users = await User.find()
-
   res.json(users)
-})
-
-app.get('/user-create', async (req, res) => {
-  const user = new User({ username: 'userTest' })
-
-  await user.save().then(() => console.log('User created'))
-
-  res.send('User created \n')
 })
 
 app.post('/login', async (req, res) => {
@@ -75,6 +67,34 @@ app.post('/signup', async (req, res) => {
   }
   await User.create({ email: req.body.email, password: req.body.password })
   res.sendStatus(200)
+})
+
+//////////////////////////////////
+// routes - token-authenticated //
+//////////////////////////////////
+
+app.get('/subject-counts', async (req, res) => {
+  const tests = await Test.getSubjectCounts()
+  res.status(200).json(tests)
+})
+
+app.post('/subject-counts', async (req, res) => {
+  const tests = await Test.getSubjectCounts()
+  res.status(200).json(tests)
+})
+
+app.get('/tests', async (req, res) => {
+  let skip = req.body.skip || 0
+  let limit = req.body.limit || 50
+  const tests = await Test.find({}, '_id course kind term professor.name test_file upload_time verified').skip(skip).limit(limit)
+  res.status(200).json(tests)
+})
+
+app.post('/tests', async (req, res) => {
+  let skip = req.body.skip || 0
+  let limit = req.body.limit || 50
+  const tests = await Test.find({}, '_id course kind term professor.name test_file upload_time verified').skip(skip).limit(limit)
+  res.status(200).json(tests)
 })
 
 
