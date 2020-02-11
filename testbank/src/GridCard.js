@@ -38,11 +38,9 @@ export default function GridCard(props) {
     return s
   }
 
-  // const test = () => { () }
-
   return (
     <Card className={classes.root}>
-      <CardActionArea>
+      <CardActionArea onClick={props.handleClick}>
         <CardContent>
           <Typography variant="h5" component="h2">
             {props.title}

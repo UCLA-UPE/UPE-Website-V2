@@ -78,8 +78,8 @@ TestSchema.statics.getSubjects = async function() {
 }
 
 TestSchema.statics.getSubject = async function(subject) {
-  const thisSubject = await this.find({'course.subject': subject})
-  const uniqueNumbers = thisSubject.distinct('course.number')
+  const thisSubject = this.find({ 'course.subject': subject })
+  const uniqueNumbers = await thisSubject.distinct('course.number')
   let ret = []
   for (number of uniqueNumbers) {
     ret.push({

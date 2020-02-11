@@ -3,7 +3,7 @@ import { makeStyles } from '@material-ui/core/styles'
 import Grid from '@material-ui/core/Grid'
 import axios from 'axios'
 
-import SubjectCard from './SubjectCard'
+import GridCard from './GridCard'
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -18,16 +18,16 @@ export default function TestbankGrid(props) {
   const classes = useStyles()
 
   React.useEffect(() => {
-    loadSubjects()
-  }, [props.nav.length])
+    loadGrid()
+  }, [])
 
-  const [courseSubjects, setCourseSubjects] = React.useState([])
-  const loadSubjects = async () => {
+  const [gridItems, setGridItems] = React.useState([])
+  const loadGrid = async () => {
     try {
       const res = await axios.post(props.apiUrl + '/get-subjects', {
         token: props.token
       })
-      setCourseSubjects(res.data)
+      setGridItems(res.data)
       // console.log(res.data)
     } catch(e) {
       if (e.response) {
@@ -36,22 +36,15 @@ export default function TestbankGrid(props) {
     }
   }
 
-  const [selectedCourseSubject, setSelectedCourseSubject] = React.useState()
-  const handleCourseSubjectClick = (clickedCourseSubject) => async () => {
-    // console.log(clickedCourseSubject)
-    setSelectedCourseSubject(clickedCourseSubject)
-    await loadSubject(clickedCourseSubject)
-  }
-
   return (
     <Grid container spacing={2} className={classes.grid}>
-      {courseSubjects.map(subject => (
+      {gridItems.map(subject => (
         <Grid item key={subject.course_subject} md={4}>
-          <SubjectCard 
-            title={subject.course_subject} 
-            subItems={subject.course_numbers} 
-            documentCount={subject.count} 
-            handleClick={handleCourseSubjectClick(subject.course_subject)} 
+          <GridCard
+            title={subject.course_subject}
+            subItems={subject.course_numbers}
+            documentCount={subject.count}
+            handleClick={props.handleClick(subject.course_subject)}
           />
         </Grid>
         ))}

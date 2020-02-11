@@ -82,6 +82,10 @@ app.post('/get-subjects', async (req, res) => {
 })
 
 app.post('/get-subject', async (req, res) => {
+  if (!req.body.subject) {
+    res.sendStatus(400)
+    return
+  }
   const subject = await Test.getSubject(req.body.subject)
   res.status(200).json(subject)
 })

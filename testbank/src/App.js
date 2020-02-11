@@ -23,7 +23,6 @@ export default function App() {
 
   // state hooks
   const [authToken,  setAuthToken]  = React.useState()
-  const [nav,        setNav]        = React.useState([{ name: 'Home', path: '' }])
   const [sbOpen,     setSbOpen]     = React.useState(false)
   const [sbSeverity, setSbSeverity] = React.useState()
   const [sbMessage,  setSbMessage]  = React.useState()
@@ -62,16 +61,13 @@ export default function App() {
 
     }
   }
-  const handleSubjectCardClick = (subject) => () => {
-    setNav(nav => nav.concat({ name: subject, path: '/' + subject }))
-  }
   
   return (
     <>
       <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" />
       <CssBaseline />
-      <ButtonAppBar token={authToken} apiUrl={apiUrl} authCB={authCB} nav={nav} />
-      <TestbankBody token={authToken} apiUrl={apiUrl} nav={nav} handleSubjectCardClick={handleSubjectCardClick} />
+      <ButtonAppBar token={authToken} apiUrl={apiUrl} authCB={authCB} />
+      <TestbankBody token={authToken} apiUrl={apiUrl} />
       <InfoBar open={sbOpen} setOpen={setSbOpen} severity={sbSeverity} message={sbMessage} />
     </>
   )
