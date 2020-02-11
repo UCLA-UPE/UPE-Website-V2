@@ -15,11 +15,16 @@ const UserSchema = new mongoose.Schema({
   }
 })
 
-// mongoose pre-hook to bcrypt plaintext password
+// mongoose pre-hook to hash plaintext password
 UserSchema.pre('save', async function(next) {
   this.password = await bcrypt.hash(this.password, SALT_ROUNDS)
   next()
 })
+
+// method to validate plaintext password
+UserSchema.methods.isValidPassword = async function(password) {
+  return await bcrypt.compare(password, this.password)
+}
 
 const User = mongoose.model('User', UserSchema)
 

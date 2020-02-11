@@ -59,13 +59,14 @@ export default function Login(props) {
   const handleLogin = async (event) => {
     event.preventDefault() // prevent form submit from refreshing page
     const res = await axios.post(props.apiUrl + '/login', {
+      responseType: 'text',
       email: email,
       password: password
     })
     console.log(res)
   }
-  const handleRegister = async (event) => {
-    const res = await axios.post(props.apiUrl + '/register', {
+  const handleSignup = async (event) => {
+    const res = await axios.post(props.apiUrl + '/signup', {
       email: email,
       password: password
     })
@@ -123,12 +124,12 @@ export default function Login(props) {
             </Grid>
             <Grid item>
               <Button
-                onClick={handleRegister}
+                onClick={handleSignup}
                 variant="contained"
                 color="primary"
                 className={classes.popover_button}
               >
-                Register
+                Sign Up
               </Button>
             </Grid>
           </Grid>
