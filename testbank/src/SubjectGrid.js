@@ -14,7 +14,7 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-export default function TestSubject(props) {
+export default function SubjectGrid(props) {
   
   const classes = useStyles()
 

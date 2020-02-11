@@ -13,7 +13,7 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-export default function TestSubjects(props) {
+export default function TestbankGrid(props) {
   
   const classes = useStyles()
 
