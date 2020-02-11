@@ -6,6 +6,7 @@ import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
 import MenuIcon from '@material-ui/icons/Menu';
+import PublishIcon from '@material-ui/icons/Publish';
 
 import LoginButton from './LoginButton'
 
@@ -21,7 +22,7 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-export default function ButtonAppBar() {
+export default function ButtonAppBar(props) {
   const classes = useStyles();
 
   return (
@@ -31,10 +32,13 @@ export default function ButtonAppBar() {
           <IconButton edge="start" className={classes.menuButton} color="inherit" aria-label="menu">
             <MenuIcon />
           </IconButton>
+          <IconButton edge="start" className={classes.menuButton} color="inherit" aria-label="upload">
+            <PublishIcon />
+          </IconButton>
           <Typography variant="h6" className={classes.title}>
             UCLA UPE Testbank
           </Typography>
-          <LoginButton />
+          <LoginButton apiUrl={props.apiUrl} />
         </Toolbar>
       </AppBar>
     </div>

@@ -30,7 +30,7 @@ export default function LoginButton(props) {
   return (
     <div>
       <Button aria-describedby={id} color="inherit" onClick={handleClick}>
-        Login
+        Log In
       </Button>
       <Popover
         id={id}
@@ -46,7 +46,7 @@ export default function LoginButton(props) {
           horizontal: 'center',
         }}
       >
-        <Login />
+        <Login apiUrl={props.apiUrl} />
       </Popover>
     </div>
   );

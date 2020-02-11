@@ -12,62 +12,29 @@ import ButtonAppBar from './ButtonAppBar'
 
 const apiUrl = `http://localhost:8080`
 
-class App extends React.Component {
+export default function App() {
 
-  constructor(props) {
-    super(props)
-    this.state = {
-      users: []
-    }
-  }
+  // state hooks
+  const [users, setUsers] = React.useState([])
+  const [token, setToken] = React.useState(null)
 
-  async createUser() {
-    await axios.get(apiUrl + '/user-create')
-    this.loadUsers()
-  }
-  
-  async loadUsers() {
+  // effect hooks
+  React.useEffect(() => { loadUsers() })
+
+  // routines
+  const loadUsers = async () => {
     const res = await axios.get(apiUrl + '/users')
-    this.setState({
-      users: res.data
-    })
-  }
-
-  componentDidMount() {
-    this.loadUsers()
+    setUsers(res.data)
   }
   
-  render() {
-    // return (
-    //   <div className="App">
-    //     <header className="App-header">
-    //       <Button variant="contained" color="primary">
-    //         Hello World
-    //       </Button>
-    //       <button onClick={() => this.createUser()}>Create User</button>
-    //       <p>Users liast:</p>
-    //       <ul>
-    //         {this.state.users.map(user => (
-    //           <li key={user._id}>id: {user._id}</li>
-    //         ))}
-    //       </ul>
-    //     </header>
-    //   </div>
-    // )
-    return (
-      <>
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" />
-        <CssBaseline />
-        <ButtonAppBar />
-        <div className="App">
-          <Typography variant="h1" component="h2" gutterBottom>
-            h1. Heading
-          </Typography>
-        </div>
-      </>
-    )
-    
-  }
+  return (
+    <>
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" />
+      <CssBaseline />
+      <ButtonAppBar apiUrl={apiUrl} />
+      <Typography variant="h1" component="h2" gutterBottom>
+        h1. Heading
+      </Typography>
+    </>
+  )
 }
-
-export default App

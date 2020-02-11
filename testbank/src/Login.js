@@ -1,5 +1,4 @@
 import React from 'react';
-import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import TextField from '@material-ui/core/TextField';
@@ -8,10 +7,10 @@ import Checkbox from '@material-ui/core/Checkbox';
 import Link from '@material-ui/core/Link';
 import Grid from '@material-ui/core/Grid';
 import Box from '@material-ui/core/Box';
-import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
+import axios from 'axios'
 
 function Copyright() {
   return (
@@ -39,7 +38,7 @@ const useStyles = makeStyles(theme => ({
   form: {
     width: '100%', // Fix IE 11 issue.
   },
-  submit: {
+  popover_button: {
     margin: theme.spacing(1, 0, 2),
   },
   copyright: {
@@ -47,14 +46,37 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-export default function Login() {
+export default function Login(props) {
   const classes = useStyles();
+
+  const [email, setEmail] = React.useState(null);
+  const [password, setPassword] = React.useState(null);
+
+  const loadUsers = async () => {
+    const res = await axios.get(props.apiUrl + '/users')
+    console.log(res)
+  }
+  const handleLogin = async (event) => {
+    event.preventDefault() // prevent form submit from refreshing page
+    const res = await axios.post(props.apiUrl + '/login', {
+      email: email,
+      password: password
+    })
+    console.log(res)
+  }
+  const handleRegister = async (event) => {
+    const res = await axios.post(props.apiUrl + '/register', {
+      email: email,
+      password: password
+    })
+    console.log(res)
+  }
 
   return (
     <Container component="main" maxWidth="xs">
       <CssBaseline />
       <div className={classes.paper}>
-        <form className={classes.form} noValidate>
+        <form className={classes.form} onSubmit={handleLogin} noValidate>
           <TextField
             variant="outlined"
             margin="normal"
@@ -63,6 +85,7 @@ export default function Login() {
             id="email"
             label="Email Address"
             name="email"
+            onChange={e => setEmail(e.target.value)}
             autoComplete="email"
             autoFocus
           />
@@ -75,33 +98,44 @@ export default function Login() {
             label="Password"
             type="password"
             id="password"
+            onChange={e => setPassword(e.target.value)}
             autoComplete="current-password"
           />
           <FormControlLabel
             control={<Checkbox value="remember" color="primary" />}
             label="Remember me"
           />
-          <Button
-            type="submit"
-            fullWidth
-            variant="contained"
-            color="primary"
-            className={classes.submit}
+          <Grid
+            container
+            direction="row"
+            justify="flex-start"
+            alignItems="center"
           >
-            Login
-          </Button>
-          <Grid container>
             <Grid item xs>
-              <Link href="#" variant="body2">
-                Forgot password?
-              </Link>
+              <Button
+                type="submit"
+                variant="contained"
+                color="primary"
+                className={classes.popover_button}
+              >
+                Log In
+              </Button>
             </Grid>
             <Grid item>
-              <Link href="#" variant="body2">
-                {"Don't have an account? Sign Up"}
-              </Link>
+              <Button
+                onClick={handleRegister}
+                variant="contained"
+                color="primary"
+                className={classes.popover_button}
+              >
+                Register
+              </Button>
             </Grid>
           </Grid>
+          
+          <Link href="#" variant="body2">
+            Forgot password?
+          </Link>
         </form>
       </div>
       <Box mt={4} mb={2}>
