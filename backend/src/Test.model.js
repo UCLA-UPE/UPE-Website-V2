@@ -63,18 +63,32 @@ TestSchema.methods.toString = function() {
   return `[${this.term.quarter} ${this.term.year}] (${this.professor.name}) ${this.course.subject} ${this.course.number} - ${this.kind.name} ${this.kind.number}`
 }
 
-TestSchema.statics.getSubjectCounts = async function() {
-  let subjects = await this.distinct('course.subject')
-  let counts = []
-  for (subject of subjects) {
-    counts.push({
+TestSchema.statics.getSubjects = async function() {
+  const uniqueSubjects = await this.distinct('course.subject')
+  let ret = []
+  for (subject of uniqueSubjects) {
+    ret.push({
       'course_subject': subject,
       'course_numbers': await this.find({ 'course.subject': subject }).distinct('course.number'),
       'count': await this.find({ 'course.subject': subject }).count()
     })
   }
-  counts.sort((a, b) => b['count'] - a['count'])
-  return counts
+  ret.sort((a, b) => b['count'] - a['count'])
+  return ret
+}
+
+TestSchema.statics.getSubject = async function(subject) {
+  const thisSubject = await this.find({'course.subject': subject})
+  const uniqueNumbers = thisSubject.distinct('course.number')
+  let ret = []
+  for (number of uniqueNumbers) {
+    ret.push({
+      'course_number': number,
+      'count': await thisSubject.find({ 'course.number': number }).count()
+    })
+  }
+  ret.sort((a, b) => b['count'] - a['count'])
+  return ret
 }
 
 const Test = mongoose.model('Test', TestSchema)

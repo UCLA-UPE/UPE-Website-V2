@@ -30,6 +30,9 @@ app.use(passport.initialize())
 // passport
 // https://www.digitalocean.com/community/tutorials/api-authentication-with-json-web-tokensjwt-and-passport
 
+// const verifyTokenMiddleware = (req, res, next) => {
+//   const token = req.token
+// }
 
 
 ////////////
@@ -73,14 +76,14 @@ app.post('/signup', async (req, res) => {
 // routes - token-authenticated //
 //////////////////////////////////
 
-app.get('/subject-counts', async (req, res) => {
-  const tests = await Test.getSubjectCounts()
-  res.status(200).json(tests)
+app.post('/get-subjects', async (req, res) => {
+  const subjects = await Test.getSubjects()
+  res.status(200).json(subjects)
 })
 
-app.post('/subject-counts', async (req, res) => {
-  const tests = await Test.getSubjectCounts()
-  res.status(200).json(tests)
+app.post('/get-subject', async (req, res) => {
+  const subject = await Test.getSubject(req.body.subject)
+  res.status(200).json(subject)
 })
 
 app.get('/tests', async (req, res) => {

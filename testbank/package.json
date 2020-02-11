@@ -5,7 +5,7 @@
   "description": "UPE Website V2 - Frontend - Testbank",
   "main": "index.js",
   "scripts": {
-    "start": "webpack --mode production && serve -l 3000 dist",
+    "start": "webpack --mode production && serve -s -l 3000 dist",
     "build": "webpack --mode production",
     "dev": "webpack-dev-server --mode development",
     "build-dev": "webpack --mode development",
@@ -22,6 +22,7 @@
     "react": "^16.12.0",
     "react-dom": "^16.12.0",
     "react-hot-loader": "^4.12.19",
+    "react-router-dom": "^5.1.2",
     "serve": "^11.3.0"
   },
   "devDependencies": {

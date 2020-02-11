@@ -31,6 +31,9 @@ module.exports = {
     port: 3000,
     // publicPath: 'http://localhost:3000/dist/',
     publicPath: '/dist/',
+    historyApiFallback: {
+      index: 'index.html'
+    }
   },
   plugins: [
     new HtmlWebpackPlugin({ template: './src/index.html' })
