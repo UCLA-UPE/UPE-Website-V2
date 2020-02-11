@@ -38,7 +38,7 @@ export default function ButtonAppBar(props) {
           <Typography variant="h6" className={classes.title}>
             UCLA UPE Testbank
           </Typography>
-          <LoginButton apiUrl={props.apiUrl} />
+          <LoginButton apiUrl={props.apiUrl} authCB={props.authCB} />
         </Toolbar>
       </AppBar>
     </div>

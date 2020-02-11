@@ -2,39 +2,73 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 import axios from 'axios'
 
-import Typography from '@material-ui/core/Typography'
+// material-ui components
 import CssBaseline from '@material-ui/core/CssBaseline'
 import Button from '@material-ui/core/Button'
 
+// custom components
+import ButtonAppBar from './ButtonAppBar'
+import TestbankBody from './TestbankBody'
+import InfoBar from './InfoBar'
+
+// style
 import './App.css'
 
-import ButtonAppBar from './ButtonAppBar'
-
+// magic constants
 const apiUrl = `http://localhost:8080`
+
+
 
 export default function App() {
 
   // state hooks
-  const [users, setUsers] = React.useState([])
-  const [token, setToken] = React.useState(null)
+  const [authToken,  setAuthToken]  = React.useState(null)
+  const [sbOpen,     setSbOpen]     = React.useState(false)
+  const [sbSeverity, setSbSeverity] = React.useState()
+  const [sbMessage,  setSbMessage]  = React.useState()
 
   // effect hooks
-  React.useEffect(() => { loadUsers() })
+  React.useEffect(() => {
+    console.log(authToken)
+  })
 
   // routines
-  const loadUsers = async () => {
-    const res = await axios.get(apiUrl + '/users')
-    setUsers(res.data)
+  const showInfoBar = (severity, message) => {
+    setSbSeverity(severity)
+    setSbMessage(message)
+    setSbOpen(true)
+  }
+  const authCB = (event, response) => {
+    if (event === 'login') {
+      if (response.status === 200) {
+        showInfoBar('success', 'Login Success!')
+        setAuthToken(response.data.token)
+      }
+      else {
+        showInfoBar('error', 'Login Failed')
+      }
+    }
+    else if (event === 'signup') {
+      if (response.status === 200) {
+        showInfoBar('success', 'Signed Up!')
+        setAuthToken(response.data.token)
+      }
+      else {
+        showInfoBar('error', 'Email Address Exists')
+      }
+    }
+    else if (event === 'token') {
+
+    }
   }
   
   return (
     <>
       <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" />
       <CssBaseline />
-      <ButtonAppBar apiUrl={apiUrl} />
-      <Typography variant="h1" component="h2" gutterBottom>
-        h1. Heading
-      </Typography>
+      <ButtonAppBar token={authToken} apiUrl={apiUrl} authCB={authCB} />
+      <TestbankBody />
+      <InfoBar open={sbOpen} setOpen={setSbOpen} severity={sbSeverity} message={sbMessage} />
     </>
   )
 }

@@ -52,25 +52,32 @@ export default function Login(props) {
   const [email, setEmail] = React.useState(null);
   const [password, setPassword] = React.useState(null);
 
-  const loadUsers = async () => {
-    const res = await axios.get(props.apiUrl + '/users')
-    console.log(res)
-  }
   const handleLogin = async (event) => {
     event.preventDefault() // prevent form submit from refreshing page
-    const res = await axios.post(props.apiUrl + '/login', {
-      responseType: 'text',
-      email: email,
-      password: password
-    })
-    console.log(res)
+    try {
+      const res = await axios.post(props.apiUrl + '/login', {
+        email: email,
+        password: password
+      })
+      props.authCB('login', res)
+    } catch(e) {
+      if (e.response) {
+        props.authCB('login', e.response)
+      }
+    }
   }
   const handleSignup = async (event) => {
-    const res = await axios.post(props.apiUrl + '/signup', {
-      email: email,
-      password: password
-    })
-    console.log(res)
+    try {
+      const res = await axios.post(props.apiUrl + '/signup', {
+        email: email,
+        password: password
+      })
+      props.authCB('signup', res)
+    } catch(e) {
+      if (e.response) {
+        props.authCB('signup', e.response)
+      }
+    }
   }
 
   return (

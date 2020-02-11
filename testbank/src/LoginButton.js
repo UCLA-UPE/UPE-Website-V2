@@ -46,7 +46,7 @@ export default function LoginButton(props) {
           horizontal: 'center',
         }}
       >
-        <Login apiUrl={props.apiUrl} />
+        <Login apiUrl={props.apiUrl} authCB={props.authCB} />
       </Popover>
     </div>
   );
