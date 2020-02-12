@@ -6,6 +6,7 @@ const cors = require('cors')
 const bcrypt = require('bcrypt')
 const passport = require('passport')
 const jwt = require('jsonwebtoken')
+const path = require('path')
 
 // some magic constants
 const PORT = 8080
@@ -104,8 +105,9 @@ app.post('/get-test-file', async (req, res) => {
     res.sendStatus(400)
     return
   }
-  const testFile = await Test.getTestFile(req.body._id)
-  res.status(200).json(testFile)
+  const test = await Test.findOne({ '_id': req.body._id }, 'test_file')
+
+  res.sendFile(path.join(__dirname, 'data', test.test_file))
 })
 
 app.get('/tests', async (req, res) => {

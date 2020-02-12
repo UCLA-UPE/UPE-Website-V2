@@ -33,6 +33,8 @@ import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
 
 import TestListItem from './TestListItem'
 
+import saveBlob from 'downloadjs'
+
 const colorHash = new ColorHash({ hash: (s) => {
   // npm string-hash
   let hash = 5381, i = s.length
@@ -108,8 +110,11 @@ export default function SubjectNumberTestList(props) {
       const res = await axios.post(props.apiUrl + '/get-test-file', {
         token: props.token,
         _id: _id
+      }, {
+        responseType: 'blob'
       })
-      console.log(res)
+      const contentType = res.headers['content-type']
+      saveBlob(res.data, _id + '.pdf', contentType)
     } catch(e) {
       if (e.response) {
         console.log(e.response)
