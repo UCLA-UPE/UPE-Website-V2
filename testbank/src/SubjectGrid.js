@@ -8,10 +8,8 @@ import GridCard from './GridCard'
 
 const useStyles = makeStyles(theme => ({
   root: {
-  },
-  grid: {
     padding: theme.spacing(4)
-  }
+  },
 }));
 
 export default function SubjectGrid(props) {
@@ -43,7 +41,7 @@ export default function SubjectGrid(props) {
       <Typography variant="h2" component="h2">
         {props.subject}
       </Typography>
-      <Grid container spacing={2} className={classes.grid}>
+      <Grid container spacing={2} className={classes.root}>
         {gridItems.map(courseNumber => (
           <Grid item
             onClick={props.handleClick(props.subject, courseNumber.course_number)}

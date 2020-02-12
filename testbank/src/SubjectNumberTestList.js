@@ -1,4 +1,7 @@
 import React from 'react'
+import Box from '@material-ui/core/Box'
+import Paper from '@material-ui/core/Paper'
+import Divider from '@material-ui/core/Divider'
 import { makeStyles } from '@material-ui/core/styles'
 import Container from '@material-ui/core/Container'
 import Typography from '@material-ui/core/Typography'
@@ -9,10 +12,10 @@ import TestListItem from './TestListItem'
 
 const useStyles = makeStyles(theme => ({
   root: {
-  },
-  grid: {
+    width: '100%',
+    maxWidth: 360,
     padding: theme.spacing(4)
-  }
+  },
 }));
 
 export default function SubjectNumberTestList(props) {
@@ -32,7 +35,6 @@ export default function SubjectNumberTestList(props) {
         number: props.number
       })
       setListItems(res.data)
-      console.log(res.data)
     } catch(e) {
       if (e.response) {
         console.log(e.response)
@@ -45,17 +47,24 @@ export default function SubjectNumberTestList(props) {
       <Typography variant="h2" component="h2">
         {props.subject} {props.number}
       </Typography>
-      <List>
-        {listItems.map(test => (
-          <TestListItem 
-            key={test._id}
-            kind={`${test.kind.name} ${test.kind.number || ''}`}
-            professor={[test.professor.name]} 
-            term={`${test.term.quarter} ${test.term.year}`}
-            handleClick={props.handleClick(props.subject, props.number, test._id)} 
-          />
+      <Box className={classes.root}>
+      <Paper>
+        <List dense >
+          {listItems.map((test, i) => (
+            <div key={test._id}>
+              {i ? <Divider absolute component="li" /> : null}
+              <TestListItem 
+                key={test._id}
+                kind={`${test.kind.name} ${test.kind.number || ''}`}
+                professor={test.professor.name} 
+                term={`${test.term.quarter} ${test.term.year}`}
+                handleClick={props.handleClick(props.subject, props.number, test._id)} 
+              />
+            </div>
           ))}
-      </List>
+        </List>
+      </Paper>
+      </Box>
     </>
   )
 }
