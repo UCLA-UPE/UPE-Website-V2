@@ -96,6 +96,10 @@ TestSchema.statics.getSubjectNumberTests = async function(subject, number) {
   return tests
 }
 
+TestSchema.statics.getTestFile = async function(_id) {
+  return _id
+}
+
 const Test = mongoose.model('Test', TestSchema)
 
 module.exports = Test

@@ -99,6 +99,15 @@ app.post('/get-subject-number-tests', async (req, res) => {
   res.status(200).json(tests)
 })
 
+app.post('/get-test-file', async (req, res) => {
+  if (!req.body._id) {
+    res.sendStatus(400)
+    return
+  }
+  const testFile = await Test.getTestFile(req.body._id)
+  res.status(200).json(testFile)
+})
+
 app.get('/tests', async (req, res) => {
   let skip = req.body.skip || 0
   let limit = req.body.limit || 50
