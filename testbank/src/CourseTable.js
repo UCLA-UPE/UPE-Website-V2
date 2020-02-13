@@ -93,6 +93,10 @@ const seasonsEmoji = (season) => {
 // }
 
 export default function CourseTable(props) {
+
+  const { apiUrl, token, handleClickTestInfo } = props
+  const subject = decodeURIComponent(props.subject)
+  const number = decodeURIComponent(props.number)
   
   const classes = useStyles()
 
@@ -105,11 +109,11 @@ export default function CourseTable(props) {
   const [testData, setTestData] = React.useState({ tests: [], count: 0 })
   const loadTests = async (opts) => {
     try {
-      const res = await axios.post(props.apiUrl + '/get-tests', {
-        token: props.token,
+      const res = await axios.post(apiUrl + '/get-tests', {
+        token: token,
         filters: {
-          subject: props.subject,
-          number: props.number
+          subject: subject,
+          number: number
         },
         sort: opts.sort,
         order: opts.order,
@@ -127,8 +131,8 @@ export default function CourseTable(props) {
   
   const downloadFile = (_id) => async () => {
     try {
-      const res = await axios.post(props.apiUrl + '/get-test-file', {
-        token: props.token,
+      const res = await axios.post(apiUrl + '/get-test-file', {
+        token: token,
         _id: _id
       }, {
         responseType: 'blob'
@@ -157,7 +161,7 @@ export default function CourseTable(props) {
   return (
     <>
       <Typography variant="h2" component="h2">
-        {props.subject} {props.number}
+        {subject} {number}
       </Typography>
       <Box className={classes.root}>
         <Paper>
@@ -192,7 +196,7 @@ export default function CourseTable(props) {
                         variant='outlined' 
                         size='small' 
                         style={{ color: colorHash.hex(test._id) }} 
-                        onClick={props.handleClickTestInfo(test._id)}
+                        onClick={handleClickTestInfo(test._id)}
                       />
                     </TableCell>
                     <TableCell>{test.kind.name + (test.kind.number ? ' ' + test.kind.number : '')}</TableCell>

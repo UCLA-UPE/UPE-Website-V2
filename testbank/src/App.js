@@ -21,18 +21,15 @@ const apiUrl = `http://localhost:8080`
 
 function App() {
 
-  // state hooks
   const [authToken,  setAuthToken]  = React.useState()
   const [sbOpen,     setSbOpen]     = React.useState(false)
   const [sbSeverity, setSbSeverity] = React.useState()
   const [sbMessage,  setSbMessage]  = React.useState()
 
-  // effect hooks
   React.useEffect(() => {
     // console.log('authToken: ' + authToken)
   })
 
-  // routines
   const showInfoBar = (severity, message) => {
     setSbSeverity(severity)
     setSbMessage(message)

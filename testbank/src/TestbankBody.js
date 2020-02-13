@@ -13,23 +13,23 @@ import SubjectGrid from './SubjectGrid'
 import SubjectNumberTestList from './SubjectNumberTestList'
 
 const routes = {
-  '/testbank': () => (p) => (
+  '/testbank/test/:id': ({ id }) => (p) => (
+    <Typography>TODO</Typography>
+    // <TestInfo />
+  ),
+  '/testbank/peruse': () => (p) => (
     <TestbankGrid 
       token={p.token} apiUrl={p.apiUrl}
       handleClick={p.handleClickSubject} 
     />
   ),
-  '/testbank/test/:id': ({ id }) => (p) => (
-    <Typography>TODO</Typography>
-    // <TestInfo />
-  ),
-  '/testbank/:subject': ({ subject }) => (p) => (
+  '/testbank/peruse/:subject': ({ subject }) => (p) => (
     <SubjectGrid 
       token={p.token} apiUrl={p.apiUrl} subject={subject} 
       handleClick={p.handleClickNumber} 
     />
   ),
-  '/testbank/:subject/:number': ({ subject, number }) => (p) => (
+  '/testbank/peruse/:subject/:number': ({ subject, number }) => (p) => (
     <CourseTable
       token={p.token} apiUrl={p.apiUrl} subject={subject}
       number={number} handleClickTestInfo={p.handleClickTestInfo}
@@ -39,14 +39,15 @@ const routes = {
 
 export default function TestbankBody(props) {
   
-  useRedirect('/', '/testbank')
+  useRedirect('/', '/testbank/peruse')
+  useRedirect('/testbank', '/testbank/peruse')
   const match = useRoutes(routes)
 
   const handleClickSubject = (subject) => () => {
-    navigate(`/testbank/${subject}`)
+    navigate(`/testbank/peruse/${subject}`)
   }
   const handleClickNumber = (subject, number) => () => {
-    navigate(`/testbank/${subject}/${number}`)
+    navigate(`/testbank/peruse/${subject}/${number}`)
   }
   const handleClickTestInfo = (testID) => () => {
     navigate(`/testbank/test/${testID}`)
