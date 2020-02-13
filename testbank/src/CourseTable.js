@@ -45,34 +45,6 @@ const colorHash = new ColorHash({ hash: (s) => {
   return hash >>> 0
 }})
 
-const useStyles = makeStyles(theme => ({
-  root: {
-    width: '100%',
-    padding: theme.spacing(4)
-  },
-  chipColor: (color) => {
-    colorPrimary: '#' + color
-  },
-  toolbarRoot: {
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingTop: theme.spacing(3),
-    marginBottom: theme.spacing(3)
-  },
-  toolbarTitle: {
-      flex: '0 0 auto',
-     marginRight: theme.spacing(2)
-  },
-  toolbarFilter: {
-     flex: '1 1 100%',
-    padding: '0 36px'
-  },
-  formControl: {
-    margin: theme.spacing(1),
-    minWidth: 120,
-  },
-}))
-
 const seasonsEmoji = (season) => {
   if (season === 'Fall') return '🍁'
   else if (season === 'Winter') return '❄️'
@@ -100,6 +72,75 @@ const emojiTooltip = (season) => (
 //     to = setTimeout(fn, delay)
 //   }
 // }
+
+const termQuarterCompare = (a, b) => {
+  if (a.data.quarter === b.data.quarter) return 0
+  else if (a.data.quarter === 'Fall') return -1
+  else if (b.data.quarter === 'Fall') return 1
+  else if (a.data.quarter === 'Winter') return -1
+  else if (b.data.quarter === 'Winter') return 1
+  else if (a.data.quarter === 'Spring') return -1
+  else if (b.data.quarter === 'Spring') return 1
+  else if (a.data.quarter === 'Summer') return -1
+  else if (b.data.quarter === 'Summer') return 1
+  else return a.data.quarter.localeCompare(b.data.quarter)
+}
+
+const termCompare = (a, b) => {
+  if (a.data.year !== b.data.year) return a.data.year - b.data.year
+  else return termQuarterCompare(a, b)
+}
+
+const kindCompare = (a, b) => {
+  if (a.data.name === b.data.name) { return a.data.number - b.data.number }
+  else if (a.data.name === 'Quiz') { return -1 }
+  else if (b.data.name === 'Quiz') { return 1 }
+  else if (a.data.name === 'Midterm') { return -1 }
+  else if (b.data.name === 'Midterm') { return 1 }
+  else if (a.data.name === 'Final') { return -1 }
+  else if (b.data.name === 'Final') { return 1  }
+  else { return a.data.name.localeCompare(b.data.name) }
+}
+
+const useStyles = makeStyles(theme => ({
+  root: {
+    width: '100%',
+    padding: theme.spacing(4)
+  },
+  chipColor: (color) => {
+    colorPrimary: '#' + color
+  },
+  filterControlsToolbar: {
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingTop: theme.spacing(3),
+    marginBottom: theme.spacing(2)
+  },
+  filterChipsToolbar: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    alignItems: 'flex-start',
+    paddingLeft: theme.spacing(10),
+    paddingRight: theme.spacing(10),
+    marginBottom: theme.spacing(3)
+  },
+  filterTitle: {
+      flex: '0 0 auto',
+     marginRight: theme.spacing(2)
+  },
+  filterAutocomplete: {
+    flex: '1 1 100%',
+    padding: '0 36px'
+  },
+  filterChip: {
+    margin: theme.spacing(1)
+  },
+  formControl: {
+    margin: theme.spacing(1),
+    minWidth: 120,
+  },
+}))
 
 export default function CourseTable(props) {
 
@@ -139,37 +180,6 @@ export default function CourseTable(props) {
     }
   }
 
-  const kindCompare = (a, b) => {
-    if (a.data.name === b.data.name) { return a.data.number - b.data.number }
-    else if (a.data.name === 'Quiz') { return -1 }
-    else if (b.data.name === 'Quiz') { return 1 }
-    else if (a.data.name === 'Midterm') { return -1 }
-    else if (b.data.name === 'Midterm') { return 1 }
-    else if (a.data.name === 'Final') { return -1 }
-    else if (b.data.name === 'Final') { return 1  }
-    else { return a.data.name.localeCompare(b.data.name) }
-  }
-
-  const termQuarterCompare = (a, b) => {
-    if (a.data.quarter === b.data.quarter) return 0
-    else if (a.data.quarter === 'Fall') return -1
-    else if (b.data.quarter === 'Fall') return 1
-    else if (a.data.quarter === 'Winter') return -1
-    else if (b.data.quarter === 'Winter') return 1
-    else if (a.data.quarter === 'Spring') return -1
-    else if (b.data.quarter === 'Spring') return 1
-    else if (a.data.quarter === 'Summer') return -1
-    else if (b.data.quarter === 'Summer') return 1
-    else return a.data.quarter.localeCompare(b.data.quarter)
-  }
-
-  const termCompare = (a, b) => {
-    if (a.data.year !== b.data.year) return a.data.year - b.data.year
-    else return termQuarterCompare(a, b)
-  }
-
-  const [showFilter, setShowFilter] = React.useState(false)
-  const [filterItems, setFilterItems] = React.useState([])
   const [filterOptions, setFilterOptions] = React.useState([])
   const loadFilterOptions = async () => {
     try {
@@ -177,7 +187,6 @@ export default function CourseTable(props) {
         subject: subject,
         number: number
       })
-      console.log(res.data)
 
       const professorsSorted = res.data.professors.map( professor => ({
         field: 'Professor', 
@@ -198,7 +207,6 @@ export default function CourseTable(props) {
       })).sort(termCompare)
 
       const filterOptionsSorted = [].concat.apply([], [professorsSorted, kindsSorted, termsSorted])
-      console.log(filterOptionsSorted)
       setFilterOptions(filterOptionsSorted)
     } catch(e) {
       console.log(e)
@@ -234,10 +242,91 @@ export default function CourseTable(props) {
     loadTests({ page: 0, limit: newRowsPerPage })
   }
 
-  const handleClickFilter = () => {
-    setShowFilter(!showFilter)
-    // if (showFilter) { loadFilterOptions() }
-    loadFilterOptions()
+  const [showFilter, setShowFilter] = React.useState(false)
+  const handleShowFilterBar = () => {
+    if (!showFilter) {
+      if (filterOptions.length === 0) {
+        loadFilterOptions()
+      }
+      setShowFilter(true)
+    }
+    else {
+      setShowFilter(false)
+    }
+  }
+
+  const [filterItems, setFilterItems] = React.useState([
+  {
+    "field": "Professor",
+    "data": {
+      "name": null
+    },
+    "display": "(None)"
+  },
+  {
+    "field": "Professor",
+    "data": {
+      "name": "Angelopoulos"
+    },
+    "display": "Angelopoulos"
+  },
+  {
+    "field": "Professor",
+    "data": {
+      "name": "Austin"
+    },
+    "display": "Austin"
+  },
+  {
+    "field": "Professor",
+    "data": {
+      "name": "Chen Chen"
+    },
+    "display": "Chen Chen"
+  },
+  {
+    "field": "Professor",
+    "data": {
+      "name": "Clover May"
+    },
+    "display": "Clover May"
+  },
+  {
+    "field": "Professor",
+    "data": {
+      "name": "David Arnold"
+    },
+    "display": "David Arnold"
+  },
+  {
+    "field": "Professor",
+    "data": {
+      "name": "E. Randles"
+    },
+    "display": "E. Randles"
+  }
+])
+  const handleFilterItemAdd = (event) => {
+    event.preventDefault()
+    const set = new Set(filterItems)
+    if (filterSelected && !set.has(filterSelected)) {
+      setFilterItems([...filterItems, filterSelected])
+      console.log(filterItems)
+    }
+  }
+
+  const handleFilterItemDelete = (itemToDelete) => () => {
+    for (let i = 0; i < filterItems.length; ++i) {
+      if (filterItems[i].field === itemToDelete.field && filterItems[i].display === itemToDelete.display) {
+        setFilterItems([...filterItems.slice(0, i), ...filterItems.slice(i + 1)])
+        return
+      }
+    }
+  }
+
+  const [filterSelected, setFilterSelected] = React.useState(null)
+  const handleFilterChange = (event, values) => {
+    setFilterSelected(values)
   }
 
   return (
@@ -247,31 +336,44 @@ export default function CourseTable(props) {
       </Typography>
       <Box className={classes.root}>
         <Paper>
-          <Toolbar className={classes.toolbarRoot}>
-            <Typography variant='h6' id='tableTitle' className={classes.toolbarTitle}>
+          <Toolbar className={classes.filterControlsToolbar}>
+            <Typography variant='h6' id='tableTitle' className={classes.filterTitle}>
               All Tests
             </Typography>
             {showFilter ? 
-              <Autocomplete
-                className={classes.toolbarFilter}
-                id='grouped-filter'
-                size='small'
-                options={filterOptions}
-                groupBy={option => option.field}
-                getOptionLabel={option => option.display}
-                style={{ width: 300 }}
-                renderInput={params => (
-                  <TextField {...params} label='With categories' variant='outlined' fullWidth />
-                )}
-              />
+              <form className={classes.filterAutocomplete} onSubmit={handleFilterItemAdd} noValidate>
+                <Autocomplete
+                  id='grouped-filter'
+                  size='small'
+                  options={filterOptions}
+                  groupBy={option => option.field}
+                  getOptionLabel={option => option.display}
+                  onChange={handleFilterChange}
+                  renderInput={params => (
+                    <TextField {...params} autoFocus label='Filter / Search' variant='outlined' fullWidth />
+                  )}
+                />
+              </form>
             : null }
             <Tooltip title='Filter list'>
-              <IconButton aria-label='filter list' onClick={handleClickFilter}>
+              <IconButton aria-label='filter list' onClick={handleShowFilterBar}>
                 <Badge badgeContent={'+'} color='default'>
                   <FilterListIcon />
                 </Badge>
               </IconButton>
             </Tooltip>
+          </Toolbar>
+          <Toolbar className={classes.filterChipsToolbar}>
+            {filterItems.map(item => (
+              <Chip 
+                key={item.display}
+                color='primary'
+                variant='outlined'
+                className={classes.filterChip}
+                label={item.field + ': ' + item.display} 
+                onDelete={handleFilterItemDelete(item)}
+              />
+            ))}
           </Toolbar>
           <TableContainer>
             <Table className={classes.table} aria-label='test table' aria-labelledby='tableTitle' size='small'>
