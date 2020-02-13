@@ -100,6 +100,19 @@ app.post('/get-subject-number-tests', async (req, res) => {
   res.status(200).json(tests)
 })
 
+app.post('/get-tests', async (req, res) => {
+  // check filters valid
+  const sort = req.body.sort || null
+  const order = req.body.order == 'asc' ? 'asc' : 'desc'
+  const limit = req.body.limit <= 25 ? req.body.limit : 25
+  const skip = req.body.page ? req.body.page * limit : 0
+  const [tests, count] = await Test.getTests(req.body.filters, sort, order, skip, limit)
+  res.status(200).json({ 
+    tests: tests,
+    count: count
+  })
+})
+
 app.post('/get-test-file', async (req, res) => {
   if (!req.body._id) {
     res.sendStatus(400)

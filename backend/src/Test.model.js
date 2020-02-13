@@ -8,11 +8,13 @@ const TestSchema = new mongoose.Schema({
   course: {
     subject: {
       type: String,
-      required: true
+      required: true,
+      index: true
     },
     number: {
       type: String,
-      required: true
+      required: true,
+      index: true
     }
   },
   kind: {
@@ -59,6 +61,8 @@ const TestSchema = new mongoose.Schema({
   }
 })
 
+const PUBLIC_FIELDS = '_id term.quarter term.year professor.name course.subject course.number kind.name kind.number'
+
 TestSchema.methods.toString = function() {
   return `[${this.term.quarter} ${this.term.year}] (${this.professor.name}) ${this.course.subject} ${this.course.number} - ${this.kind.name} ${this.kind.number}`
 }
@@ -92,8 +96,18 @@ TestSchema.statics.getSubjectNumbers = async function(subject) {
 }
 
 TestSchema.statics.getSubjectNumberTests = async function(subject, number) {
-  const tests = await this.find({ 'course.subject': subject, 'course.number': number }, '_id term.quarter term.year professor.name course.subject course.number kind.name kind.number')
+  const tests = await this.find({ 'course.subject': subject, 'course.number': number }, PUBLIC_FIELDS)
   return tests
+}
+
+TestSchema.statics.getTests = async function(filters, sort, order, skip, limit) {
+  let filterList = {}
+  for (const [key, value] of Object.entries(filters)) {
+    filterList['course.' + key] = value
+  }
+  const count = await this.find(filterList, PUBLIC_FIELDS).countDocuments()
+  const tests = await this.find(filterList, PUBLIC_FIELDS).sort({ sort: order }).skip(skip).limit(limit)
+  return [tests, count]
 }
 
 TestSchema.statics.getTestFile = async function(_id) {

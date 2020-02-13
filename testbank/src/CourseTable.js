@@ -13,6 +13,7 @@ import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableContainer from '@material-ui/core/TableContainer';
+import TableFooter from '@material-ui/core/TableFooter';
 import TableHead from '@material-ui/core/TableHead';
 import TablePagination from '@material-ui/core/TablePagination';
 import TableRow from '@material-ui/core/TableRow';
@@ -32,6 +33,7 @@ import GetAppIcon from '@material-ui/icons/GetApp';
 import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
 
 import TestListItem from './TestListItem'
+import CourseTablePaginationActions from './CourseTablePaginationActions'
 
 import saveBlob from 'downloadjs'
 
@@ -81,23 +83,41 @@ const seasonsEmoji = (season) => {
   return emojiTooltip(season, emoji)
 }
 
-export default function SubjectNumberTestList(props) {
+// // a closure for window.setTimeout()
+// const debounced = (fn, delay) => {
+//   let to
+//   return () => {
+//     clearTimeout(to)
+//     to = setTimeout(fn, delay)
+//   }
+// }
+
+export default function CourseTable(props) {
   
   const classes = useStyles()
 
+  const [page, setPage] = React.useState(0);
+  const [rowsPerPage, setRowsPerPage] = React.useState(5);
   React.useEffect(() => {
-    loadList()
+    loadTests({ page: page, limit: rowsPerPage })
   }, [])
 
-  const [listItems, setListItems] = React.useState([])
-  const loadList = async () => {
+  const [testData, setTestData] = React.useState({ tests: [], count: 0 })
+  const loadTests = async (opts) => {
     try {
-      const res = await axios.post(props.apiUrl + '/get-subject-number-tests', {
+      const res = await axios.post(props.apiUrl + '/get-tests', {
         token: props.token,
-        subject: props.subject,
-        number: props.number
+        filters: {
+          subject: props.subject,
+          number: props.number
+        },
+        sort: opts.sort,
+        order: opts.order,
+        page: opts.page,
+        limit: opts.limit,
       })
-      setListItems(res.data)
+      setTestData(res.data)
+      console.log(res)
     } catch(e) {
       if (e.response) {
         console.log(e.response)
@@ -121,6 +141,18 @@ export default function SubjectNumberTestList(props) {
       }
     }
   }
+
+  const handleChangePage = (event, newPage) => {
+    loadTests({ page: newPage, limit: rowsPerPage })
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = event => {
+    const newRowsPerPage = parseInt(event.target.value, 10)
+    setRowsPerPage(newRowsPerPage);
+    setPage(0);
+    loadTests({ page: 0, limit: newRowsPerPage })
+  };
 
   return (
     <>
@@ -152,7 +184,7 @@ export default function SubjectNumberTestList(props) {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {listItems.map(test => (
+                {testData.tests.map(test => (
                   <TableRow key={test._id}>
                     <TableCell component="th" scope="row">
                       <Chip 
@@ -166,16 +198,34 @@ export default function SubjectNumberTestList(props) {
                     <TableCell>{test.kind.name + (test.kind.number ? ' ' + test.kind.number : '')}</TableCell>
                     <TableCell>{test.professor.name || '-'}</TableCell>
                     <TableCell>
-                      {test.term.year}<span>&emsp;</span>{seasonsEmoji(test.term.quarter)}</TableCell>
+                      {test.term.year}<span>&ensp;</span>{seasonsEmoji(test.term.quarter)}</TableCell>
                     <TableCell align='right'>{test.filesize || '-'}</TableCell>
                     <TableCell padding='none'>
                       <IconButton onClick={downloadFile(test._id)}>
-                        <GetAppIcon />
+                        <GetAppIcon style={{ fontSize: '18px' }} />
                       </IconButton>
                     </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
+              <TableFooter>
+                <TableRow>
+                  <TablePagination 
+                    rowsPerPageOptions={[5, 10, 25, { label: 'All', value: -1 }]}
+                    colSpan={3}
+                    count={testData.count}
+                    rowsPerPage={rowsPerPage}
+                    page={page}
+                    SelectProps={{
+                      inputProps: { 'aria-label': 'rows per page' },
+                      native: true,
+                    }}
+                    onChangePage={handleChangePage}
+                    onChangeRowsPerPage={handleChangeRowsPerPage}
+                    ActionsComponent={CourseTablePaginationActions}
+                  />
+                </TableRow>
+              </TableFooter>
             </Table>
           </TableContainer>
         </Paper>
