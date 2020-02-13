@@ -38,6 +38,8 @@ const routes = {
 }
 
 export default function TestbankBody(props) {
+
+  const { token, apiUrl } = props
   
   useRedirect('/', '/testbank/peruse')
   useRedirect('/testbank', '/testbank/peruse')
@@ -56,7 +58,8 @@ export default function TestbankBody(props) {
     <Container maxWidth='md' mb='15px' >
       <Box m={3}>
         {typeof(match) == 'function' && match({
-          ...props,
+          token: token,
+          apiUrl: apiUrl,
           handleClickSubject: handleClickSubject,
           handleClickNumber: handleClickNumber,
           handleClickTestInfo: handleClickTestInfo,

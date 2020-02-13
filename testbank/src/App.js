@@ -1,6 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 import axios from 'axios'
+import { useRoutes, useRedirect, navigate, A } from 'hookrouter'
 
 // material-ui components
 import CssBaseline from '@material-ui/core/CssBaseline'
@@ -17,9 +18,19 @@ import './App.css'
 // magic constants
 const apiUrl = `http://localhost:8080`
 
-
+// apparently there should be only one top-level router
+const routes = {
+  '*': () => (authToken, apiUrl, authCB) => (
+    <>
+      <TestbankAppBar token={authToken} apiUrl={apiUrl} authCB={authCB} />
+      <TestbankBody token={authToken} apiUrl={apiUrl} />
+    </>
+  ),
+}
 
 function App() {
+
+  const match = useRoutes(routes)
 
   const [authToken,  setAuthToken]  = React.useState()
   const [sbOpen,     setSbOpen]     = React.useState(false)
@@ -63,8 +74,7 @@ function App() {
     <>
       <link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap' />
       <CssBaseline />
-      <TestbankAppBar token={authToken} apiUrl={apiUrl} authCB={authCB} />
-      <TestbankBody token={authToken} apiUrl={apiUrl} />
+      {match(authToken, apiUrl, authCB)}
       <InfoBar open={sbOpen} setOpen={setSbOpen} severity={sbSeverity} message={sbMessage} />
     </>
   )
