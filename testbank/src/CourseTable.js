@@ -1,44 +1,43 @@
 import React from 'react'
 import Box from '@material-ui/core/Box'
 import Paper from '@material-ui/core/Paper'
-import Divider from '@material-ui/core/Divider'
 import { makeStyles } from '@material-ui/core/styles'
-import Container from '@material-ui/core/Container'
 import Typography from '@material-ui/core/Typography'
 import List from '@material-ui/core/List'
 import axios from 'axios'
 import ColorHash from 'color-hash'
 
-import Table from '@material-ui/core/Table';
-import TableBody from '@material-ui/core/TableBody';
-import TableCell from '@material-ui/core/TableCell';
-import TableContainer from '@material-ui/core/TableContainer';
-import TableFooter from '@material-ui/core/TableFooter';
-import TableHead from '@material-ui/core/TableHead';
-import TablePagination from '@material-ui/core/TablePagination';
-import TableRow from '@material-ui/core/TableRow';
-import TableSortLabel from '@material-ui/core/TableSortLabel';
-import Toolbar from '@material-ui/core/Toolbar';
-import Checkbox from '@material-ui/core/Checkbox';
-import IconButton from '@material-ui/core/IconButton';
-import Tooltip from '@material-ui/core/Tooltip';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Switch from '@material-ui/core/Switch';
-import Chip from '@material-ui/core/Chip';
-import Zoom from '@material-ui/core/Zoom';
+import Table from '@material-ui/core/Table'
+import TableBody from '@material-ui/core/TableBody'
+import TableCell from '@material-ui/core/TableCell'
+import TableContainer from '@material-ui/core/TableContainer'
+import TableFooter from '@material-ui/core/TableFooter'
+import TableHead from '@material-ui/core/TableHead'
+import TablePagination from '@material-ui/core/TablePagination'
+import TableRow from '@material-ui/core/TableRow'
+// import TableSortLabel from '@material-ui/core/TableSortLabel'
+import Toolbar from '@material-ui/core/Toolbar'
+import IconButton from '@material-ui/core/IconButton'
+import Tooltip from '@material-ui/core/Tooltip'
+import Chip from '@material-ui/core/Chip'
+import Zoom from '@material-ui/core/Zoom'
+import Badge from '@material-ui/core/Badge'
+import Autocomplete from '@material-ui/lab/Autocomplete'
 
-import DeleteIcon from '@material-ui/icons/Delete';
-import FilterListIcon from '@material-ui/icons/FilterList';
-import GetAppIcon from '@material-ui/icons/GetApp';
-import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
+import FormControl from '@material-ui/core/FormControl'
+// import FormControlLabel from '@material-ui/core/FormControlLabel'
+import Select from '@material-ui/core/Select'
+import TextField from '@material-ui/core/TextField'
 
-import TestListItem from './TestListItem'
+import FilterListIcon from '@material-ui/icons/FilterList'
+import GetAppIcon from '@material-ui/icons/GetApp'
+
 import CourseTablePaginationActions from './CourseTablePaginationActions'
 
 import saveBlob from 'downloadjs'
 
 const colorHash = new ColorHash({ hash: (s) => {
-  // npm string-hash
+  // from npm string-hash
   let hash = 5381, i = s.length
   while (i) {
     hash = (hash * 33) ^ s.charCodeAt(--i)
@@ -55,33 +54,43 @@ const useStyles = makeStyles(theme => ({
     colorPrimary: '#' + color
   },
   toolbarRoot: {
-    paddingLeft: theme.spacing(2),
-    paddingRight: theme.spacing(1),
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingTop: theme.spacing(3),
+    marginBottom: theme.spacing(3)
   },
   toolbarTitle: {
-    flex: '1 1 100%',
+      flex: '0 0 auto',
+     marginRight: theme.spacing(2)
   },
-}));
+  toolbarFilter: {
+     flex: '1 1 100%',
+    padding: '0 36px'
+  },
+  formControl: {
+    margin: theme.spacing(1),
+    minWidth: 120,
+  },
+}))
 
-const emojiTooltip = (title, emoji) => (
+const seasonsEmoji = (season) => {
+  if (season === 'Fall') return '🍁'
+  else if (season === 'Winter') return '❄️'
+  else if (season === 'Spring') return '🌼'
+  else if (season === 'Summer') return '☀️'
+  return '[ Not a valid season :( ]'
+}
+
+const emojiTooltip = (season) => (
   <Tooltip 
     arrow 
     TransitionComponent={Zoom} 
-    placement="right" 
-    title={title}
+    placement='right' 
+    title={season}
   >
-    <span>{emoji}</span>
+    <span>{seasonsEmoji(season)}</span>
   </Tooltip>
 )
-
-const seasonsEmoji = (season) => {
-  let emoji
-  if (season === 'Fall') emoji = '🍁'
-  else if (season === 'Winter') emoji = '❄️'
-  else if (season === 'Spring') emoji = '🌼'
-  else if (season === 'Summer') emoji = '☀️'
-  return emojiTooltip(season, emoji)
-}
 
 // // a closure for window.setTimeout()
 // const debounced = (fn, delay) => {
@@ -100,8 +109,8 @@ export default function CourseTable(props) {
   
   const classes = useStyles()
 
-  const [page, setPage] = React.useState(0);
-  const [rowsPerPage, setRowsPerPage] = React.useState(5);
+  const [page, setPage] = React.useState(0)
+  const [rowsPerPage, setRowsPerPage] = React.useState(5)
   React.useEffect(() => {
     loadTests({ page: page, limit: rowsPerPage })
   }, [])
@@ -113,7 +122,8 @@ export default function CourseTable(props) {
         token: token,
         filters: {
           subject: subject,
-          number: number
+          number: number,
+          ...opts.filters
         },
         sort: opts.sort,
         order: opts.order,
@@ -121,11 +131,77 @@ export default function CourseTable(props) {
         limit: opts.limit,
       })
       setTestData(res.data)
-      console.log(res)
+      // console.log(res)
     } catch(e) {
       if (e.response) {
         console.log(e.response)
       }
+    }
+  }
+
+  const kindCompare = (a, b) => {
+    if (a.data.name === b.data.name) { return a.data.number - b.data.number }
+    else if (a.data.name === 'Quiz') { return -1 }
+    else if (b.data.name === 'Quiz') { return 1 }
+    else if (a.data.name === 'Midterm') { return -1 }
+    else if (b.data.name === 'Midterm') { return 1 }
+    else if (a.data.name === 'Final') { return -1 }
+    else if (b.data.name === 'Final') { return 1  }
+    else { return a.data.name.localeCompare(b.data.name) }
+  }
+
+  const termQuarterCompare = (a, b) => {
+    if (a.data.quarter === b.data.quarter) return 0
+    else if (a.data.quarter === 'Fall') return -1
+    else if (b.data.quarter === 'Fall') return 1
+    else if (a.data.quarter === 'Winter') return -1
+    else if (b.data.quarter === 'Winter') return 1
+    else if (a.data.quarter === 'Spring') return -1
+    else if (b.data.quarter === 'Spring') return 1
+    else if (a.data.quarter === 'Summer') return -1
+    else if (b.data.quarter === 'Summer') return 1
+    else return a.data.quarter.localeCompare(b.data.quarter)
+  }
+
+  const termCompare = (a, b) => {
+    if (a.data.year !== b.data.year) return a.data.year - b.data.year
+    else return termQuarterCompare(a, b)
+  }
+
+  const [showFilter, setShowFilter] = React.useState(false)
+  const [filterItems, setFilterItems] = React.useState([])
+  const [filterOptions, setFilterOptions] = React.useState([])
+  const loadFilterOptions = async () => {
+    try {
+      const res = await axios.post(apiUrl + '/get-filter-options', {
+        subject: subject,
+        number: number
+      })
+      console.log(res.data)
+
+      const professorsSorted = res.data.professors.map( professor => ({
+        field: 'Professor', 
+        data: professor, 
+        display: professor.name ? professor.name : '(None)', 
+      })).sort( (a, b) => (a.display === null ? -1 : a.display.localeCompare(b.display)))
+
+      const kindsSorted = res.data.kinds.map( kind => ({
+        field: 'Kind', 
+        data: kind, 
+        display: kind.name + ' ' + (kind.number ? kind.number : '')
+      })).sort(kindCompare)
+
+      const termsSorted = res.data.terms.map( term => ({
+        field: 'Term', 
+        data: term, 
+        display: term.year.toString() + ' ' + term.quarter,
+      })).sort(termCompare)
+
+      const filterOptionsSorted = [].concat.apply([], [professorsSorted, kindsSorted, termsSorted])
+      console.log(filterOptionsSorted)
+      setFilterOptions(filterOptionsSorted)
+    } catch(e) {
+      console.log(e)
     }
   }
   
@@ -148,40 +224,62 @@ export default function CourseTable(props) {
 
   const handleChangePage = (event, newPage) => {
     loadTests({ page: newPage, limit: rowsPerPage })
-    setPage(newPage);
-  };
+    setPage(newPage)
+  }
 
   const handleChangeRowsPerPage = event => {
     const newRowsPerPage = parseInt(event.target.value, 10)
-    setRowsPerPage(newRowsPerPage);
-    setPage(0);
+    setRowsPerPage(newRowsPerPage)
+    setPage(0)
     loadTests({ page: 0, limit: newRowsPerPage })
-  };
+  }
+
+  const handleClickFilter = () => {
+    setShowFilter(!showFilter)
+    // if (showFilter) { loadFilterOptions() }
+    loadFilterOptions()
+  }
 
   return (
     <>
-      <Typography variant="h2" component="h2">
+      <Typography variant='h2' component='h2'>
         {subject} {number}
       </Typography>
       <Box className={classes.root}>
         <Paper>
           <Toolbar className={classes.toolbarRoot}>
-            <Typography className={classes.toolbarTitle} variant="h6" id="tableTitle">
+            <Typography variant='h6' id='tableTitle' className={classes.toolbarTitle}>
               All Tests
             </Typography>
-            <Tooltip title="Filter list">
-              <IconButton aria-label="filter list">
-                <FilterListIcon />
+            {showFilter ? 
+              <Autocomplete
+                className={classes.toolbarFilter}
+                id='grouped-filter'
+                size='small'
+                options={filterOptions}
+                groupBy={option => option.field}
+                getOptionLabel={option => option.display}
+                style={{ width: 300 }}
+                renderInput={params => (
+                  <TextField {...params} label='With categories' variant='outlined' fullWidth />
+                )}
+              />
+            : null }
+            <Tooltip title='Filter list'>
+              <IconButton aria-label='filter list' onClick={handleClickFilter}>
+                <Badge badgeContent={'+'} color='default'>
+                  <FilterListIcon />
+                </Badge>
               </IconButton>
             </Tooltip>
           </Toolbar>
           <TableContainer>
-            <Table className={classes.table} aria-label="test table" aria-labelledby="tableTitle" size='small'>
+            <Table className={classes.table} aria-label='test table' aria-labelledby='tableTitle' size='small'>
               <TableHead>
                 <TableRow>
-                  <TableCell component="th" scope="row">Identifier</TableCell>
-                  <TableCell>Kind</TableCell>
+                  <TableCell component='th' scope='row'>Identifier</TableCell>
                   <TableCell>Professor</TableCell>
+                  <TableCell>Kind</TableCell>
                   <TableCell>Term</TableCell>
                   <TableCell align='right'>Size</TableCell>
                   <TableCell padding='none'></TableCell>
@@ -190,19 +288,19 @@ export default function CourseTable(props) {
               <TableBody>
                 {testData.tests.map(test => (
                   <TableRow key={test._id}>
-                    <TableCell component="th" scope="row">
+                    <TableCell component='th' scope='row'>
                       <Chip 
                         label={test._id.slice(-6)} 
                         variant='outlined' 
                         size='small' 
-                        style={{ color: colorHash.hex(test._id) }} 
+                        style={{ color: colorHash.hex(test._id), fontFamily: 'Monospace' }} 
                         onClick={handleClickTestInfo(test._id)}
                       />
                     </TableCell>
-                    <TableCell>{test.kind.name + (test.kind.number ? ' ' + test.kind.number : '')}</TableCell>
                     <TableCell>{test.professor.name || '-'}</TableCell>
+                    <TableCell>{test.kind.name + (test.kind.number ? ' ' + test.kind.number : '')}</TableCell>
                     <TableCell>
-                      {test.term.year}<span>&ensp;</span>{seasonsEmoji(test.term.quarter)}</TableCell>
+                      {test.term.year}<span>&ensp;</span>{emojiTooltip(test.term.quarter)}</TableCell>
                     <TableCell align='right'>{test.filesize || '-'}</TableCell>
                     <TableCell padding='none'>
                       <IconButton onClick={downloadFile(test._id)}>

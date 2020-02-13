@@ -92,7 +92,6 @@ export default function TestbankAppBar(props) {
         <Toolbar>
           {match}
           <LoginButton apiUrl={apiUrl} authCB={authCB} />
-          }
         </Toolbar>
       </AppBar>
     </div>

@@ -13,27 +13,28 @@ const useStyles = makeStyles({
   },
   bullet: {
     display: 'inline-block',
-    margin: '0 3px',
+    margin: '0 4px',
     transform: 'scale(0.8)',
   },
   title: {
     fontSize: 14,
   },
   pos: {
-    marginBottom: 12,
+    padding: 16,
+    lineHeight: 2,
   },
 })
 
 export default function GridCard(props) {
   const classes = useStyles()
-  const bull = <span className={classes.bullet}>•</span>
+  // const bull = <span className={classes.bullet}>•</span>
 
   const listBulleted = (max_overflow) => {
     let s = props.subItems.slice(0, max_overflow).map((number, i) => (
-      <span key={number}>{(i ? bull : '')}{number}</span>
+      <span key={number}>{(i ? <span>&emsp;</span> : '')}{number}</span>
     ))
     if (props.subItems.length > max_overflow) {
-      s.push(<span key={max_overflow}>{bull}({props.subItems.length - max_overflow} more)</span>)
+      s.push(<span key={max_overflow}>&emsp;({props.subItems.length - max_overflow}&nbsp;more)</span>)
     }
     return s
   }
@@ -46,7 +47,7 @@ export default function GridCard(props) {
             {props.title}
           </Typography>
           <Typography className={classes.pos} color="textSecondary">
-            {listBulleted(7)}
+            {listBulleted(8)}
           </Typography>
           <Typography variant="body2" component="p">
             {props.documentCount} Documents

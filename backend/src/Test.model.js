@@ -110,8 +110,27 @@ TestSchema.statics.getTests = async function(filters, sort, order, skip, limit) 
   return [tests, count]
 }
 
-TestSchema.statics.getTestFile = async function(_id) {
-  return _id
+TestSchema.statics.getFilterOptions = async function(subject, number) {
+
+  // distinct on multiple fields: need to use aggregate pipeline
+  const uniqueProfessors = await this.aggregate().
+    match({ course: { subject: subject, number: number }}).
+    group({ _id: { name: "$professor.name" }}).
+    project({ _id: 0, name: "$_id.name" })
+
+  // distinct on multiple fields: need to use aggregate pipeline
+  const uniqueKinds = await this.aggregate().
+    match({ course: { subject: subject, number: number }}).
+    group({ _id: { name: "$kind.name", number: "$kind.number" }}).
+    project({ _id: 0, name: "$_id.name", number: "$_id.number" })
+
+  // distinct on multiple fields: need to use aggregate pipeline
+  const uniqueTerms = await this.aggregate().
+    match({ course: { subject: subject, number: number }}).
+    group({ _id: { year: "$term.year", quarter: "$term.quarter" }}).
+    project({ _id: 0, year: "$_id.year", quarter: "$_id.quarter" })
+
+  return { professors: uniqueProfessors, kinds: uniqueKinds, terms: uniqueTerms }
 }
 
 const Test = mongoose.model('Test', TestSchema)

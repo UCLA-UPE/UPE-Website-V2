@@ -119,8 +119,16 @@ app.post('/get-test-file', async (req, res) => {
     return
   }
   const test = await Test.findOne({ '_id': req.body._id }, 'test_file')
-
   res.sendFile(path.join(__dirname, 'data', test.test_file))
+})
+
+app.post('/get-filter-options', async (req, res) => {
+  if (!req.body.subject || !req.body.number) {
+    res.sendStatus(400)
+    return
+  }
+  const options = await Test.getFilterOptions(req.body.subject, req.body.number)
+  res.status(200).json(options)
 })
 
 app.get('/tests', async (req, res) => {
