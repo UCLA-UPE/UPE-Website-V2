@@ -102,7 +102,7 @@ TestSchema.statics.getSubjectNumberTests = async function(subject, number) {
 
 TestSchema.statics.getTests = async function(course, filters, sort, order, skip, limit) {
   console.log(filters)
-  const tests = await this.aggregate([
+  const testsAgg = await this.aggregate([
     { '$match': { 
        course: course, 
        ...(filters.professor && {'professor.name': { '$in': filters.professor.map(p => p.name) }}),
@@ -119,28 +119,32 @@ TestSchema.statics.getTests = async function(course, filters, sort, order, skip,
       ]
     }}
   ])
-  console.log(tests[0].data)
-  return [tests[0].data, tests[0].count[0] ? tests[0].count[0].count : 0]
+  const tests = testsAgg[0]
+  return [tests.data, tests.count[0] ? tests.count[0].count : 0]
 }
 
 TestSchema.statics.getFilterOptions = async function(course) {
 
-  const uniqueProfessors = await this.aggregate().
-    match({ course: course }).
-    group({ _id: '$professor.name' }).
-    project({ _id: 0, name: '$_id.professor.name' })
-
-  const uniqueKinds = await this.aggregate().
-    match({ course: course }).
-    group({ _id: '$kind' }).
-    project({ _id: 0, name: '$_id.name', number: '$_id.number' })
-
-  const uniqueTerms = await this.aggregate().
-    match({ course: course }).
-    group({ _id: '$term'}).
-    project({ _id: 0, quarter: '$_id.quarter', year: '$_id.year' })
-
-  return { professors: uniqueProfessors, kinds: uniqueKinds, terms: uniqueTerms }
+  const filtersAgg = await this.aggregate([
+    { '$match': { course: course }},
+    { '$facet': {
+      professors: [
+        { '$group': { _id: '$professor.name' }},
+         { '$project': { _id: 0, name: '$_id' }}
+      ],
+      kinds: [
+        { '$group': { _id: '$kind' }},
+        { '$project': { _id: 0, name: '$_id.name', number: '$_id.number' }}
+      ],
+      terms: [
+        { '$group': { _id: '$term' }},
+        { '$project': { _id: 0, quarter: '$_id.quarter', year: '$_id.year' }}
+      ],
+    }}
+  ])
+  const filters = filtersAgg[0]
+  console.log(filters)
+  return filters
 }
 
 const Test = mongoose.model('Test', TestSchema)
