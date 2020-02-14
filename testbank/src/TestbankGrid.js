@@ -29,10 +29,9 @@ export default function TestbankGrid(props) {
         token: props.token
       })
       setGridItems(res.data)
-      // console.log(res.data)
     } catch(e) {
-      if (e.response) {
-        console.log(e.response)
+      if (e.response.status === 401) {
+        props.authCB('tokenExpiry')
       }
     }
   }

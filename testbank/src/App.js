@@ -23,23 +23,21 @@ const routes = {
   '*': () => (authToken, apiUrl, authCB) => (
     <>
       <TestbankAppBar token={authToken} apiUrl={apiUrl} authCB={authCB} />
-      <TestbankBody token={authToken} apiUrl={apiUrl} />
+      <TestbankBody token={authToken} apiUrl={apiUrl} authCB={authCB} />
     </>
   ),
 }
 
 function App() {
 
+  useRedirect('/', '/testbank')
+
   const match = useRoutes(routes)
 
-  const [authToken,  setAuthToken]  = React.useState('asdf')
+  const [authToken,  setAuthToken]  = React.useState(null)
   const [sbOpen,     setSbOpen]     = React.useState(false)
   const [sbSeverity, setSbSeverity] = React.useState()
   const [sbMessage,  setSbMessage]  = React.useState()
-
-  React.useEffect(() => {
-    // console.log('authToken: ' + authToken)
-  })
 
   const showInfoBar = (severity, message) => {
     setSbSeverity(severity)
@@ -51,7 +49,6 @@ function App() {
       if (response.status === 200) {
         showInfoBar('success', 'Login Success!')
         setAuthToken(response.data.token)
-        console.log(response.data.token)
       }
       else {
         showInfoBar('error', 'Login Failed')
@@ -66,8 +63,10 @@ function App() {
         showInfoBar('error', 'Email Address Exists')
       }
     }
-    else if (event === 'token') {
-
+    else if (event === 'tokenExpiry') {
+      setAuthToken(null)
+      navigate('/testbank')
+      showInfoBar('error', 'Token Expired')
     }
   }
   

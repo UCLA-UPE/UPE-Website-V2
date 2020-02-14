@@ -113,7 +113,7 @@ const useStyles = makeStyles(theme => ({
 
 export default function CourseTable(props) {
 
-  const { apiUrl, token, handleClickTestInfo } = props
+  const { apiUrl, token, handleClickTestInfo, authCB } = props
   const courseSubject = decodeURIComponent(props.courseSubject)
   const courseNumber = decodeURIComponent(props.courseNumber)
   
@@ -138,7 +138,9 @@ export default function CourseTable(props) {
       })
       setTestData(res.data)
     } catch(e) {
-      console.log(e)
+      if (e.response.status === 401) {
+        authCB('tokenExpiry')
+      }
     }
   }
 
@@ -176,7 +178,9 @@ export default function CourseTable(props) {
       const filterOptionsSorted = [].concat.apply([], [professorsSorted, kindsSorted, termsSorted])
       setFilterOptions(filterOptionsSorted)
     } catch(e) {
-      console.log(e)
+      if (e.response.status === 401) {
+        authCB('tokenExpiry')
+      }
     }
   }
   
@@ -191,7 +195,9 @@ export default function CourseTable(props) {
       const contentType = res.headers['content-type']
       saveBlob(res.data, _id + '.pdf', contentType)
     } catch(e) {
-      console.log(e)
+      if (e.response.status === 401) {
+        authCB('tokenExpiry')
+      }
     }
   }
 
@@ -211,7 +217,6 @@ export default function CourseTable(props) {
   }, [page, rowsPerPage])
 
   const handleOpenFilterBar = () => {
-    console.log('open')
     if (filterOptions.length === 0) {
       loadFilterOptions()
     }
@@ -221,7 +226,6 @@ export default function CourseTable(props) {
   const handleFilterItemsChange = (event, values) => {
     setPage(0)
     setFilterItems(values)
-    console.log(values)
   }
 
   React.useEffect(() => {

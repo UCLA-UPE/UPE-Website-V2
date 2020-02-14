@@ -14,7 +14,7 @@ const useStyles = makeStyles(theme => ({
 
 export default function SubjectGrid(props) {
 
-  const { apiUrl, token } = props
+  const { apiUrl, token, authCB } = props
   const courseSubject = decodeURIComponent(props.courseSubject)
   
   const classes = useStyles()
@@ -31,10 +31,9 @@ export default function SubjectGrid(props) {
         subject: courseSubject
       })
       setGridItems(res.data)
-      console.log(res.data)
     } catch(e) {
-      if (e.response) {
-        console.log(e.response)
+      if (e.response.status === 401) {
+        authCB('tokenExpiry')
       }
     }
   }

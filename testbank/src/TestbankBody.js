@@ -7,42 +7,43 @@ import { useRoutes, useRedirect, navigate } from 'hookrouter'
 
 // import DataDisplayGrid from './DataDisplayGrid'
 // import EnhancedTable from './EnhancedTable'
-import CourseTable from './CourseTable'
-import TestbankGrid from './TestbankGrid'
+import Home from './Home'
 import SubjectGrid from './SubjectGrid'
-import SubjectNumberTestList from './SubjectNumberTestList'
+import TestbankGrid from './TestbankGrid'
+import CourseTable from './CourseTable'
 
 const routes = {
-  '/testbank/test/:id': ({ id }) => (p) => (
-    <Typography>TODO</Typography>
-    // <TestInfo />
+  '/testbank': () => (p) => (
+    <Home token={p.token} />
   ),
   '/testbank/peruse': () => (p) => (
     <TestbankGrid 
-      token={p.token} apiUrl={p.apiUrl}
-      handleClick={p.handleClickSubject} 
+      token={p.token} apiUrl={p.apiUrl} handleClick={p.handleClickSubject} 
+      authCB={p.authCB}
     />
   ),
   '/testbank/peruse/:courseSubject': ({ courseSubject }) => (p) => (
     <SubjectGrid 
       token={p.token} apiUrl={p.apiUrl} courseSubject={courseSubject} 
-      handleClick={p.handleClickNumber} 
+      handleClick={p.handleClickNumber} authCB={p.authCB}
     />
   ),
   '/testbank/peruse/:courseSubject/:courseNumber': ({ courseSubject, courseNumber }) => (p) => (
     <CourseTable
       token={p.token} apiUrl={p.apiUrl} courseSubject={courseSubject}
       courseNumber={courseNumber} handleClickTestInfo={p.handleClickTestInfo}
+      authCB={p.authCB}
     />
+  ),
+  '/testbank/test/:id': ({ id }) => (p) => (
+    <Typography>TODO</Typography>
+    // <TestInfo />
   ),
 }
 
 export default function TestbankBody(props) {
 
-  const { token, apiUrl } = props
-  
-  useRedirect('/', '/testbank/peruse')
-  useRedirect('/testbank', '/testbank/peruse')
+  const { token, apiUrl, authCB } = props
   const match = useRoutes(routes)
 
   const handleClickSubject = (courseSubject) => () => {
@@ -63,6 +64,7 @@ export default function TestbankBody(props) {
           handleClickSubject: handleClickSubject,
           handleClickNumber: handleClickNumber,
           handleClickTestInfo: handleClickTestInfo,
+          authCB: authCB
         }) || navigate(`/`)}
       </Box>
     </Container>

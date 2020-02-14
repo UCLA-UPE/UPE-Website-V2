@@ -45,6 +45,11 @@ const Breadcrumb = (props) => (
   </Typography>
 )
 const routes = {
+  '/testbank': () => (
+    <Breadcrumb
+      trail={[]}
+    />
+  ),
   '/testbank/test/:id': ({ id }) => (
     <Breadcrumb
       trail={[

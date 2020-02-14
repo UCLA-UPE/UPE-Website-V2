@@ -10,7 +10,7 @@ const mongoSanitize = require('express-mongo-sanitize')
 // some magic constants
 const PORT = 8080
 const HOST = '0.0.0.0'
-const TOKEN_EXPIRY_PERIOD = '30d'
+const TOKEN_EXPIRY_PERIOD = '10s'
 
 // mongoose models
 const User = require('./src/User.model')
