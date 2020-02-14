@@ -64,15 +64,6 @@ const emojiTooltip = (season) => (
   </Tooltip>
 )
 
-// // a closure for window.setTimeout()
-// const debounced = (fn, delay) => {
-//   let to
-//   return () => {
-//     clearTimeout(to)
-//     to = setTimeout(fn, delay)
-//   }
-// }
-
 const termQuarterCompare = (a, b) => {
   if (a.data.quarter === b.data.quarter) return 0
   else if (a.data.quarter === 'Fall') return -1
@@ -100,6 +91,17 @@ const kindCompare = (a, b) => {
   else if (a.data.name === 'Final') { return -1 }
   else if (b.data.name === 'Final') { return 1  }
   else { return a.data.name.localeCompare(b.data.name) }
+}
+
+const aggregateFilters = (filterItems) => {
+  const professorArr = filterItems.filter(item => item.field === 'professor')
+  const kindArr = filterItems.filter(item => item.field === 'kind')
+  const termArr = filterItems.filter(item => item.field === 'term')
+  return {
+    ...(professorArr.length > 0 && { professor: professorArr.map(item => item.data)}),
+    ...(kindArr.length > 0 && { kind: kindArr.map(item => item.data)}),
+    ...(termArr.length > 0 && { term: termArr.map(item => item.data)})
+  }
 }
 
 const useStyles = makeStyles(theme => ({
@@ -145,38 +147,35 @@ const useStyles = makeStyles(theme => ({
 export default function CourseTable(props) {
 
   const { apiUrl, token, handleClickTestInfo } = props
-  const subject = decodeURIComponent(props.subject)
-  const number = decodeURIComponent(props.number)
+  const courseSubject = decodeURIComponent(props.courseSubject)
+  const courseNumber = decodeURIComponent(props.courseNumber)
   
   const classes = useStyles()
 
-  const [page, setPage] = React.useState(0)
-  const [rowsPerPage, setRowsPerPage] = React.useState(5)
-  React.useEffect(() => {
-    loadTests({ page: page, limit: rowsPerPage })
-  }, [])
-
   const [testData, setTestData] = React.useState({ tests: [], count: 0 })
   const loadTests = async (opts) => {
+    console.log('---')
     try {
-      const res = await axios.post(apiUrl + '/get-tests', {
+      const body = {
         token: token,
-        filters: {
-          subject: subject,
-          number: number,
-          ...opts.filters
+        course: {
+          subject: courseSubject,
+          number: courseNumber
         },
-        sort: opts.sort,
-        order: opts.order,
-        page: opts.page,
-        limit: opts.limit,
-      })
-      setTestData(res.data)
-      // console.log(res)
-    } catch(e) {
-      if (e.response) {
-        console.log(e.response)
+        filters: {
+          ...opts?.filters
+        },
+        sort: opts?.sort,
+        order: opts?.order,
+        page: page,
+        limit: rowsPerPage,
       }
+      console.log(body)
+      const res = await axios.post(apiUrl + '/get-tests', body)
+      // console.log(res.data)
+      setTestData(res.data)
+    } catch(e) {
+      console.log(e)
     }
   }
 
@@ -184,25 +183,32 @@ export default function CourseTable(props) {
   const loadFilterOptions = async () => {
     try {
       const res = await axios.post(apiUrl + '/get-filter-options', {
-        subject: subject,
-        number: number
+        course: {
+          subject: courseSubject,
+          number: courseNumber
+        }
       })
-
       const professorsSorted = res.data.professors.map( professor => ({
-        field: 'Professor', 
+        field: 'professor', 
+        fieldDisplay: 'Professor', 
         data: professor, 
+        // query: [{ 'professor.name': professor.name }],
         display: professor.name ? professor.name : '(None)', 
       })).sort( (a, b) => (a.display === null ? -1 : a.display.localeCompare(b.display)))
 
       const kindsSorted = res.data.kinds.map( kind => ({
-        field: 'Kind', 
+        field: 'kind', 
+        fieldDisplay: 'Kind', 
         data: kind, 
+        // query: [{ 'kind.name': kind.name }, { 'kind.number': kind.number }],
         display: kind.name + ' ' + (kind.number ? kind.number : '')
       })).sort(kindCompare)
 
       const termsSorted = res.data.terms.map( term => ({
-        field: 'Term', 
+        field: 'term', 
+        fieldDisplay: 'Term', 
         data: term, 
+        // query: [{ 'term.year': term.year }, { 'term.quarter': term.quarter }],
         display: term.year.toString() + ' ' + term.quarter,
       })).sort(termCompare)
 
@@ -230,17 +236,20 @@ export default function CourseTable(props) {
     }
   }
 
+  const [page, setPage] = React.useState(0)
   const handleChangePage = (event, newPage) => {
-    loadTests({ page: newPage, limit: rowsPerPage })
     setPage(newPage)
   }
-
+  const [rowsPerPage, setRowsPerPage] = React.useState(5)
   const handleChangeRowsPerPage = event => {
-    const newRowsPerPage = parseInt(event.target.value, 10)
-    setRowsPerPage(newRowsPerPage)
+    setRowsPerPage(parseInt(event.target.value, 10))
     setPage(0)
-    loadTests({ page: 0, limit: newRowsPerPage })
   }
+  React.useEffect(() => {
+    loadTests({
+      filters: aggregateFilters(filterItems)
+    })
+  }, [page, rowsPerPage])
 
   const [showFilter, setShowFilter] = React.useState(false)
   const handleShowFilterBar = () => {
@@ -255,67 +264,22 @@ export default function CourseTable(props) {
     }
   }
 
-  const [filterItems, setFilterItems] = React.useState([
-  {
-    "field": "Professor",
-    "data": {
-      "name": null
-    },
-    "display": "(None)"
-  },
-  {
-    "field": "Professor",
-    "data": {
-      "name": "Angelopoulos"
-    },
-    "display": "Angelopoulos"
-  },
-  {
-    "field": "Professor",
-    "data": {
-      "name": "Austin"
-    },
-    "display": "Austin"
-  },
-  {
-    "field": "Professor",
-    "data": {
-      "name": "Chen Chen"
-    },
-    "display": "Chen Chen"
-  },
-  {
-    "field": "Professor",
-    "data": {
-      "name": "Clover May"
-    },
-    "display": "Clover May"
-  },
-  {
-    "field": "Professor",
-    "data": {
-      "name": "David Arnold"
-    },
-    "display": "David Arnold"
-  },
-  {
-    "field": "Professor",
-    "data": {
-      "name": "E. Randles"
-    },
-    "display": "E. Randles"
-  }
-])
-  const handleFilterItemAdd = (event) => {
-    event.preventDefault()
-    const set = new Set(filterItems)
-    if (filterSelected && !set.has(filterSelected)) {
-      setFilterItems([...filterItems, filterSelected])
-      console.log(filterItems)
-    }
+  const [selectedFilterItem, setSelectedFilterItem] = React.useState(null)
+  const handleSelectedFilterItemChange = (event, values) => {
+    setSelectedFilterItem(values)
   }
 
+  const [filterItems, setFilterItems] = React.useState([])
+  const handleFilterItemAdd = (event) => {
+    event.preventDefault()
+    setPage(0)
+    const set = new Set(filterItems)
+    if (selectedFilterItem && !set.has(selectedFilterItem)) {
+      setFilterItems([...filterItems, selectedFilterItem])
+    }
+  }
   const handleFilterItemDelete = (itemToDelete) => () => {
+    setPage(0)
     for (let i = 0; i < filterItems.length; ++i) {
       if (filterItems[i].field === itemToDelete.field && filterItems[i].display === itemToDelete.display) {
         setFilterItems([...filterItems.slice(0, i), ...filterItems.slice(i + 1)])
@@ -323,16 +287,16 @@ export default function CourseTable(props) {
       }
     }
   }
-
-  const [filterSelected, setFilterSelected] = React.useState(null)
-  const handleFilterChange = (event, values) => {
-    setFilterSelected(values)
-  }
+  React.useEffect(() => {
+    loadTests({
+      filters: aggregateFilters(filterItems)
+    })
+  }, [filterItems.length])
 
   return (
     <>
       <Typography variant='h2' component='h2'>
-        {subject} {number}
+        {courseSubject} {courseNumber}
       </Typography>
       <Box className={classes.root}>
         <Paper>
@@ -346,9 +310,9 @@ export default function CourseTable(props) {
                   id='grouped-filter'
                   size='small'
                   options={filterOptions}
-                  groupBy={option => option.field}
+                  groupBy={option => option.fieldDisplay}
                   getOptionLabel={option => option.display}
-                  onChange={handleFilterChange}
+                  onChange={handleSelectedFilterItemChange}
                   renderInput={params => (
                     <TextField {...params} autoFocus label='Filter / Search' variant='outlined' fullWidth />
                   )}
@@ -370,7 +334,7 @@ export default function CourseTable(props) {
                 color='primary'
                 variant='outlined'
                 className={classes.filterChip}
-                label={item.field + ': ' + item.display} 
+                label={item.fieldDisplay + ': ' + item.display} 
                 onDelete={handleFilterItemDelete(item)}
               />
             ))}
@@ -415,7 +379,7 @@ export default function CourseTable(props) {
               <TableFooter>
                 <TableRow>
                   <TablePagination 
-                    rowsPerPageOptions={[5, 10, 25, { label: 'All', value: -1 }]}
+                    rowsPerPageOptions={[5, 10, 25]}
                     colSpan={3}
                     count={testData.count}
                     rowsPerPage={rowsPerPage}

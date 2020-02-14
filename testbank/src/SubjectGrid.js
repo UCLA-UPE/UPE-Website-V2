@@ -15,7 +15,7 @@ const useStyles = makeStyles(theme => ({
 export default function SubjectGrid(props) {
 
   const { apiUrl, token } = props
-  const subject = decodeURIComponent(props.subject)
+  const courseSubject = decodeURIComponent(props.courseSubject)
   
   const classes = useStyles()
 
@@ -28,7 +28,7 @@ export default function SubjectGrid(props) {
     try {
       const res = await axios.post(apiUrl + '/get-subject-numbers', {
         token: token,
-        subject: subject
+        subject: courseSubject
       })
       setGridItems(res.data)
       console.log(res.data)
@@ -42,12 +42,12 @@ export default function SubjectGrid(props) {
   return (
     <>
       <Typography variant="h2" component="h2">
-        {subject}
+        {courseSubject}
       </Typography>
       <Grid container spacing={2} className={classes.root}>
         {gridItems.map(courseNumber => (
           <Grid item
-            onClick={props.handleClick(subject, courseNumber.course_number)}
+            onClick={props.handleClick(courseSubject, courseNumber.course_number)}
             key={courseNumber.course_number}
             md={4}
           >

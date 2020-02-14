@@ -1,5 +1,4 @@
 const express = require('express')
-const app = express()
 const bodyParser = require('body-parser')
 const connectDb = require('./src/connection')
 const cors = require('cors')
@@ -7,6 +6,7 @@ const bcrypt = require('bcrypt')
 const passport = require('passport')
 const jwt = require('jsonwebtoken')
 const path = require('path')
+const mongoSanitize = require('express-mongo-sanitize')
 
 // some magic constants
 const PORT = 8080
@@ -20,6 +20,8 @@ const Test = require('./src/Test.model')
 
 
 
+const app = express()
+
 ///////////////////////
 // middleware config //
 ///////////////////////
@@ -27,6 +29,7 @@ const Test = require('./src/Test.model')
 app.use(cors())
 app.use(bodyParser.json())
 app.use(passport.initialize())
+app.use(mongoSanitize())
 
 // passport
 // https://www.digitalocean.com/community/tutorials/api-authentication-with-json-web-tokensjwt-and-passport
@@ -101,12 +104,20 @@ app.post('/get-subject-number-tests', async (req, res) => {
 })
 
 app.post('/get-tests', async (req, res) => {
+  // console.log(req.body)
   // check filters valid
-  const sort = req.body.sort || null
-  const order = req.body.order == 'asc' ? 'asc' : 'desc'
+  if (!
+    (req.body.sort === null || typeof(req.body.sort) === 'number') &&
+    (req.body.order === null || req.body.order === 'asc' || req.body.order === 'desc') &&
+    typeof(req.body.limit) === 'number' &&
+    typeof(req.body.page) === 'number'
+  ) {
+    res.sendStatus(400)
+    return
+  }
+  const skip = req.body.page * req.body.limit
   const limit = req.body.limit <= 25 ? req.body.limit : 25
-  const skip = req.body.page ? req.body.page * limit : 0
-  const [tests, count] = await Test.getTests(req.body.filters, sort, order, skip, limit)
+  const [tests, count] = await Test.getTests(req.body.course, req.body.filters, req.body.sort, req.body.order, skip, limit)
   res.status(200).json({ 
     tests: tests,
     count: count
@@ -123,11 +134,11 @@ app.post('/get-test-file', async (req, res) => {
 })
 
 app.post('/get-filter-options', async (req, res) => {
-  if (!req.body.subject || !req.body.number) {
+  if (!req.body.course) {
     res.sendStatus(400)
     return
   }
-  const options = await Test.getFilterOptions(req.body.subject, req.body.number)
+  const options = await Test.getFilterOptions(req.body.course)
   res.status(200).json(options)
 })
 

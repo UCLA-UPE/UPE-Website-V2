@@ -100,33 +100,44 @@ TestSchema.statics.getSubjectNumberTests = async function(subject, number) {
   return tests
 }
 
-TestSchema.statics.getTests = async function(filters, sort, order, skip, limit) {
-  let filterList = {}
-  for (const [key, value] of Object.entries(filters)) {
-    filterList['course.' + key] = value
-  }
-  const count = await this.find(filterList, PUBLIC_FIELDS).countDocuments()
-  const tests = await this.find(filterList, PUBLIC_FIELDS).sort({ sort: order }).skip(skip).limit(limit)
-  return [tests, count]
+TestSchema.statics.getTests = async function(course, filters, sort, order, skip, limit) {
+  console.log(filters)
+  const tests = await this.aggregate([
+    { '$match': { 
+      course: course, 
+      ...(filters.professor && {'professor.name': { '$in': filters.professor.map(p => p.name) }}),
+      ...(filters.kind && {kind: { '$in': filters.kind }}),
+      ...(filters.term && {term: { '$in': filters.term }})
+    }},
+    { '$facet': {
+      data: [
+        { '$skip': skip },
+        { '$limit': limit },
+      ],
+      count: [
+        { '$count': 'count' }
+      ]
+    }}
+  ])
+  return [tests[0].data, tests[0].count[0] ? tests[0].count[0].count : 0]
 }
 
-TestSchema.statics.getFilterOptions = async function(subject, number) {
+TestSchema.statics.getFilterOptions = async function(course) {
 
-  // distinct on multiple fields: need to use aggregate pipeline
+  // distinct on multiple fields: need to use flexibility of aggregate pipeline
+
   const uniqueProfessors = await this.aggregate().
-    match({ course: { subject: subject, number: number }}).
+    match({ course: course }).
     group({ _id: { name: "$professor.name" }}).
     project({ _id: 0, name: "$_id.name" })
 
-  // distinct on multiple fields: need to use aggregate pipeline
   const uniqueKinds = await this.aggregate().
-    match({ course: { subject: subject, number: number }}).
+    match({ course: course }).
     group({ _id: { name: "$kind.name", number: "$kind.number" }}).
     project({ _id: 0, name: "$_id.name", number: "$_id.number" })
 
-  // distinct on multiple fields: need to use aggregate pipeline
   const uniqueTerms = await this.aggregate().
-    match({ course: { subject: subject, number: number }}).
+    match({ course: course }).
     group({ _id: { year: "$term.year", quarter: "$term.quarter" }}).
     project({ _id: 0, year: "$_id.year", quarter: "$_id.quarter" })
 
