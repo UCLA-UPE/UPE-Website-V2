@@ -10,7 +10,9 @@ import PublishIcon from '@material-ui/icons/Publish';
 import NavigateNextIcon from '@material-ui/icons/NavigateNext';
 import { useRoutes, useRedirect, navigate, A } from 'hookrouter'
 
-import LoginButton from './LoginButton'
+// import LoginButton from './LoginButton'
+import Login from './Login'
+// import ProfileButton from './ProfileButton'
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -86,7 +88,7 @@ const routes = {
 
 export default function TestbankAppBar(props) {
 
-  const { apiUrl, authCB } = props
+  const { token, apiUrl, authCB } = props
 
   const classes = useStyles()
   const match = useRoutes(routes)
@@ -96,7 +98,12 @@ export default function TestbankAppBar(props) {
       <AppBar position="static">
         <Toolbar>
           {match}
-          <LoginButton apiUrl={apiUrl} authCB={authCB} />
+          {token === null ?
+            <Login apiUrl={apiUrl} authCB={authCB} />
+          :
+            null
+            // <ProfileButton token={token} apiUrl={apiUrl} authCB={authCB} />
+          }
         </Toolbar>
       </AppBar>
     </div>
