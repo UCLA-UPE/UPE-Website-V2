@@ -143,7 +143,6 @@ TestSchema.statics.getFilterOptions = async function(course) {
     }}
   ])
   const filters = filtersAgg[0]
-  console.log(filters)
   return filters
 }
 
