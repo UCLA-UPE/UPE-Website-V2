@@ -104,10 +104,10 @@ TestSchema.statics.getTests = async function(course, filters, sort, order, skip,
   console.log(filters)
   const tests = await this.aggregate([
     { '$match': { 
-      course: course, 
-      ...(filters.professor && {'professor.name': { '$in': filters.professor.map(p => p.name) }}),
-      ...(filters.kind && {kind: { '$in': filters.kind }}),
-      ...(filters.term && {term: { '$in': filters.term }})
+       course: course, 
+       ...(filters.professor && {'professor.name': { '$in': filters.professor.map(p => p.name) }}),
+       ...(filters.kind && {kind: { '$in': filters.kind }}),
+       ...(filters.term && {term: { '$in': filters.term }})
     }},
     { '$facet': {
       data: [
@@ -119,27 +119,26 @@ TestSchema.statics.getTests = async function(course, filters, sort, order, skip,
       ]
     }}
   ])
+  console.log(tests[0].data)
   return [tests[0].data, tests[0].count[0] ? tests[0].count[0].count : 0]
 }
 
 TestSchema.statics.getFilterOptions = async function(course) {
 
-  // distinct on multiple fields: need to use flexibility of aggregate pipeline
-
   const uniqueProfessors = await this.aggregate().
     match({ course: course }).
-    group({ _id: { name: "$professor.name" }}).
-    project({ _id: 0, name: "$_id.name" })
+    group({ _id: '$professor.name' }).
+    project({ _id: 0, name: '$_id.professor.name' })
 
   const uniqueKinds = await this.aggregate().
     match({ course: course }).
-    group({ _id: { name: "$kind.name", number: "$kind.number" }}).
-    project({ _id: 0, name: "$_id.name", number: "$_id.number" })
+    group({ _id: '$kind' }).
+    project({ _id: 0, name: '$_id.name', number: '$_id.number' })
 
   const uniqueTerms = await this.aggregate().
     match({ course: course }).
-    group({ _id: { year: "$term.year", quarter: "$term.quarter" }}).
-    project({ _id: 0, year: "$_id.year", quarter: "$_id.quarter" })
+    group({ _id: '$term'}).
+    project({ _id: 0, quarter: '$_id.quarter', year: '$_id.year' })
 
   return { professors: uniqueProfessors, kinds: uniqueKinds, terms: uniqueTerms }
 }
