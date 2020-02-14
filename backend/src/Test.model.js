@@ -74,7 +74,7 @@ TestSchema.statics.getSubjects = async function() {
     ret.push({
       'course_subject': subject,
       'course_numbers': await this.find({ 'course.subject': subject }).distinct('course.number'),
-      'count': await this.find({ 'course.subject': subject }).count()
+      'count': await this.find({ 'course.subject': subject }).countDocuments()
     })
   }
   ret.sort((a, b) => b['count'] - a['count'])
@@ -88,7 +88,7 @@ TestSchema.statics.getSubjectNumbers = async function(subject) {
   for (number of uniqueNumbers) {
     ret.push({
       'course_number': number,
-      'count': await thisSubject.find({ 'course.number': number }).count()
+      'count': await thisSubject.find({ 'course.number': number }).countDocuments()
     })
   }
   ret.sort((a, b) => b['count'] - a['count'])

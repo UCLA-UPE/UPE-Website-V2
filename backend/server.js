@@ -3,7 +3,6 @@ const bodyParser = require('body-parser')
 const connectDb = require('./src/connection')
 const cors = require('cors')
 const bcrypt = require('bcrypt')
-const passport = require('passport')
 const jwt = require('jsonwebtoken')
 const path = require('path')
 const mongoSanitize = require('express-mongo-sanitize')
@@ -11,8 +10,7 @@ const mongoSanitize = require('express-mongo-sanitize')
 // some magic constants
 const PORT = 8080
 const HOST = '0.0.0.0'
-const TOKEN_EXPIRY_PERIOD_DAYS = 30
-const SECRET_PRIVATE_KEY = 'lmao'
+const TOKEN_EXPIRY_PERIOD = '30d'
 
 // mongoose models
 const User = require('./src/User.model')
@@ -28,15 +26,19 @@ const app = express()
 
 app.use(cors())
 app.use(bodyParser.json())
-app.use(passport.initialize())
 app.use(mongoSanitize())
 
-// passport
-// https://www.digitalocean.com/community/tutorials/api-authentication-with-json-web-tokensjwt-and-passport
+const verifyToken = (req, res, next) => {
+  try {
+    jwt.verify(req.body.token, process.env.JWT_SECRET, { expiresIn: TOKEN_EXPIRY_PERIOD })
+    console.log('verified')
+    next()
+  } catch(e) {
+    console.log('failed verification')
+    res.sendStatus(401)
+  }
+}
 
-// const verifyTokenMiddleware = (req, res, next) => {
-//   const token = req.token
-// }
 
 
 ////////////
@@ -60,8 +62,8 @@ app.post('/login', async (req, res) => {
   }
   const token = await jwt.sign(
     { _id: user._id, email: user.email }, 
-    SECRET_PRIVATE_KEY, 
-    { 'expiresIn': '10s' }
+    process.env.JWT_SECRET,
+    { expiresIn: TOKEN_EXPIRY_PERIOD }
   )
   res.status(200).json({ token })
 })
@@ -72,20 +74,27 @@ app.post('/signup', async (req, res) => {
     res.sendStatus(401)
     return
   }
+  const token = await jwt.sign(
+    { _id: user._id, email: user.email }, 
+    process.env.JWT_SECRET,
+    { expiresIn: TOKEN_EXPIRY_PERIOD }
+  )
   await User.create({ email: req.body.email, password: req.body.password })
-  res.sendStatus(200)
+  res.status(200).json({ token })
 })
 
-//////////////////////////////////
-// routes - token-authenticated //
-//////////////////////////////////
 
-app.post('/get-subjects', async (req, res) => {
+
+////////////////////////
+// routes - protected //
+////////////////////////
+
+app.post('/get-subjects', verifyToken, async (req, res) => {
   const subjects = await Test.getSubjects()
   res.status(200).json(subjects)
 })
 
-app.post('/get-subject-numbers', async (req, res) => {
+app.post('/get-subject-numbers', verifyToken, async (req, res) => {
   if (!req.body.subject) {
     res.sendStatus(400)
     return
@@ -94,7 +103,7 @@ app.post('/get-subject-numbers', async (req, res) => {
   res.status(200).json(subject_numbers)
 })
 
-app.post('/get-subject-number-tests', async (req, res) => {
+app.post('/get-subject-number-tests', verifyToken, async (req, res) => {
   if (!req.body.subject || !req.body.number) {
     res.sendStatus(400)
     return
@@ -103,8 +112,7 @@ app.post('/get-subject-number-tests', async (req, res) => {
   res.status(200).json(tests)
 })
 
-app.post('/get-tests', async (req, res) => {
-  // console.log(req.body)
+app.post('/get-tests', verifyToken, async (req, res) => {
   // check filters valid
   if (!
     (req.body.sort === null || typeof(req.body.sort) === 'number') &&
@@ -124,7 +132,7 @@ app.post('/get-tests', async (req, res) => {
   })
 })
 
-app.post('/get-test-file', async (req, res) => {
+app.post('/get-test-file', verifyToken, async (req, res) => {
   if (!req.body._id) {
     res.sendStatus(400)
     return
@@ -133,7 +141,7 @@ app.post('/get-test-file', async (req, res) => {
   res.sendFile(path.join(__dirname, 'data', test.test_file))
 })
 
-app.post('/get-filter-options', async (req, res) => {
+app.post('/get-filter-options', verifyToken, async (req, res) => {
   if (!req.body.course) {
     res.sendStatus(400)
     return
@@ -142,14 +150,14 @@ app.post('/get-filter-options', async (req, res) => {
   res.status(200).json(options)
 })
 
-app.get('/tests', async (req, res) => {
+app.get('/tests', verifyToken, async (req, res) => {
   let skip = req.body.skip || 0
   let limit = req.body.limit || 50
   const tests = await Test.find({}, '_id course kind term professor.name test_file upload_time verified').skip(skip).limit(limit)
   res.status(200).json(tests)
 })
 
-app.post('/tests', async (req, res) => {
+app.post('/tests', verifyToken, async (req, res) => {
   let skip = req.body.skip || 0
   let limit = req.body.limit || 50
   const tests = await Test.find({}, '_id course kind term professor.name test_file upload_time verified').skip(skip).limit(limit)

@@ -32,7 +32,7 @@ function App() {
 
   const match = useRoutes(routes)
 
-  const [authToken,  setAuthToken]  = React.useState()
+  const [authToken,  setAuthToken]  = React.useState('asdf')
   const [sbOpen,     setSbOpen]     = React.useState(false)
   const [sbSeverity, setSbSeverity] = React.useState()
   const [sbMessage,  setSbMessage]  = React.useState()
@@ -51,6 +51,7 @@ function App() {
       if (response.status === 200) {
         showInfoBar('success', 'Login Success!')
         setAuthToken(response.data.token)
+        console.log(response.data.token)
       }
       else {
         showInfoBar('error', 'Login Failed')

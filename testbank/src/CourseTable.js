@@ -122,7 +122,7 @@ export default function CourseTable(props) {
   const [testData, setTestData] = React.useState({ tests: [], count: 0 })
   const loadTests = async (opts) => {
     try {
-      const body = {
+      const res = await axios.post(apiUrl + '/get-tests', {
         token: token,
         course: {
           subject: courseSubject,
@@ -135,8 +135,7 @@ export default function CourseTable(props) {
         order: opts?.order,
         page: page,
         limit: rowsPerPage,
-      }
-      const res = await axios.post(apiUrl + '/get-tests', body)
+      })
       setTestData(res.data)
     } catch(e) {
       console.log(e)
@@ -147,6 +146,7 @@ export default function CourseTable(props) {
   const loadFilterOptions = async () => {
     try {
       const res = await axios.post(apiUrl + '/get-filter-options', {
+        token: token,
         course: {
           subject: courseSubject,
           number: courseNumber
