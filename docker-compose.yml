@@ -8,8 +8,11 @@ services:
       - backend
   backend:
     build: ./backend
+    env_file:
+      - .env
     environment:
-      - PRODUCTION='true'
+      - PRODUCTION=${PRODUCTION}
+      - JWT_SECRET=${JWT_SECRET}
     ports:
       - '8080:8080'
     depends_on:
