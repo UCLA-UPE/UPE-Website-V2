@@ -14,7 +14,7 @@ import InfoSnackbar from './InfoSnackbar'
 import './App.css'
 
 const API_PORT = 8080
-const apiUrl = os.hostname() + ':' + API_PORT
+const apiUrl = 'http://' + os.hostname() + ':' + API_PORT
 console.log('api url is set to ' + apiUrl)
 
 // apparently there should be only one top-level router
