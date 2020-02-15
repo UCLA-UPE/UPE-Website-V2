@@ -1,16 +1,14 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 import axios from 'axios'
-import { useRoutes, useRedirect, navigate, A } from 'hookrouter'
+import { useRoutes, navigate, } from 'hookrouter'
 
-// material-ui components
 import CssBaseline from '@material-ui/core/CssBaseline'
 import Button from '@material-ui/core/Button'
 
-// custom components
-import TestbankAppBar from './TestbankAppBar'
-import TestbankBody from './TestbankBody'
-import InfoBar from './InfoBar'
+import Navbar from './Navbar'
+import Body from './Body'
+import InfoSnackbar from './InfoSnackbar'
 
 // style
 import './App.css'
@@ -23,8 +21,8 @@ const routes = {
   // INFO: '/testbank' is set as base path in index.js
   '*': () => (authToken, apiUrl, authCB) => (
     <>
-      <TestbankAppBar token={authToken} apiUrl={apiUrl} authCB={authCB} />
-      <TestbankBody token={authToken} apiUrl={apiUrl} authCB={authCB} />
+      <Navbar token={authToken} apiUrl={apiUrl} authCB={authCB} />
+      <Body token={authToken} apiUrl={apiUrl} authCB={authCB} />
     </>
   ),
 }
@@ -50,7 +48,7 @@ export default () => {
     setSbSeverity(severity)
     setSbMessage(message)
 
-    // infobar causes re-render of TestbankBody when it auto closes
+    // InfoSnackbar causes re-render of Body when it auto closes
     // this will be an issue with hookrouter is resolved
     // many of the showInfoBar() calls are disabled because of this
     setSbOpen(true)
@@ -104,7 +102,7 @@ export default () => {
       <link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap' />
       <CssBaseline />
       {match(authToken, apiUrl, authCB)}
-      <InfoBar open={sbOpen} setOpen={setSbOpen} message={sbMessage} severity={sbSeverity} />
+      <InfoSnackbar open={sbOpen} setOpen={setSbOpen} message={sbMessage} severity={sbSeverity} />
     </>
   )
 }

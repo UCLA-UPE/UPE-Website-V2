@@ -1,11 +1,12 @@
 import React from 'react'
+import axios from 'axios'
+
 import Button from '@material-ui/core/Button'
 import Box from '@material-ui/core/Box'
 import { makeStyles } from '@material-ui/core/styles'
 import Popover from '@material-ui/core/Popover'
 import IconButton from '@material-ui/core/IconButton'
 import AccountCircleIcon from '@material-ui/icons/AccountCircle'
-import axios from 'axios'
 
 const useStyles = makeStyles(theme => ({
   paper: {
@@ -16,7 +17,7 @@ const useStyles = makeStyles(theme => ({
   },
 }))
 
-export default function ProfilePopover(props) {
+export default React.memo((props) => {
 
   const { token, apiUrl, authCB } = props
   const classes = useStyles()
@@ -68,4 +69,4 @@ export default function ProfilePopover(props) {
       </Popover>
     </div>
   )
-}
+})

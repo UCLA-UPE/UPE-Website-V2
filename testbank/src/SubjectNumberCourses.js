@@ -1,11 +1,11 @@
-import axios from 'axios'
 import React from 'react'
+import axios from 'axios'
 import ColorHash from 'color-hash'
 import saveBlob from 'downloadjs'
 
+import { makeStyles } from '@material-ui/core/styles'
 import Box from '@material-ui/core/Box'
 import Paper from '@material-ui/core/Paper'
-import { makeStyles } from '@material-ui/core/styles'
 import Typography from '@material-ui/core/Typography'
 import Table from '@material-ui/core/Table'
 import TableBody from '@material-ui/core/TableBody'
@@ -24,7 +24,7 @@ import Autocomplete from '@material-ui/lab/Autocomplete'
 import TextField from '@material-ui/core/TextField'
 import GetAppIcon from '@material-ui/icons/GetApp'
 
-import CourseTablePaginationActions from './CourseTablePaginationActions'
+import SubjectNumberCoursesPagination from './SubjectNumberCoursesPagination'
 
 const colorHash = new ColorHash({ hash: (s) => {
   // from npm string-hash
@@ -111,7 +111,7 @@ const useStyles = makeStyles(theme => ({
   },
 }))
 
-export default function CourseTable(props) {
+export default React.memo((props) => {
 
   const { apiUrl, token, handleClickTestInfo, authCB } = props
   const courseSubject = decodeURIComponent(props.courseSubject)
@@ -315,7 +315,7 @@ export default function CourseTable(props) {
                     }}
                     onChangePage={handleChangePage}
                     onChangeRowsPerPage={handleChangeRowsPerPage}
-                    ActionsComponent={CourseTablePaginationActions}
+                    ActionsComponent={SubjectNumberCoursesPagination}
                   />
                 </TableRow>
               </TableFooter>
@@ -325,4 +325,4 @@ export default function CourseTable(props) {
       </Box>
     </>
   )
-}
+})

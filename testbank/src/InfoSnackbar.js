@@ -6,15 +6,14 @@ function Alert(props) {
   return <MuiAlert elevation={6} variant="filled" {...props} />
 }
 
-export default function InfoBar(props) {
+export default React.memo((props) => {
 
   const { open, setOpen, message, severity } = props
   const handleClose = (event, reason) => {
-    // if (reason === 'clickaway') {
-    //   return
-    // }
+    if (reason === 'clickaway') {
+      return
+    }
     setOpen(false)
-    console.log(open)
   }
   return (
     <Snackbar key={'info-snackbar'} open={open} autoHideDuration={1000} onClose={handleClose}>
@@ -23,4 +22,4 @@ export default function InfoBar(props) {
       </Alert>
     </Snackbar>
   )
-}
+})

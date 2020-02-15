@@ -1,35 +1,34 @@
 import React from 'react'
-import Container from '@material-ui/core/Container'
-import Box from '@material-ui/core/Box'
-import Typography from '@material-ui/core/Typography'
 import axios from 'axios'
 import { useRoutes, useRedirect, navigate } from 'hookrouter'
 
-// import DataDisplayGrid from './DataDisplayGrid'
-// import EnhancedTable from './EnhancedTable'
+import Container from '@material-ui/core/Container'
+import Box from '@material-ui/core/Box'
+import Typography from '@material-ui/core/Typography'
+
 import Home from './Home'
-import SubjectGrid from './SubjectGrid'
-import TestbankGrid from './TestbankGrid'
-import CourseTable from './CourseTable'
+import Subjects from './Subjects'
+import SubjectNumbers from './SubjectNumbers'
+import SubjectNumberCourses from './SubjectNumberCourses'
 
 const routes = {
   '/': () => (p) => (
     <Home token={p.token} />
   ),
   '/peruse': () => (p) => (
-    <TestbankGrid 
+    <Subjects 
       token={p.token} apiUrl={p.apiUrl} handleClick={p.handleClickSubject} 
       authCB={p.authCB}
     />
   ),
   '/peruse/:courseSubject': ({ courseSubject }) => (p) => (
-    <SubjectGrid 
+    <SubjectNumbers 
       token={p.token} apiUrl={p.apiUrl} courseSubject={courseSubject} 
       handleClick={p.handleClickNumber} authCB={p.authCB}
     />
   ),
   '/peruse/:courseSubject/:courseNumber': ({ courseSubject, courseNumber }) => (p) => (
-    <CourseTable
+    <SubjectNumberCourses
       token={p.token} apiUrl={p.apiUrl} courseSubject={courseSubject}
       courseNumber={courseNumber} handleClickTestInfo={p.handleClickTestInfo}
       authCB={p.authCB}
@@ -66,15 +65,6 @@ export default React.memo((props) => {
           handleClickTestInfo: handleClickTestInfo,
           authCB: authCB
         }) || navigate(`/`)}
-
-        {/* {token ?  */}
-        {/*   <TestbankGrid  */}
-        {/*     token={token} apiUrl={apiUrl} handleClick={handleClickSubject}  */}
-        {/*     authCB={authCB} */}
-        {/*   /> */}
-        {/* : */}
-        {/*   <Home token={token} /> */}
-        {/* } */}
       </Box>
     </Container>
   )
