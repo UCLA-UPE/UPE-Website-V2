@@ -4,6 +4,7 @@ const User = require('./User.model')
 
 const host = process.env.PRODUCTION ? 'mongo' : 'localhost'
 const connection = 'mongodb://' + host + ':27017/upe-web'
+console.log('API server connecting to ' + connection)
 
 // opt in to new MongoDB features
 mongoose.set('useNewUrlParser', true)
