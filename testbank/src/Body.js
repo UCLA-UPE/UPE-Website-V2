@@ -10,10 +10,11 @@ import Home from './Home'
 import Subjects from './Subjects'
 import SubjectNumbers from './SubjectNumbers'
 import SubjectNumberCourses from './SubjectNumberCourses'
+import Profile from './Profile'
 
 const routes = {
   '/': () => (p) => (
-    <Home token={p.token} />
+    <Home token={p.token} apiUrl={p.apiUrl} />
   ),
   '/peruse': () => (p) => (
     <Subjects 
@@ -37,6 +38,11 @@ const routes = {
   '/test/:id': ({ id }) => (p) => (
     <Typography>TODO</Typography>
     // <TestInfo />
+  ),
+  '/profile': () => (p) => (
+    <Profile
+      token={p.token} apiUrl={p.apiUrl}
+    />
   ),
 }
 
@@ -64,7 +70,7 @@ export default React.memo((props) => {
           handleClickNumber: handleClickNumber,
           handleClickTestInfo: handleClickTestInfo,
           authCB: authCB
-        }) || navigate(`/`)}
+        }) || navigate('/')}
       </Box>
     </Container>
   )

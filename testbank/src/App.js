@@ -1,6 +1,5 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
-import axios from 'axios'
 import { useRoutes, navigate, } from 'hookrouter'
 
 import CssBaseline from '@material-ui/core/CssBaseline'

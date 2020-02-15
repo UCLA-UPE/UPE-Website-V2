@@ -1,5 +1,6 @@
 import React from 'react'
 import axios from 'axios'
+import { navigate } from 'hookrouter'
 
 import Button from '@material-ui/core/Button'
 import Box from '@material-ui/core/Box'
@@ -64,6 +65,7 @@ export default React.memo((props) => {
         }}
       >
         <Box className={classes.paper}>
+          <Button onClick={() => navigate('/profile')}>Profile</Button>
           <Button onClick={handleLogout}>Logout</Button>
         </Box>
       </Popover>

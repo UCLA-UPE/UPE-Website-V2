@@ -47,17 +47,22 @@ app.use(logger)
 
 
 
-////////////
-// routes //
-////////////
+/////////////
+// utility //
+/////////////
+
+const signUserToken = async (_id, email) => await jwt.sign(
+  { _id: _id, email: email }, 
+  process.env.JWT_SECRET,
+  { expiresIn: TOKEN_EXPIRY_PERIOD }
+)
+
+//////////////////////////
+// routes - unprotected //
+//////////////////////////
 
 app.get('/', (req, res) => {
-  res.send('Hello from Node.js apasdfp \n')
-})
-
-app.get('/users', async (req, res) => {
-  const users = await User.find()
-  res.json(users)
+  res.send('UPE Web API is working!\n')
 })
 
 app.post('/login', async (req, res) => {
@@ -66,28 +71,25 @@ app.post('/login', async (req, res) => {
     res.sendStatus(401)
     return
   }
-  const token = await jwt.sign(
-    { _id: user._id, email: user.email }, 
-    process.env.JWT_SECRET,
-    { expiresIn: TOKEN_EXPIRY_PERIOD }
-  )
+  const token = await signUserToken(user._id, user.email)
   console.log(token)
-  res.status(200).json({ token })
+  res.status(200).json({ token: token })
 })
 
 app.post('/signup', async (req, res) => {
   const exists = await User.findOne({ email: req.body.email })
   if (exists) {
-    res.sendStatus(401)
+    res.sendStatus(400)
     return
   }
-  const token = await jwt.sign(
-    { _id: user._id, email: user.email }, 
-    process.env.JWT_SECRET,
-    { expiresIn: TOKEN_EXPIRY_PERIOD }
-  )
-  await User.create({ email: req.body.email, password: req.body.password })
-  res.status(200).json({ token })
+  const user = await User.create({ email: req.body.email, password: req.body.password })
+  const token = await signUserToken(user._id, user.email)
+  res.status(200).json({ token: token })
+})
+
+app.get('/summary', async (req, res) => {
+  const summary = await Test.countDocuments()
+  res.status(200).json(summary)
 })
 
 
@@ -95,6 +97,11 @@ app.post('/signup', async (req, res) => {
 ////////////////////////
 // routes - protected //
 ////////////////////////
+
+app.post('/get-profile', verifyToken, async (req, res) => {
+  const profile = await User.getProfile(req.body.token)
+  res.status(200).json(profile)
+})
 
 app.post('/logout', verifyToken, async (req, res) => {
   // TODO: invalidate token
@@ -160,20 +167,6 @@ app.post('/get-filter-options', verifyToken, async (req, res) => {
   }
   const options = await Test.getFilterOptions(req.body.course)
   res.status(200).json(options)
-})
-
-app.get('/tests', verifyToken, async (req, res) => {
-  let skip = req.body.skip || 0
-  let limit = req.body.limit || 50
-  const tests = await Test.find({}, '_id course kind term professor.name test_file upload_time verified').skip(skip).limit(limit)
-  res.status(200).json(tests)
-})
-
-app.post('/tests', verifyToken, async (req, res) => {
-  let skip = req.body.skip || 0
-  let limit = req.body.limit || 50
-  const tests = await Test.find({}, '_id course kind term professor.name test_file upload_time verified').skip(skip).limit(limit)
-  res.status(200).json(tests)
 })
 
 

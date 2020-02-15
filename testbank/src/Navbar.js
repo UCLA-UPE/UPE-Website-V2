@@ -1,4 +1,5 @@
 import React from 'react'
+import axios from 'axios'
 import { useRoutes, useRedirect, navigate, A } from 'hookrouter'
 
 import { makeStyles } from '@material-ui/core/styles'
@@ -7,6 +8,7 @@ import Toolbar from '@material-ui/core/Toolbar'
 import Typography from '@material-ui/core/Typography'
 import Button from '@material-ui/core/Button'
 import IconButton from '@material-ui/core/IconButton'
+import Box from '@material-ui/core/Box'
 import MenuIcon from '@material-ui/icons/Menu'
 import PublishIcon from '@material-ui/icons/Publish'
 import NavigateNextIcon from '@material-ui/icons/NavigateNext'
@@ -46,6 +48,7 @@ const Breadcrumb = (props) => (
     ))}
   </Typography>
 )
+
 const routes = {
   '/': () => (
     <Breadcrumb
@@ -84,6 +87,14 @@ const routes = {
       ]}
     />
   ),
+  '/profile': () => (
+    <Breadcrumb
+      trail={[
+        { path: '/profile', text: 'Profile' }
+      ]}
+    />
+  ),
+  
 }
 
 export default React.memo((props) => {
@@ -93,7 +104,21 @@ export default React.memo((props) => {
   const classes = useStyles()
   const match = useRoutes(routes)
 
-  React.useEffect(() => { console.log('token:' + token) })
+  React.useEffect(() => {
+    loadCredits()
+  }, [])
+
+  const [credits, setCredits] = React.useState()
+  const loadCredits = async () => {
+    try {
+      const res = await axios.post(apiUrl + '/get-profile', {
+        token: token
+      })
+      setCredits(res.data.testbankCredits)
+    } catch(e) {
+      console.log(e)
+    }
+  }
 
   return (
     <div className={classes.root}>
@@ -101,7 +126,10 @@ export default React.memo((props) => {
         <Toolbar>
           {match}
           {token ?
-            <ProfilePopover token={token} apiUrl={apiUrl} authCB={authCB} />
+            <>
+              <Box mr={3}><Typography variant="h6">Credits: {credits}</Typography></Box>
+              <ProfilePopover token={token} apiUrl={apiUrl} authCB={authCB} />
+            </>
           :
             <LoginPopover apiUrl={apiUrl} authCB={authCB} />
           }
