@@ -1,6 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 import { useRoutes, navigate, } from 'hookrouter'
+import os from 'os'
 
 import CssBaseline from '@material-ui/core/CssBaseline'
 import Button from '@material-ui/core/Button'
@@ -12,8 +13,9 @@ import InfoSnackbar from './InfoSnackbar'
 // style
 import './App.css'
 
-// magic constants
-const apiUrl = `http://localhost:8080`
+const PORT = 8080
+const apiUrl = os.hostname() + ':' + PORT
+console.log('api url is set to ' + apiUrl)
 
 // apparently there should be only one top-level router
 const routes = {
