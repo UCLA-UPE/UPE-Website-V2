@@ -13,7 +13,7 @@ import InfoSnackbar from './InfoSnackbar'
 // style
 import './App.css'
 
-const PORT = 8080
+const PORT = 80
 const apiUrl = os.hostname() + ':' + PORT
 console.log('api url is set to ' + apiUrl)
 
