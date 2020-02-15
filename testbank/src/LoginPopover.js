@@ -50,7 +50,7 @@ const useStyles = makeStyles(theme => ({
   },
 }))
 
-export default function LoginButton(props) {
+export default function LoginPopover(props) {
   const classes = useStyles()
 
   const [anchorEl, setAnchorEl] = React.useState(null)
@@ -64,8 +64,9 @@ export default function LoginButton(props) {
   const open = Boolean(anchorEl)
   const id = open ? 'simple-popover' : undefined
 
-  const [email, setEmail] = React.useState(null)
-  const [password, setPassword] = React.useState(null)
+  const [email, setEmail] = React.useState()
+  const [password, setPassword] = React.useState()
+  const [remember, setRemember] = React.useState(false)
 
   const handleLogin = async (event) => {
     event.preventDefault() // prevent form submit from refreshing page
@@ -74,11 +75,9 @@ export default function LoginButton(props) {
         email: email,
         password: password
       })
-      props.authCB('login', res)
+      props.authCB('login', { remember: remember, res: res })
     } catch(e) {
-      if (e.response) {
-        props.authCB('login', e.response)
-      }
+      props.authCB('login', { remember: remember, res: e.response })
     }
   }
   const handleSignup = async (event) => {
@@ -87,11 +86,9 @@ export default function LoginButton(props) {
         email: email,
         password: password
       })
-      props.authCB('signup', res)
+      props.authCB('signup', { remember: remember, res: res })
     } catch(e) {
-      if (e.response) {
-        props.authCB('signup', e.response)
-      }
+      props.authCB('signup', { remember: remember, res: e.response })
     }
   }
 
@@ -115,7 +112,6 @@ export default function LoginButton(props) {
         }}
       >
         <Container component="main" maxWidth="xs">
-          <CssBaseline />
           <div className={classes.paper}>
             <form className={classes.form} onSubmit={handleLogin} noValidate>
               <TextField
@@ -143,7 +139,7 @@ export default function LoginButton(props) {
                 autoComplete="current-password"
               />
               <FormControlLabel
-                control={<Checkbox value="remember" color="primary" />}
+                control={<Checkbox value="remember" color="primary" onChange={e => setRemember(e.target.value)} />}
                 label="Remember me"
               />
               <Grid

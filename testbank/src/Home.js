@@ -5,8 +5,8 @@ import { navigate } from 'hookrouter'
 
 export default function Home(props) {
   React.useEffect(() => {
-    if (props.token !== null) {
-      navigate('/testbank/peruse', true)
+    if (props.token) {
+      navigate('/testbank/peruse')
     }
   })
 

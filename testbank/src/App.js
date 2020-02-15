@@ -20,6 +20,7 @@ const apiUrl = `http://localhost:8080`
 
 // apparently there should be only one top-level router
 const routes = {
+  // INFO: '/testbank' is set as base path in index.js
   '*': () => (authToken, apiUrl, authCB) => (
     <>
       <TestbankAppBar token={authToken} apiUrl={apiUrl} authCB={authCB} />
@@ -28,13 +29,19 @@ const routes = {
   ),
 }
 
-function App() {
-
-  useRedirect('/', '/testbank')
+export default () => {
 
   const match = useRoutes(routes)
 
-  const [authToken,  setAuthToken]  = React.useState(null)
+  const [authToken,  setAuthToken] = React.useState()
+  React.useEffect(() => {
+    const token = localStorage.getItem('token')
+    if (token) {
+      setAuthToken(token)
+      // showInfoBar('success', 'Login Success!')
+    }
+  }, [])
+
   const [sbOpen,     setSbOpen]     = React.useState(false)
   const [sbSeverity, setSbSeverity] = React.useState()
   const [sbMessage,  setSbMessage]  = React.useState()
@@ -42,22 +49,39 @@ function App() {
   const showInfoBar = (severity, message) => {
     setSbSeverity(severity)
     setSbMessage(message)
+
+    // infobar causes re-render of TestbankBody when it auto closes
+    // this will be an issue with hookrouter is resolved
+    // many of the showInfoBar() calls are disabled because of this
     setSbOpen(true)
   }
-  const authCB = (event, response) => {
+  const authCB = (event, data) => {
     if (event === 'login') {
-      if (response.status === 200) {
+      if (data.res.status === 200) {
+        setAuthToken(data.res.data.token)
+        localStorage.setItem('token', data.res.data.token)
         showInfoBar('success', 'Login Success!')
-        setAuthToken(response.data.token)
       }
       else {
         showInfoBar('error', 'Login Failed')
       }
     }
+    if (event === 'logout') {
+      if (data.res.status === 200) {
+        setAuthToken(null)
+        localStorage.removeItem('token')
+        navigate('/')
+        showInfoBar('success', 'Logged Out')
+      }
+      else {
+        showInfoBar('error', 'Logout Failed')
+      }
+    }
     else if (event === 'signup') {
-      if (response.status === 200) {
+      if (data.res.status === 200) {
+        setAuthToken(data.res.data.token)
+        localStorage.setItem('token', data.res.data.token)
         showInfoBar('success', 'Signed Up!')
-        setAuthToken(response.data.token)
       }
       else {
         showInfoBar('error', 'Email Address Exists')
@@ -65,8 +89,13 @@ function App() {
     }
     else if (event === 'tokenExpiry') {
       setAuthToken(null)
-      navigate('/testbank')
+      localStorage.removeItem('token')
+      navigate('/')
       showInfoBar('error', 'Token Expired')
+    }
+    else if (event === 'tokenDNE') {
+      // navigate('/')
+      // showInfoBar('error', 'Unauthorized')
     }
   }
   
@@ -75,9 +104,7 @@ function App() {
       <link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap' />
       <CssBaseline />
       {match(authToken, apiUrl, authCB)}
-      <InfoBar open={sbOpen} setOpen={setSbOpen} severity={sbSeverity} message={sbMessage} />
+      <InfoBar open={sbOpen} setOpen={setSbOpen} message={sbMessage} severity={sbSeverity} />
     </>
   )
 }
-
-export default App

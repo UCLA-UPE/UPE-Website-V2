@@ -101,7 +101,6 @@ TestSchema.statics.getSubjectNumberTests = async function(subject, number) {
 }
 
 TestSchema.statics.getTests = async function(course, filters, sort, order, skip, limit) {
-  console.log(filters)
   const testsAgg = await this.aggregate([
     { '$match': { 
        course: course, 

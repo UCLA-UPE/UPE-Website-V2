@@ -10,9 +10,8 @@ import PublishIcon from '@material-ui/icons/Publish';
 import NavigateNextIcon from '@material-ui/icons/NavigateNext';
 import { useRoutes, useRedirect, navigate, A } from 'hookrouter'
 
-// import LoginButton from './LoginButton'
-import Login from './Login'
-// import ProfileButton from './ProfileButton'
+import LoginPopover from './LoginPopover'
+import ProfilePopover from './ProfilePopover'
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -29,9 +28,9 @@ const useStyles = makeStyles(theme => ({
 const Rarr = () => <span>&ensp;&rarr;&ensp;</span>
 const Breadcrumb = (props) => (
   <Typography variant="h6" style={{ flexGrow: 1 }}>
-    <span>
-      UCLA UPE Testbank
-    </span>
+    <A href='/' style={{ textDecoration: 'none', color: 'inherit' }}>
+      Home
+    </A>
     {props.trail.map(t => (
       <span key={t.path}>
         <Rarr />
@@ -47,40 +46,40 @@ const Breadcrumb = (props) => (
   </Typography>
 )
 const routes = {
-  '/testbank': () => (
+  '/': () => (
     <Breadcrumb
       trail={[]}
     />
   ),
-  '/testbank/test/:id': ({ id }) => (
+  '/test/:id': ({ id }) => (
     <Breadcrumb
       trail={[
         { path: null, text: 'Test' },
-        { path: '/testbank/test/' + id, text: id }
+        { path: '/test/' + id, text: id }
       ]}
     />
   ),
-  '/testbank/peruse': () => (
+  '/peruse': () => (
     <Breadcrumb
       trail={[
-        { path: '/testbank/peruse', text: 'Peruse' }
+        { path: '/peruse', text: 'Peruse' }
       ]}
     />
   ),
-  '/testbank/peruse/:subject': ({ subject }) => (
+  '/peruse/:subject': ({ subject }) => (
     <Breadcrumb
       trail={[
-        { path: '/testbank/peruse', text: 'Peruse' },
-        { path: '/testbank/peruse/' + subject, text: decodeURIComponent(subject) },
+        { path: '/peruse', text: 'Peruse' },
+        { path: '/peruse/' + subject, text: decodeURIComponent(subject) },
       ]}
     />
   ),
-  '/testbank/peruse/:subject/:id': ({ subject, id }) => (
+  '/peruse/:subject/:id': ({ subject, id }) => (
     <Breadcrumb
       trail={[
-        { path: '/testbank/peruse', text: 'Peruse' },
-        { path: '/testbank/peruse/' + subject, text: decodeURIComponent(subject) },
-        { path: '/testbank/peruse/' + subject + '/' + id, text: decodeURIComponent(id) },
+        { path: '/peruse', text: 'Peruse' },
+        { path: '/peruse/' + subject, text: decodeURIComponent(subject) },
+        { path: '/peruse/' + subject + '/' + id, text: decodeURIComponent(id) },
       ]}
     />
   ),
@@ -93,16 +92,17 @@ export default function TestbankAppBar(props) {
   const classes = useStyles()
   const match = useRoutes(routes)
 
+  React.useEffect(() => { console.log('token:' + token) })
+
   return (
     <div className={classes.root}>
       <AppBar position="static">
         <Toolbar>
           {match}
-          {token === null ?
-            <Login apiUrl={apiUrl} authCB={authCB} />
+          {token ?
+            <ProfilePopover token={token} apiUrl={apiUrl} authCB={authCB} />
           :
-            null
-            // <ProfileButton token={token} apiUrl={apiUrl} authCB={authCB} />
+            <LoginPopover apiUrl={apiUrl} authCB={authCB} />
           }
         </Toolbar>
       </AppBar>

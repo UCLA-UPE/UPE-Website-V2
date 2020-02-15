@@ -10,7 +10,7 @@ const mongoSanitize = require('express-mongo-sanitize')
 // some magic constants
 const PORT = 8080
 const HOST = '0.0.0.0'
-const TOKEN_EXPIRY_PERIOD = '10s'
+const TOKEN_EXPIRY_PERIOD = '10d'
 
 // mongoose models
 const User = require('./src/User.model')
@@ -39,6 +39,12 @@ const verifyToken = (req, res, next) => {
   }
 }
 
+const logger = (req, res, next) => {
+  console.log(req.url)
+  next()
+}
+app.use(logger)
+
 
 
 ////////////
@@ -65,6 +71,7 @@ app.post('/login', async (req, res) => {
     process.env.JWT_SECRET,
     { expiresIn: TOKEN_EXPIRY_PERIOD }
   )
+  console.log(token)
   res.status(200).json({ token })
 })
 
@@ -88,6 +95,11 @@ app.post('/signup', async (req, res) => {
 ////////////////////////
 // routes - protected //
 ////////////////////////
+
+app.post('/logout', verifyToken, async (req, res) => {
+  // TODO: invalidate token
+  res.sendStatus(200)
+})
 
 app.post('/get-subjects', verifyToken, async (req, res) => {
   const subjects = await Test.getSubjects()

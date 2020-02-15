@@ -14,24 +14,29 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-export default function TestbankGrid(props) {
+export default React.memo((props) => {
   
+  const { token, apiUrl, authCB, handleClick } = props
   const classes = useStyles()
 
   React.useEffect(() => {
-    loadGrid()
+    if (token) {
+      loadGrid()
+    } else {
+      authCB('tokenDNE')
+    }
   }, [])
 
   const [gridItems, setGridItems] = React.useState([])
   const loadGrid = async () => {
     try {
-      const res = await axios.post(props.apiUrl + '/get-subjects', {
-        token: props.token
+      const res = await axios.post(apiUrl + '/get-subjects', {
+        token: token
       })
       setGridItems(res.data)
     } catch(e) {
       if (e.response.status === 401) {
-        props.authCB('tokenExpiry')
+        authCB('tokenExpiry')
       }
     }
   }
@@ -44,7 +49,7 @@ export default function TestbankGrid(props) {
       <Grid container spacing={2} className={classes.grid}>
         {gridItems.map(subject => (
           <Grid item
-            onClick={props.handleClick(subject.course_subject)}
+            onClick={handleClick(subject.course_subject)}
             key={subject.course_subject}
             md={4}
           >
@@ -58,4 +63,4 @@ export default function TestbankGrid(props) {
       </Grid>
     </>
   )
-}
+})

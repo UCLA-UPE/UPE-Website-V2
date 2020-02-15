@@ -7,16 +7,19 @@ function Alert(props) {
 }
 
 export default function InfoBar(props) {
+
+  const { open, setOpen, message, severity } = props
   const handleClose = (event, reason) => {
-    if (reason === 'clickaway') {
-      return
-    }
-    props.setOpen(false)
+    // if (reason === 'clickaway') {
+    //   return
+    // }
+    setOpen(false)
+    console.log(open)
   }
   return (
-    <Snackbar open={props.open} autoHideDuration={2000} onClose={handleClose}>
-      <Alert onClose={handleClose} severity={props.severity}>
-        {props.message}
+    <Snackbar key={'info-snackbar'} open={open} autoHideDuration={1000} onClose={handleClose}>
+      <Alert onClose={handleClose} severity={severity}>
+        {message}
       </Alert>
     </Snackbar>
   )

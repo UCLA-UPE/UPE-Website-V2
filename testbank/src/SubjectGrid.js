@@ -14,13 +14,17 @@ const useStyles = makeStyles(theme => ({
 
 export default function SubjectGrid(props) {
 
-  const { apiUrl, token, authCB } = props
+  const { apiUrl, token, authCB, handleClick } = props
   const courseSubject = decodeURIComponent(props.courseSubject)
   
   const classes = useStyles()
 
   React.useEffect(() => {
-    loadGrid()
+    if (token) {
+      loadGrid()
+    } else {
+      authCB('tokenDNE')
+    }
   }, [])
 
   const [gridItems, setGridItems] = React.useState([])
@@ -46,7 +50,7 @@ export default function SubjectGrid(props) {
       <Grid container spacing={2} className={classes.root}>
         {gridItems.map(courseNumber => (
           <Grid item
-            onClick={props.handleClick(courseSubject, courseNumber.course_number)}
+            onClick={handleClick(courseSubject, courseNumber.course_number)}
             key={courseNumber.course_number}
             md={4}
           >

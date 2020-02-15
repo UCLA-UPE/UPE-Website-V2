@@ -210,11 +210,7 @@ export default function CourseTable(props) {
     setRowsPerPage(parseInt(event.target.value, 10))
     setPage(0)
   }
-  React.useEffect(() => {
-    loadTests({
-      filters: aggregateFilters(filterItems)
-    })
-  }, [page, rowsPerPage])
+
 
   const handleOpenFilterBar = () => {
     if (filterOptions.length === 0) {
@@ -229,10 +225,14 @@ export default function CourseTable(props) {
   }
 
   React.useEffect(() => {
-    loadTests({
-      filters: aggregateFilters(filterItems)
-    })
-  }, [filterItems.length])
+    if (token) {
+      loadTests({
+        filters: aggregateFilters(filterItems)
+      })
+    } else {
+      authCB('tokenDNE')
+    }
+  }, [page, rowsPerPage, filterItems.length])
 
   return (
     <>

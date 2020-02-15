@@ -13,35 +13,35 @@ import TestbankGrid from './TestbankGrid'
 import CourseTable from './CourseTable'
 
 const routes = {
-  '/testbank': () => (p) => (
+  '/': () => (p) => (
     <Home token={p.token} />
   ),
-  '/testbank/peruse': () => (p) => (
+  '/peruse': () => (p) => (
     <TestbankGrid 
       token={p.token} apiUrl={p.apiUrl} handleClick={p.handleClickSubject} 
       authCB={p.authCB}
     />
   ),
-  '/testbank/peruse/:courseSubject': ({ courseSubject }) => (p) => (
+  '/peruse/:courseSubject': ({ courseSubject }) => (p) => (
     <SubjectGrid 
       token={p.token} apiUrl={p.apiUrl} courseSubject={courseSubject} 
       handleClick={p.handleClickNumber} authCB={p.authCB}
     />
   ),
-  '/testbank/peruse/:courseSubject/:courseNumber': ({ courseSubject, courseNumber }) => (p) => (
+  '/peruse/:courseSubject/:courseNumber': ({ courseSubject, courseNumber }) => (p) => (
     <CourseTable
       token={p.token} apiUrl={p.apiUrl} courseSubject={courseSubject}
       courseNumber={courseNumber} handleClickTestInfo={p.handleClickTestInfo}
       authCB={p.authCB}
     />
   ),
-  '/testbank/test/:id': ({ id }) => (p) => (
+  '/test/:id': ({ id }) => (p) => (
     <Typography>TODO</Typography>
     // <TestInfo />
   ),
 }
 
-export default function TestbankBody(props) {
+export default React.memo((props) => {
 
   const { token, apiUrl, authCB } = props
   const match = useRoutes(routes)
@@ -66,7 +66,16 @@ export default function TestbankBody(props) {
           handleClickTestInfo: handleClickTestInfo,
           authCB: authCB
         }) || navigate(`/`)}
+
+        {/* {token ?  */}
+        {/*   <TestbankGrid  */}
+        {/*     token={token} apiUrl={apiUrl} handleClick={handleClickSubject}  */}
+        {/*     authCB={authCB} */}
+        {/*   /> */}
+        {/* : */}
+        {/*   <Home token={token} /> */}
+        {/* } */}
       </Box>
     </Container>
   )
-}
+})
