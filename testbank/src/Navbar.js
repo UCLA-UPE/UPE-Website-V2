@@ -12,6 +12,7 @@ import MenuIcon from '@material-ui/icons/Menu'
 import PublishIcon from '@material-ui/icons/Publish'
 import NavigateNextIcon from '@material-ui/icons/NavigateNext'
 
+import UploadTestButton from './UploadTestButton'
 import LoginPopover from './LoginPopover'
 import ProfilePopover from './ProfilePopover'
 
@@ -19,11 +20,8 @@ const useStyles = makeStyles(theme => ({
   root: {
     flexGrow: 1,
   },
-  menuButton: {
-    marginRight: theme.spacing(2),
-  },
-  title: {
-    flexGrow: 1,
+  navItem: {
+    marginRight: theme.spacing(3),
   },
 }))
 
@@ -128,11 +126,14 @@ export default React.memo((props) => {
           {match}
           {authCB.isLoggedIn() ?
             <>
-              <Box mr={3}><Typography variant="h6">Credits: {credits}</Typography></Box>
-              <ProfilePopover ax={ax} authCB={authCB} />
+              <Box className={classes.navItem}><Typography variant="button">Credits: {credits}</Typography></Box>
+              <div className={classes.navItem}>
+                <UploadTestButton ax={ax} />
+              </div>
+              <ProfilePopover ax={ax} authCB={authCB} className={classes.navItem} />
             </>
           :
-            <LoginPopover ax={ax} authCB={authCB} />
+            <LoginPopover ax={ax} authCB={authCB} className={classes.navItem} />
           }
         </Toolbar>
       </AppBar>

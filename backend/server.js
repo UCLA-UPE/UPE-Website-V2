@@ -6,12 +6,15 @@ const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const path = require('path')
 const mongoSanitize = require('express-mongo-sanitize')
+const multer = require('multer')
+const util = require('util')
 
 // constants
 // TODO: use envvars for these
 const PORT = 8080
 const HOST = '0.0.0.0'
 const TOKEN_EXPIRY_PERIOD = '10d'
+const TEST_FILE_UPLOAD_MAX_SIZE = 10 * 1024 * 1024 // in bytes
 
 // envvars
 const TEST_FILES_DIR = (process.env.PRODUCTION === 'false') ? 
@@ -27,6 +30,7 @@ const Test = require('./src/Test.model')
 
 
 
+// instantiate app and others
 const app = express()
 
 ///////////////////////
@@ -55,6 +59,30 @@ const verifyToken = (req, res, next) => {
     res.status(401).json({ reason: 'JWT verification failed' })
   }
 }
+
+const upload = multer({
+  storage: multer.diskStorage({
+    destination: function (req, file, cb) {
+      cb(null, TEST_FILES_DIR)
+    },
+    filename: function (req, file, cb) {
+      cb(null, Date.now() + path.extname(file.originalname))
+    }
+  }),
+  limits: {
+    // fieldNameSize: asdf,
+    fieldSize: TEST_FILE_UPLOAD_MAX_SIZE,
+    // fields: asdf,
+    fileSize: TEST_FILE_UPLOAD_MAX_SIZE,
+    // files: asdf,
+    // parts: asdf,
+    // headerPairs: asdf,
+  }
+})
+const saveTestFile = upload.fields([
+  { name: 'file', maxCount: 1 },
+  // { name: 'meta', maxCount: 10 },
+])
 
 const logger = (req, res, next) => {
   console.log(req.url)
@@ -185,6 +213,38 @@ app.post('/get-filter-options', verifyToken, async (req, res) => {
   const options = await Test.getFilterOptions(req.body.course)
   res.status(200).json(options)
 })
+
+app.post('/upload-test-file', verifyToken, saveTestFile, async (req, res) => {
+  // if (!req.files) {
+  //   res.sendStatus(400)
+  //   return
+  // }
+  console.log(req.body)
+  console.log(req.files)
+  console.log('good')
+  // await Test.create({
+  //   user_email: {
+  // course: {
+  //   subject: {
+  //   number: {
+  // kind: {
+  //   name: {
+  //   number: {
+  // term: {
+  //   quarter: {
+  //   year: {
+  // professor: {
+  //   email: {
+  //   name: {
+  // test_file: {
+  // upload_time: {
+  // verified: {
+  // })
+  // const test = await Test.findOne({ '_id': req.body._id }, 'test_file')
+  // res.sendFile(path.join(TEST_FILES_DIR, test.test_file))
+})
+
+
 
 
 
