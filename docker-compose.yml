@@ -13,6 +13,9 @@ services:
     environment:
       - PRODUCTION=${PRODUCTION}
       - JWT_SECRET=${JWT_SECRET}
+      - DATA_DIR=/srv/data
+    volumes:
+      - ./data:/srv/data
     ports:
       - '8080:8080'
     depends_on:
@@ -21,3 +24,6 @@ services:
     image: mongo
     ports:
       - '27017:27017'
+
+volumes:
+  data:

@@ -7,10 +7,15 @@ const jwt = require('jsonwebtoken')
 const path = require('path')
 const mongoSanitize = require('express-mongo-sanitize')
 
-// some magic constants
+// constants
+// TODO: use envvars for these
 const PORT = 8080
 const HOST = '0.0.0.0'
 const TOKEN_EXPIRY_PERIOD = '10d'
+
+// envvars
+const TEST_FILES_DIRECTORY = path.join(process.env.DATA_DIR, 'tests')
+const JWT_SECRET = process.env.JWT_SECRET
 
 // mongoose models
 const User = require('./src/User.model')
@@ -30,7 +35,7 @@ app.use(mongoSanitize())
 
 const verifyToken = (req, res, next) => {
   try {
-    jwt.verify(req.body.token, process.env.JWT_SECRET, { expiresIn: TOKEN_EXPIRY_PERIOD })
+    jwt.verify(req.body.token, JWT_SECRET, { expiresIn: TOKEN_EXPIRY_PERIOD })
     console.log('verified')
     next()
   } catch(e) {
@@ -53,7 +58,7 @@ app.use(logger)
 
 const signUserToken = async (_id, email) => await jwt.sign(
   { _id: _id, email: email }, 
-  process.env.JWT_SECRET,
+  JWT_SECRET,
   { expiresIn: TOKEN_EXPIRY_PERIOD }
 )
 
@@ -157,7 +162,7 @@ app.post('/get-test-file', verifyToken, async (req, res) => {
     return
   }
   const test = await Test.findOne({ '_id': req.body._id }, 'test_file')
-  res.sendFile(path.join(__dirname, 'data', test.test_file))
+  res.sendFile(path.join(TEST_FILES_DIRECTORY, test.test_file))
 })
 
 app.post('/get-filter-options', verifyToken, async (req, res) => {
