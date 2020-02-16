@@ -24,7 +24,9 @@
   },
   "nodemonConfig": {
     "env": {
-      "JWT_SECRET": "DEV_TEST_SECRET"
+      "JWT_SECRET": "DEV_TEST_SECRET",
+      "DATA_DIR": "data",
+      "PRODUCTION": "false"
     }
   }
 }

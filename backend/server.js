@@ -14,8 +14,12 @@ const HOST = '0.0.0.0'
 const TOKEN_EXPIRY_PERIOD = '10d'
 
 // envvars
-const TEST_FILES_DIRECTORY = path.join(process.env.DATA_DIR, 'tests')
+const TEST_FILES_DIR = (process.env.PRODUCTION === 'false') ? 
+  path.join(__dirname, '/../data/tests') : // dev: put test files in UPE-Website-V2/data/tests
+  path.join(process.env.DATA_DIR, 'tests') // prod: pass in env var DATA_DIR where the "tests" folder lives
 const JWT_SECRET = process.env.JWT_SECRET
+
+console.log("TEST_FILES_DIR is set to " + TEST_FILES_DIR)
 
 // mongoose models
 const User = require('./src/User.model')
@@ -162,7 +166,7 @@ app.post('/get-test-file', verifyToken, async (req, res) => {
     return
   }
   const test = await Test.findOne({ '_id': req.body._id }, 'test_file')
-  res.sendFile(path.join(TEST_FILES_DIRECTORY, test.test_file))
+  res.sendFile(path.join(TEST_FILES_DIR, test.test_file))
 })
 
 app.post('/get-filter-options', verifyToken, async (req, res) => {

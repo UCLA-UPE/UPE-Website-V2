@@ -2,7 +2,9 @@
 const mongoose = require('mongoose')
 const User = require('./User.model')
 
-const host = process.env.PRODUCTION ? 'mongo' : 'localhost'
+const host = (process.env.PRODUCTION === 'false') ? 
+  'localhost' :  // dev
+  'mongo'        // prod
 const connection = 'mongodb://' + host + ':27017/upe-web'
 console.log('API server connecting to ' + connection)
 
