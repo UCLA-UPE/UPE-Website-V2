@@ -1,5 +1,4 @@
 import React from 'react'
-import axios from 'axios'
 
 import Box from '@material-ui/core/Box'
 import Typography from '@material-ui/core/Typography'
@@ -7,7 +6,7 @@ import { navigate } from 'hookrouter'
 
 export default function Home(props) {
 
-  const { token, apiUrl } = props
+  const { ax, token } = props
 
   React.useEffect(() => {
     if (token) {
@@ -20,9 +19,11 @@ export default function Home(props) {
   const [count, setCount] = React.useState()
   const loadCount = async (opts) => {
     try {
-      const res = await axios.get(apiUrl + '/summary')
+      const res = await ax.get('/summary')
       setCount(res.data)
     } catch(e) {
+      console.log('Home.js')
+      console.log(e)
     }
   }
 

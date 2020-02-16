@@ -1,5 +1,4 @@
 import React from 'react'
-import axios from 'axios'
 import { useRoutes, useRedirect, navigate, A } from 'hookrouter'
 
 import { makeStyles } from '@material-ui/core/styles'
@@ -99,7 +98,7 @@ const routes = {
 
 export default React.memo((props) => {
 
-  const { token, apiUrl, authCB } = props
+  const { ax, token, authCB } = props
 
   const classes = useStyles()
   const match = useRoutes(routes)
@@ -111,7 +110,7 @@ export default React.memo((props) => {
   const [credits, setCredits] = React.useState()
   const loadCredits = async () => {
     try {
-      const res = await axios.post(apiUrl + '/get-profile', {
+      const res = await ax.post('/get-profile', {
         token: token
       })
       setCredits(res.data.testbankCredits)
@@ -128,10 +127,10 @@ export default React.memo((props) => {
           {token ?
             <>
               <Box mr={3}><Typography variant="h6">Credits: {credits}</Typography></Box>
-              <ProfilePopover token={token} apiUrl={apiUrl} authCB={authCB} />
+              <ProfilePopover ax={ax} token={token} authCB={authCB} />
             </>
           :
-            <LoginPopover apiUrl={apiUrl} authCB={authCB} />
+            <LoginPopover ax={ax} authCB={authCB} />
           }
         </Toolbar>
       </AppBar>

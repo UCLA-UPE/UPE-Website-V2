@@ -1,5 +1,4 @@
 import React from 'react'
-import axios from 'axios'
 import { navigate } from 'hookrouter'
 
 import Button from '@material-ui/core/Button'
@@ -20,7 +19,7 @@ const useStyles = makeStyles(theme => ({
 
 export default React.memo((props) => {
 
-  const { token, apiUrl, authCB } = props
+  const { ax, token, authCB } = props
   const classes = useStyles()
 
   const [anchorEl, setAnchorEl] = React.useState(null)
@@ -36,7 +35,7 @@ export default React.memo((props) => {
 
   const handleLogout = async (event) => {
     try {
-      const res = await axios.post(apiUrl + '/logout', {
+      const res = await ax.post('/logout', {
         token: token
       })
       authCB('logout', { res: res })

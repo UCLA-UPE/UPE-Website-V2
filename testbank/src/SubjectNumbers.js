@@ -1,5 +1,4 @@
 import React from 'react'
-import axios from 'axios'
 
 import { makeStyles } from '@material-ui/core/styles'
 import Typography from '@material-ui/core/Typography'
@@ -15,7 +14,7 @@ const useStyles = makeStyles(theme => ({
 
 export default React.memo((props) => {
 
-  const { apiUrl, token, authCB, handleClick } = props
+  const { ax, token, authCB, handleClick } = props
   const courseSubject = decodeURIComponent(props.courseSubject)
   
   const classes = useStyles()
@@ -31,7 +30,7 @@ export default React.memo((props) => {
   const [gridItems, setGridItems] = React.useState([])
   const loadGrid = async () => {
     try {
-      const res = await axios.post(apiUrl + '/get-subject-numbers', {
+      const res = await ax.post('/get-subject-numbers', {
         token: token,
         subject: courseSubject
       })

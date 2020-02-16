@@ -1,5 +1,4 @@
 import React from 'react'
-import axios from 'axios'
 import ColorHash from 'color-hash'
 import saveBlob from 'downloadjs'
 
@@ -113,7 +112,7 @@ const useStyles = makeStyles(theme => ({
 
 export default React.memo((props) => {
 
-  const { apiUrl, token, handleClickTestInfo, authCB } = props
+  const { ax, token, handleClickTestInfo, authCB } = props
   const courseSubject = decodeURIComponent(props.courseSubject)
   const courseNumber = decodeURIComponent(props.courseNumber)
   
@@ -122,7 +121,7 @@ export default React.memo((props) => {
   const [testData, setTestData] = React.useState({ tests: [], count: 0 })
   const loadTests = async (opts) => {
     try {
-      const res = await axios.post(apiUrl + '/get-tests', {
+      const res = await ax.post('/get-tests', {
         token: token,
         course: {
           subject: courseSubject,
@@ -147,7 +146,7 @@ export default React.memo((props) => {
   const [filterOptions, setFilterOptions] = React.useState([])
   const loadFilterOptions = async () => {
     try {
-      const res = await axios.post(apiUrl + '/get-filter-options', {
+      const res = await ax.post('/get-filter-options', {
         token: token,
         course: {
           subject: courseSubject,
@@ -186,7 +185,7 @@ export default React.memo((props) => {
   
   const downloadFile = (_id) => async () => {
     try {
-      const res = await axios.post(apiUrl + '/get-test-file', {
+      const res = await ax.post('/get-test-file', {
         token: token,
         _id: _id
       }, {

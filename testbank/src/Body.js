@@ -1,5 +1,4 @@
 import React from 'react'
-import axios from 'axios'
 import { useRoutes, useRedirect, navigate } from 'hookrouter'
 
 import Container from '@material-ui/core/Container'
@@ -14,23 +13,23 @@ import Profile from './Profile'
 
 const routes = {
   '/': () => (p) => (
-    <Home token={p.token} apiUrl={p.apiUrl} />
+    <Home ax={p.ax} token={p.token} />
   ),
   '/peruse': () => (p) => (
     <Subjects 
-      token={p.token} apiUrl={p.apiUrl} handleClick={p.handleClickSubject} 
+      ax={p.ax} token={p.token} handleClick={p.handleClickSubject} 
       authCB={p.authCB}
     />
   ),
   '/peruse/:courseSubject': ({ courseSubject }) => (p) => (
     <SubjectNumbers 
-      token={p.token} apiUrl={p.apiUrl} courseSubject={courseSubject} 
+      ax={p.ax} token={p.token} courseSubject={courseSubject} 
       handleClick={p.handleClickNumber} authCB={p.authCB}
     />
   ),
   '/peruse/:courseSubject/:courseNumber': ({ courseSubject, courseNumber }) => (p) => (
     <SubjectNumberCourses
-      token={p.token} apiUrl={p.apiUrl} courseSubject={courseSubject}
+      ax={p.ax} token={p.token} courseSubject={courseSubject}
       courseNumber={courseNumber} handleClickTestInfo={p.handleClickTestInfo}
       authCB={p.authCB}
     />
@@ -41,14 +40,14 @@ const routes = {
   ),
   '/profile': () => (p) => (
     <Profile
-      token={p.token} apiUrl={p.apiUrl}
+      ax={p.ax} token={p.token}
     />
   ),
 }
 
 export default React.memo((props) => {
 
-  const { token, apiUrl, authCB } = props
+  const { ax, token, authCB } = props
   const match = useRoutes(routes)
 
   const handleClickSubject = (courseSubject) => () => {
@@ -64,8 +63,8 @@ export default React.memo((props) => {
     <Container maxWidth='md' mb='15px' >
       <Box m={3}>
         {typeof(match) == 'function' && match({
+          ax: ax,
           token: token,
-          apiUrl: apiUrl,
           handleClickSubject: handleClickSubject,
           handleClickNumber: handleClickNumber,
           handleClickTestInfo: handleClickTestInfo,

@@ -1,5 +1,4 @@
 import React from 'react'
-import axios from 'axios'
 
 import Button from '@material-ui/core/Button'
 import CssBaseline from '@material-ui/core/CssBaseline'
@@ -52,6 +51,8 @@ const useStyles = makeStyles(theme => ({
 }))
 
 export default function LoginPopover(props) {
+
+  const { ax, authCB } = props
   const classes = useStyles()
 
   const [anchorEl, setAnchorEl] = React.useState(null)
@@ -72,24 +73,24 @@ export default function LoginPopover(props) {
   const handleLogin = async (event) => {
     event.preventDefault() // prevent form submit from refreshing page
     try {
-      const res = await axios.post(props.apiUrl + '/login', {
+      const res = await ax.post('/login', {
         email: email,
         password: password
       })
-      props.authCB('login', { remember: remember, res: res })
+      authCB('login', { remember: remember, res: res })
     } catch(e) {
-      props.authCB('login', { remember: remember, res: e.response })
+      authCB('login', { remember: remember, res: e.response })
     }
   }
   const handleSignup = async (event) => {
     try {
-      const res = await axios.post(props.apiUrl + '/signup', {
+      const res = await ax.post('/signup', {
         email: email,
         password: password
       })
-      props.authCB('signup', { remember: remember, res: res })
+      authCB('signup', { remember: remember, res: res })
     } catch(e) {
-      props.authCB('signup', { remember: remember, res: e.response })
+      authCB('signup', { remember: remember, res: e.response })
     }
   }
 

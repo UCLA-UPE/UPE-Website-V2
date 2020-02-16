@@ -2,6 +2,7 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 import { useRoutes, navigate, } from 'hookrouter'
 import os from 'os'
+import axios from 'axios'
 
 import CssBaseline from '@material-ui/core/CssBaseline'
 import Button from '@material-ui/core/Button'
@@ -20,13 +21,15 @@ console.log('api url is set to ' + apiUrl)
 // apparently there should be only one top-level router
 const routes = {
   // INFO: '/testbank' is set as base path in index.js
-  '*': () => (authToken, apiUrl, authCB) => (
+  '*': () => (ax, authToken, authCB) => (
     <>
-      <Navbar token={authToken} apiUrl={apiUrl} authCB={authCB} />
-      <Body token={authToken} apiUrl={apiUrl} authCB={authCB} />
+      <Navbar ax={ax} token={authToken} authCB={authCB} />
+      <Body ax={ax} token={authToken} authCB={authCB} />
     </>
   ),
 }
+
+const ax = axios.create({ baseURL: apiUrl })
 
 export default () => {
 
@@ -102,7 +105,7 @@ export default () => {
     <>
       <link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap' />
       <CssBaseline />
-      {match(authToken, apiUrl, authCB)}
+      {match(ax, authToken, authCB)}
       <InfoSnackbar open={sbOpen} setOpen={setSbOpen} message={sbMessage} severity={sbSeverity} />
     </>
   )

@@ -1,5 +1,4 @@
 import React from 'react'
-import axios from 'axios'
 
 import { makeStyles } from '@material-ui/core/styles'
 import Typography from '@material-ui/core/Typography'
@@ -44,7 +43,7 @@ const Row = (props) => {
 
 export default React.memo((props) => {
   
-  const { token, apiUrl } = props
+  const { ax, token } = props
   const classes = useStyles()
 
   React.useEffect(() => {
@@ -60,7 +59,7 @@ export default React.memo((props) => {
 
   const loadProfile = async () => {
     try {
-      const res = await axios.post(apiUrl + '/get-profile', {
+      const res = await ax.post('/get-profile', {
         token: token
       })
       setEmail(res.data.email)
