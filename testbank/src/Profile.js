@@ -43,12 +43,8 @@ const Row = (props) => {
 
 export default React.memo((props) => {
   
-  const { ax, token } = props
+  const { ax, authCB } = props
   const classes = useStyles()
-
-  React.useEffect(() => {
-    loadProfile()
-  }, [])
 
   // is there a better way?
   const [email, setEmail] = React.useState()
@@ -59,18 +55,25 @@ export default React.memo((props) => {
 
   const loadProfile = async () => {
     try {
-      const res = await ax.post('/get-profile', {
-        token: token
-      })
+      const res = await ax.post('/get-profile')
       setEmail(res.data.email)
       setIsUpeMember(res.data.isUpeMember)
       setIsProfessor(res.data.isProfessor)
       setTestbankCredits(res.data.testbankCredits)
       setTestbankUploadedTests(res.data.testbankUploadedTests)
     } catch(e) {
-      console.log(e)
+      console.log(e.response.data.reason)
+      if (e.response.status === 401 && e.response.data.reason === 'JWT verification failed') {
+        authCB.tokenExpiry()
+      }
     }
   }
+
+  React.useEffect(() => {
+    if (authCB.isLoggedIn()) {
+      loadProfile()
+    }
+  }, [])
 
   return (
     <>

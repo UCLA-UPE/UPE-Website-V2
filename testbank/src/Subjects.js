@@ -16,27 +16,25 @@ const useStyles = makeStyles(theme => ({
 
 export default React.memo((props) => {
   
-  const { ax, token, authCB, handleClick } = props
+  const { ax, authCB, handleClick } = props
   const classes = useStyles()
 
   React.useEffect(() => {
-    if (token) {
+    if (authCB.isLoggedIn()) {
       loadGrid()
-    } else {
-      authCB('tokenDNE')
     }
   }, [])
 
   const [gridItems, setGridItems] = React.useState([])
   const loadGrid = async () => {
     try {
-      const res = await ax.post('/get-subjects', {
-        token: token
-      })
+      const res = await ax.post('/get-subjects')
       setGridItems(res.data)
     } catch(e) {
-      if (e.response.status === 401) {
-        authCB('tokenExpiry')
+      console.log('Subjects.js')
+      console.log(e.response.data.reason)
+      if (e.response.status === 401 && e.response.data.reason === 'JWT verification failed') {
+        authCB.tokenExpiry()
       }
     }
   }

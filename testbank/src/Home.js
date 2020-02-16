@@ -6,10 +6,10 @@ import { navigate } from 'hookrouter'
 
 export default function Home(props) {
 
-  const { ax, token } = props
+  const { ax, authCB } = props
 
   React.useEffect(() => {
-    if (token) {
+    if (authCB.isLoggedIn()) {
       navigate('/testbank/peruse')
     } else {
       loadCount()

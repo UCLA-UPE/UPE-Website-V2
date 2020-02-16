@@ -46,9 +46,8 @@ UserSchema.methods.isValidPassword = async function(password) {
   return await bcrypt.compare(password, this.password)
 }
 
-UserSchema.statics.getProfile = async function(token) {
-  payload = jwt.decode(token)
-  return await this.findOne({ _id: payload._id }, 'email isUpeMember isProfessor testbankCredits testbankUploadedTests')
+UserSchema.statics.getProfile = async function(tokenPayload) {
+  return await this.findOne({ _id: tokenPayload._id }, 'email isUpeMember isProfessor testbankCredits testbankUploadedTests')
 }
 
 const User = mongoose.model('User', UserSchema)

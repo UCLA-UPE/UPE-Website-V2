@@ -98,24 +98,26 @@ const routes = {
 
 export default React.memo((props) => {
 
-  const { ax, token, authCB } = props
+  const { ax, authCB } = props
 
   const classes = useStyles()
   const match = useRoutes(routes)
 
+  const [credits, setCredits] = React.useState()
+
   React.useEffect(() => {
-    loadCredits()
+    if (authCB.isLoggedIn()) {
+      loadCredits()
+    }
   }, [])
 
-  const [credits, setCredits] = React.useState()
   const loadCredits = async () => {
     try {
-      const res = await ax.post('/get-profile', {
-        token: token
-      })
+      const res = await ax.post('/get-profile')
       setCredits(res.data.testbankCredits)
     } catch(e) {
-      console.log(e)
+      console.log(e.data.reason)
+      console.log(e.response.body)
     }
   }
 
@@ -124,10 +126,10 @@ export default React.memo((props) => {
       <AppBar position="static">
         <Toolbar>
           {match}
-          {token ?
+          {authCB.isLoggedIn() ?
             <>
               <Box mr={3}><Typography variant="h6">Credits: {credits}</Typography></Box>
-              <ProfilePopover ax={ax} token={token} authCB={authCB} />
+              <ProfilePopover ax={ax} authCB={authCB} />
             </>
           :
             <LoginPopover ax={ax} authCB={authCB} />

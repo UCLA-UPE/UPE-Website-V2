@@ -14,16 +14,14 @@ const useStyles = makeStyles(theme => ({
 
 export default React.memo((props) => {
 
-  const { ax, token, authCB, handleClick } = props
+  const { ax, authCB, handleClick } = props
   const courseSubject = decodeURIComponent(props.courseSubject)
   
   const classes = useStyles()
 
   React.useEffect(() => {
-    if (token) {
+    if (authCB.isLoggedIn()) {
       loadGrid()
-    } else {
-      authCB('tokenDNE')
     }
   }, [])
 
@@ -31,13 +29,13 @@ export default React.memo((props) => {
   const loadGrid = async () => {
     try {
       const res = await ax.post('/get-subject-numbers', {
-        token: token,
         subject: courseSubject
       })
       setGridItems(res.data)
     } catch(e) {
-      if (e.response.status === 401) {
-        authCB('tokenExpiry')
+      console.log(e.response.data.reason)
+      if (e.response.status === 401 && e.response.data.reason === 'JWT verification failed') {
+        authCB.tokenExpiry()
       }
     }
   }

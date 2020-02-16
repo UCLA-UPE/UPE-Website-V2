@@ -39,12 +39,20 @@ app.use(mongoSanitize())
 
 const verifyToken = (req, res, next) => {
   try {
-    jwt.verify(req.body.token, JWT_SECRET, { expiresIn: TOKEN_EXPIRY_PERIOD })
-    console.log('verified')
+    const auth = req.get('Authorization')
+    if (auth === undefined) {
+      console.log('Authorization header missing')
+      res.status(401).json({ reason: 'Authorization header missing' })
+      return
+    }
+    const [schema, token] = auth.split(' ')
+    jwt.verify(token, JWT_SECRET, { expiresIn: TOKEN_EXPIRY_PERIOD })
+    req.tokenPayload = jwt.decode(token)
+    console.log('JWT verified')
     next()
   } catch(e) {
-    console.log('failed verification')
-    res.sendStatus(401)
+    console.log('JWT verification failed')
+    res.status(401).json({ reason: 'JWT verification failed' })
   }
 }
 
@@ -108,7 +116,7 @@ app.get('/summary', async (req, res) => {
 ////////////////////////
 
 app.post('/get-profile', verifyToken, async (req, res) => {
-  const profile = await User.getProfile(req.body.token)
+  const profile = await User.getProfile(req.tokenPayload)
   res.status(200).json(profile)
 })
 

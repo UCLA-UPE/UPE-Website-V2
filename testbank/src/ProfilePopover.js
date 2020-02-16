@@ -19,7 +19,7 @@ const useStyles = makeStyles(theme => ({
 
 export default React.memo((props) => {
 
-  const { ax, token, authCB } = props
+  const { ax, authCB } = props
   const classes = useStyles()
 
   const [anchorEl, setAnchorEl] = React.useState(null)
@@ -35,12 +35,13 @@ export default React.memo((props) => {
 
   const handleLogout = async (event) => {
     try {
-      const res = await ax.post('/logout', {
-        token: token
-      })
-      authCB('logout', { res: res })
+      const res = await ax.post('/logout')
+      authCB.logout(res)
     } catch(e) {
-      authCB('logout', { res: e.response })
+      console.log(e.response.data.reason)
+      if (e.response.status === 401 && e.response.data.reason === 'JWT verification failed') {
+        authCB.tokenExpiry()
+      }
     }
   }
 

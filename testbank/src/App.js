@@ -21,10 +21,10 @@ console.log('api url is set to ' + apiUrl)
 // apparently there should be only one top-level router
 const routes = {
   // INFO: '/testbank' is set as base path in index.js
-  '*': () => (ax, authToken, authCB) => (
+  '*': () => (ax, authCB) => (
     <>
-      <Navbar ax={ax} token={authToken} authCB={authCB} />
-      <Body ax={ax} token={authToken} authCB={authCB} />
+      <Navbar ax={ax} authCB={authCB} />
+      <Body ax={ax} authCB={authCB} />
     </>
   ),
 }
@@ -35,11 +35,26 @@ export default () => {
 
   const match = useRoutes(routes)
 
-  const [authToken,  setAuthToken] = React.useState()
+  const setToken = (token) => {
+    ax.interceptors.request.use(config => {
+      config.headers = { 'Authorization': `Bearer ${token}` }
+      return config
+    }, error => Promise.reject(error))
+    setIsLoggedIn(true)
+  }
+  const unsetToken = () => {
+    ax.interceptors.request.use(config => {
+      delete config.headers.Authorization
+      return config
+    }, error => Promise.reject(error))
+    setIsLoggedIn(false)
+  }
+
+  const [isLoggedIn, setIsLoggedIn] = React.useState(false)
   React.useEffect(() => {
     const token = localStorage.getItem('token')
     if (token) {
-      setAuthToken(token)
+      setToken(token)
       // showInfoBar('success', 'Login Success!')
     }
   }, [])
@@ -57,20 +72,20 @@ export default () => {
     // many of the showInfoBar() calls are disabled because of this
     setSbOpen(true)
   }
-  const authCB = (event, data) => {
-    if (event === 'login') {
-      if (data.res.status === 200) {
-        setAuthToken(data.res.data.token)
-        localStorage.setItem('token', data.res.data.token)
+  const authCB = {
+    login: (res, remember) => {
+      if (res.status === 200) {
+        setToken(res.data.token)
+        localStorage.setItem('token', res.data.token)
         showInfoBar('success', 'Login Success!')
       }
       else {
         showInfoBar('error', 'Login Failed')
       }
-    }
-    if (event === 'logout') {
-      if (data.res.status === 200) {
-        setAuthToken(null)
+    },
+    logout: (res) => {
+      if (res.status === 200) {
+        unsetToken()
         localStorage.removeItem('token')
         navigate('/')
         showInfoBar('success', 'Logged Out')
@@ -78,34 +93,36 @@ export default () => {
       else {
         showInfoBar('error', 'Logout Failed')
       }
-    }
-    else if (event === 'signup') {
-      if (data.res.status === 200) {
-        setAuthToken(data.res.data.token)
-        localStorage.setItem('token', data.res.data.token)
+    },
+    signup: (res, remember) => {
+      if (res.status === 200) {
+        setToken(res.data.token)
+        localStorage.setItem('token', res.data.token)
         showInfoBar('success', 'Signed Up!')
       }
       else {
         showInfoBar('error', 'Email Address Exists')
       }
-    }
-    else if (event === 'tokenExpiry') {
-      setAuthToken(null)
+    },
+    tokenExpiry: () => {
+      console.log('Token expired.')
+      unsetToken()
       localStorage.removeItem('token')
       navigate('/')
       showInfoBar('error', 'Token Expired')
-    }
-    else if (event === 'tokenDNE') {
+    },
+    tokenDNE: () => {
       // navigate('/')
       // showInfoBar('error', 'Unauthorized')
-    }
+    },
+    isLoggedIn: () => { return isLoggedIn },
   }
   
   return (
     <>
       <link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap' />
       <CssBaseline />
-      {match(ax, authToken, authCB)}
+      {match(ax, authCB)}
       <InfoSnackbar open={sbOpen} setOpen={setSbOpen} message={sbMessage} severity={sbSeverity} />
     </>
   )

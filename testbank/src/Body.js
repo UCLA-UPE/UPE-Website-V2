@@ -13,23 +13,23 @@ import Profile from './Profile'
 
 const routes = {
   '/': () => (p) => (
-    <Home ax={p.ax} token={p.token} />
+    <Home ax={p.ax} authCB={p.authCB} />
   ),
   '/peruse': () => (p) => (
     <Subjects 
-      ax={p.ax} token={p.token} handleClick={p.handleClickSubject} 
+      ax={p.ax} handleClick={p.handleClickSubject} 
       authCB={p.authCB}
     />
   ),
   '/peruse/:courseSubject': ({ courseSubject }) => (p) => (
     <SubjectNumbers 
-      ax={p.ax} token={p.token} courseSubject={courseSubject} 
+      ax={p.ax} courseSubject={courseSubject} 
       handleClick={p.handleClickNumber} authCB={p.authCB}
     />
   ),
   '/peruse/:courseSubject/:courseNumber': ({ courseSubject, courseNumber }) => (p) => (
     <SubjectNumberCourses
-      ax={p.ax} token={p.token} courseSubject={courseSubject}
+      ax={p.ax} courseSubject={courseSubject}
       courseNumber={courseNumber} handleClickTestInfo={p.handleClickTestInfo}
       authCB={p.authCB}
     />
@@ -40,14 +40,14 @@ const routes = {
   ),
   '/profile': () => (p) => (
     <Profile
-      ax={p.ax} token={p.token}
+      ax={p.ax} authCB={p.authCB}
     />
   ),
 }
 
 export default React.memo((props) => {
 
-  const { ax, token, authCB } = props
+  const { ax, authCB } = props
   const match = useRoutes(routes)
 
   const handleClickSubject = (courseSubject) => () => {
@@ -64,7 +64,6 @@ export default React.memo((props) => {
       <Box m={3}>
         {typeof(match) == 'function' && match({
           ax: ax,
-          token: token,
           handleClickSubject: handleClickSubject,
           handleClickNumber: handleClickNumber,
           handleClickTestInfo: handleClickTestInfo,

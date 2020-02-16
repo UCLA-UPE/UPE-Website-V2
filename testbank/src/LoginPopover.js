@@ -77,9 +77,11 @@ export default function LoginPopover(props) {
         email: email,
         password: password
       })
-      authCB('login', { remember: remember, res: res })
+      authCB.login(res, remember)
     } catch(e) {
-      authCB('login', { remember: remember, res: e.response })
+      console.log('LoginPopver.js')
+      console.log(e)
+      authCB.login(e.response)
     }
   }
   const handleSignup = async (event) => {
@@ -88,9 +90,11 @@ export default function LoginPopover(props) {
         email: email,
         password: password
       })
-      authCB('signup', { remember: remember, res: res })
+      authCB.signup(res, remember)
     } catch(e) {
-      authCB('signup', { remember: remember, res: e.response })
+      console.log('LoginPopver.js')
+      console.log(e)
+      authCB.signup(e.response)
     }
   }
 

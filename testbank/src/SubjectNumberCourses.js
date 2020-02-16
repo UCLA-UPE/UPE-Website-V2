@@ -112,7 +112,7 @@ const useStyles = makeStyles(theme => ({
 
 export default React.memo((props) => {
 
-  const { ax, token, handleClickTestInfo, authCB } = props
+  const { ax, handleClickTestInfo, authCB } = props
   const courseSubject = decodeURIComponent(props.courseSubject)
   const courseNumber = decodeURIComponent(props.courseNumber)
   
@@ -122,7 +122,6 @@ export default React.memo((props) => {
   const loadTests = async (opts) => {
     try {
       const res = await ax.post('/get-tests', {
-        token: token,
         course: {
           subject: courseSubject,
           number: courseNumber
@@ -137,8 +136,9 @@ export default React.memo((props) => {
       })
       setTestData(res.data)
     } catch(e) {
-      if (e.response.status === 401) {
-        authCB('tokenExpiry')
+      console.log(e.response.data.reason)
+      if (e.response.status === 401 && e.response.data.reason === 'JWT verification failed') {
+        authCB.tokenExpiry()
       }
     }
   }
@@ -147,7 +147,6 @@ export default React.memo((props) => {
   const loadFilterOptions = async () => {
     try {
       const res = await ax.post('/get-filter-options', {
-        token: token,
         course: {
           subject: courseSubject,
           number: courseNumber
@@ -177,8 +176,9 @@ export default React.memo((props) => {
       const filterOptionsSorted = [].concat.apply([], [professorsSorted, kindsSorted, termsSorted])
       setFilterOptions(filterOptionsSorted)
     } catch(e) {
-      if (e.response.status === 401) {
-        authCB('tokenExpiry')
+      console.log(e.response.data.reason)
+      if (e.response.status === 401 && e.response.data.reason === 'JWT verification failed') {
+        authCB.tokenExpiry()
       }
     }
   }
@@ -186,7 +186,6 @@ export default React.memo((props) => {
   const downloadFile = (_id) => async () => {
     try {
       const res = await ax.post('/get-test-file', {
-        token: token,
         _id: _id
       }, {
         responseType: 'blob'
@@ -194,8 +193,9 @@ export default React.memo((props) => {
       const contentType = res.headers['content-type']
       saveBlob(res.data, _id + '.pdf', contentType)
     } catch(e) {
-      if (e.response.status === 401) {
-        authCB('tokenExpiry')
+      console.log(e.response.data.reason)
+      if (e.response.status === 401 && e.response.data.reason === 'JWT verification failed') {
+        authCB.tokenExpiry()
       }
     }
   }
@@ -210,7 +210,6 @@ export default React.memo((props) => {
     setPage(0)
   }
 
-
   const handleOpenFilterBar = () => {
     if (filterOptions.length === 0) {
       loadFilterOptions()
@@ -224,12 +223,8 @@ export default React.memo((props) => {
   }
 
   React.useEffect(() => {
-    if (token) {
-      loadTests({
-        filters: aggregateFilters(filterItems)
-      })
-    } else {
-      authCB('tokenDNE')
+    if (authCB.isLoggedIn()) {
+      loadTests({ filters: aggregateFilters(filterItems) })
     }
   }, [page, rowsPerPage, filterItems.length])
 
