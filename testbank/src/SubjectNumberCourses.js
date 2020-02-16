@@ -120,84 +120,65 @@ export default React.memo((props) => {
 
   const [testData, setTestData] = React.useState({ tests: [], count: 0 })
   const loadTests = async (opts) => {
-    try {
-      const res = await ax.post('/get-tests', {
-        course: {
-          subject: courseSubject,
-          number: courseNumber
-        },
-        filters: {
-          ...opts?.filters
-        },
-        sort: opts?.sort,
-        order: opts?.order,
-        page: page,
-        limit: rowsPerPage,
-      })
-      setTestData(res.data)
-    } catch(e) {
-      console.log(e.response.data.reason)
-      if (e.response.status === 401 && e.response.data.reason === 'JWT verification failed') {
-        authCB.tokenExpiry()
-      }
-    }
+    const res = await ax.post('/get-tests', {
+      course: {
+        subject: courseSubject,
+        number: courseNumber
+      },
+      filters: {
+        ...opts?.filters
+      },
+      sort: opts?.sort,
+      order: opts?.order,
+      page: page,
+      limit: rowsPerPage,
+    })
+    setTestData(res.data)
   }
 
   const [filterOptions, setFilterOptions] = React.useState([])
   const loadFilterOptions = async () => {
-    try {
-      const res = await ax.post('/get-filter-options', {
-        course: {
-          subject: courseSubject,
-          number: courseNumber
-        }
-      })
-      const professorsSorted = res.data.professors.map( professor => ({
-        field: 'professor', 
-        fieldDisplay: 'Professor', 
-        data: professor, 
-        display: professor.name ? professor.name : '(None)', 
-      })).sort( (a, b) => (a.display === null ? -1 : a.display.localeCompare(b.display)))
+    const res = await ax.post(
+      '/get-filter-options', {
+      course: {
+        subject: courseSubject,
+        number: courseNumber
+      }}
+    )
 
-      const kindsSorted = res.data.kinds.map( kind => ({
-        field: 'kind', 
-        fieldDisplay: 'Kind', 
-        data: kind, 
-        display: kind.name + ' ' + (kind.number ? kind.number : '')
-      })).sort(kindCompare)
+    const professorsSorted = res.data.professors.map( professor => ({
+      field: 'professor', 
+      fieldDisplay: 'Professor', 
+      data: professor, 
+      display: professor.name ? professor.name : '(None)', 
+    })).sort( (a, b) => (a.display === null ? -1 : a.display.localeCompare(b.display)))
 
-      const termsSorted = res.data.terms.map( term => ({
-        field: 'term', 
-        fieldDisplay: 'Term', 
-        data: term, 
-        display: term.year.toString() + ' ' + term.quarter,
-      })).sort(termCompare)
+    const kindsSorted = res.data.kinds.map( kind => ({
+      field: 'kind', 
+      fieldDisplay: 'Kind', 
+      data: kind, 
+      display: kind.name + ' ' + (kind.number ? kind.number : '')
+    })).sort(kindCompare)
 
-      const filterOptionsSorted = [].concat.apply([], [professorsSorted, kindsSorted, termsSorted])
-      setFilterOptions(filterOptionsSorted)
-    } catch(e) {
-      console.log(e.response.data.reason)
-      if (e.response.status === 401 && e.response.data.reason === 'JWT verification failed') {
-        authCB.tokenExpiry()
-      }
-    }
+    const termsSorted = res.data.terms.map( term => ({
+      field: 'term', 
+      fieldDisplay: 'Term', 
+      data: term, 
+      display: term.year.toString() + ' ' + term.quarter,
+    })).sort(termCompare)
+
+    const filterOptionsSorted = [].concat.apply([], [professorsSorted, kindsSorted, termsSorted])
+    setFilterOptions(filterOptionsSorted)
   }
   
   const downloadFile = (_id) => async () => {
-    try {
-      const res = await ax.post('/get-test-file', {
-        _id: _id
-      }, {
-        responseType: 'blob'
-      })
-      const contentType = res.headers['content-type']
-      saveBlob(res.data, _id + '.pdf', contentType)
-    } catch(e) {
-      console.log(e.response.data.reason)
-      if (e.response.status === 401 && e.response.data.reason === 'JWT verification failed') {
-        authCB.tokenExpiry()
-      }
-    }
+    const res = await ax.post(
+      '/get-test-file', 
+      { _id: _id }, 
+      { responseType: 'blob' }
+    )
+    const contentType = res.headers['content-type']
+    saveBlob(res.data, _id + '.pdf', contentType)
   }
 
   const [page, setPage] = React.useState(0)

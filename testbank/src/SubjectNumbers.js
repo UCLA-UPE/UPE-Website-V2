@@ -27,17 +27,8 @@ export default React.memo((props) => {
 
   const [gridItems, setGridItems] = React.useState([])
   const loadGrid = async () => {
-    try {
-      const res = await ax.post('/get-subject-numbers', {
-        subject: courseSubject
-      })
-      setGridItems(res.data)
-    } catch(e) {
-      console.log(e.response.data.reason)
-      if (e.response.status === 401 && e.response.data.reason === 'JWT verification failed') {
-        authCB.tokenExpiry()
-      }
-    }
+    const res = await ax.post('/get-subject-numbers', { subject: courseSubject })
+    setGridItems(res.data)
   }
 
   return (

@@ -18,13 +18,8 @@ export default function Home(props) {
 
   const [count, setCount] = React.useState()
   const loadCount = async (opts) => {
-    try {
-      const res = await ax.get('/summary')
-      setCount(res.data)
-    } catch(e) {
-      console.log('Home.js')
-      console.log(e)
-    }
+    const res = await ax.get('/summary')
+    setCount(res.data)
   }
 
   return (

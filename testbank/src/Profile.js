@@ -54,19 +54,12 @@ export default React.memo((props) => {
   const [testbankUploadedTests, setTestbankUploadedTests] = React.useState()
 
   const loadProfile = async () => {
-    try {
-      const res = await ax.post('/get-profile')
-      setEmail(res.data.email)
-      setIsUpeMember(res.data.isUpeMember)
-      setIsProfessor(res.data.isProfessor)
-      setTestbankCredits(res.data.testbankCredits)
-      setTestbankUploadedTests(res.data.testbankUploadedTests)
-    } catch(e) {
-      console.log(e.response.data.reason)
-      if (e.response.status === 401 && e.response.data.reason === 'JWT verification failed') {
-        authCB.tokenExpiry()
-      }
-    }
+    const res = await ax.post('/get-profile')
+    setEmail(res.data.email)
+    setIsUpeMember(res.data.isUpeMember)
+    setIsProfessor(res.data.isProfessor)
+    setTestbankCredits(res.data.testbankCredits)
+    setTestbankUploadedTests(res.data.testbankUploadedTests)
   }
 
   React.useEffect(() => {

@@ -34,15 +34,8 @@ export default React.memo((props) => {
   const id = open ? 'simple-popover' : undefined
 
   const handleLogout = async (event) => {
-    try {
-      const res = await ax.post('/logout')
-      authCB.logout(res)
-    } catch(e) {
-      console.log(e.response.data.reason)
-      if (e.response.status === 401 && e.response.data.reason === 'JWT verification failed') {
-        authCB.tokenExpiry()
-      }
-    }
+    const res = await ax.post('/logout')
+    authCB.logout(res)
   }
 
   return (

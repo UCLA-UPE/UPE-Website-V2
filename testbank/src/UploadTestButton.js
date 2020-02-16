@@ -34,18 +34,10 @@ export default React.memo((props) => {
   const uploadFile = async () => {
     let formData = new FormData()
     formData.append('file', ref.current.files[0])
-    try {
-      const res = await ax.post('/upload-test-file', 
-        formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data'
-          }
-        }
-      )
-    } catch(e) {
-      console.log('Error in UploadTestButton.js')
-      console.log(e)
-    }
+    const res = await ax.post('/upload-test-file', 
+      formData,
+      { headers: { 'Content-Type': 'multipart/form-data' }}
+    )
   }
 
   const handleChange = () => {

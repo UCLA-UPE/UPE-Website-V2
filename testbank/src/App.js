@@ -29,34 +29,56 @@ const routes = {
   ),
 }
 
+// create an axios instance to configure things
 const ax = axios.create({ baseURL: apiUrl })
 
 export default () => {
 
   const match = useRoutes(routes)
 
-  const setToken = (token) => {
+  const login = (token) => {
     ax.interceptors.request.use(config => {
       config.headers = { 'Authorization': `Bearer ${token}` }
       return config
     }, error => Promise.reject(error))
+    localStorage.setItem('token', token)
     setIsLoggedIn(true)
   }
-  const unsetToken = () => {
+
+  const logout = () => {
     ax.interceptors.request.use(config => {
       delete config.headers.Authorization
       return config
     }, error => Promise.reject(error))
+    localStorage.removeItem('token')
     setIsLoggedIn(false)
+    navigate('/')
   }
 
   const [isLoggedIn, setIsLoggedIn] = React.useState(false)
   React.useEffect(() => {
     const token = localStorage.getItem('token')
     if (token) {
-      setToken(token)
-      // showInfoBar('success', 'Login Success!')
+      login(token)
+      showInfoBar('success', 'Login Success!')
     }
+    ax.interceptors.response.use(
+      (response) => response, // Do nothing to success (2xx) responses
+      (error) => {
+        // Intercept error (300+) responses
+        if (error.response.status === 401 && error.response.data.reason === 'Authorization header missing') {
+          // TODO
+          console.log('Authorization header missing.')
+        }
+        else if (error.response.status === 401 && error.response.data.reason === 'JWT verification failed') {
+          authCB.tokenExpiry()
+        }
+        else {
+          console.log(error)
+        }
+        return Promise.reject(error)
+      }
+    )
   }, [])
 
   const [sbOpen,     setSbOpen]     = React.useState(false)
@@ -75,8 +97,7 @@ export default () => {
   const authCB = {
     login: (res, remember) => {
       if (res.status === 200) {
-        setToken(res.data.token)
-        localStorage.setItem('token', res.data.token)
+        login(res.data.token)
         showInfoBar('success', 'Login Success!')
       }
       else {
@@ -85,9 +106,7 @@ export default () => {
     },
     logout: (res) => {
       if (res.status === 200) {
-        unsetToken()
-        localStorage.removeItem('token')
-        navigate('/')
+        logout()
         showInfoBar('success', 'Logged Out')
       }
       else {
@@ -96,8 +115,7 @@ export default () => {
     },
     signup: (res, remember) => {
       if (res.status === 200) {
-        setToken(res.data.token)
-        localStorage.setItem('token', res.data.token)
+        login(res.data.token)
         showInfoBar('success', 'Signed Up!')
       }
       else {
@@ -105,11 +123,9 @@ export default () => {
       }
     },
     tokenExpiry: () => {
-      console.log('Token expired.')
-      unsetToken()
-      localStorage.removeItem('token')
-      navigate('/')
-      showInfoBar('error', 'Token Expired')
+      console.log('Token invalid.')
+      logout()
+      // showInfoBar('error', 'Token Invalid')
     },
     tokenDNE: () => {
       // navigate('/')

@@ -72,30 +72,18 @@ export default function LoginPopover(props) {
 
   const handleLogin = async (event) => {
     event.preventDefault() // prevent form submit from refreshing page
-    try {
-      const res = await ax.post('/login', {
-        email: email,
-        password: password
-      })
-      authCB.login(res, remember)
-    } catch(e) {
-      console.log('LoginPopver.js')
-      console.log(e)
-      authCB.login(e.response)
-    }
+    const res = await ax.post('/login', {
+      email: email,
+      password: password
+    })
+    authCB.login(res, remember)
   }
   const handleSignup = async (event) => {
-    try {
-      const res = await ax.post('/signup', {
-        email: email,
-        password: password
-      })
-      authCB.signup(res, remember)
-    } catch(e) {
-      console.log('LoginPopver.js')
-      console.log(e)
-      authCB.signup(e.response)
-    }
+    const res = await ax.post('/signup', {
+      email: email,
+      password: password
+    })
+    authCB.signup(res, remember)
   }
 
   return (

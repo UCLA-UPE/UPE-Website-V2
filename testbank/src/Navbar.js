@@ -110,13 +110,8 @@ export default React.memo((props) => {
   }, [])
 
   const loadCredits = async () => {
-    try {
-      const res = await ax.post('/get-profile')
-      setCredits(res.data.testbankCredits)
-    } catch(e) {
-      console.log(e.data.reason)
-      console.log(e.response.body)
-    }
+    const res = await ax.post('/get-profile')
+    setCredits(res.data.testbankCredits)
   }
 
   return (
