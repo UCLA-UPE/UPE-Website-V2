@@ -37,7 +37,7 @@ export default () => {
   const match = useRoutes(routes)
 
   const [authInterceptor, setAuthInterceptor] = React.useState(null)
-  const login = (token) => {
+  const login = (token, remember) => {
     if (!authInterceptor) {
       const int = ax.interceptors.request.use(config => {
         config.headers = { 'Authorization': `Bearer ${token}` }
@@ -45,7 +45,9 @@ export default () => {
       }, error => Promise.reject(error))
       setAuthInterceptor(int)
     }
-    localStorage.setItem('token', token)
+    if (remember) {
+      localStorage.setItem('token', token)
+    }
     setIsLoggedIn(true)
   }
   const logout = () => {
@@ -106,7 +108,7 @@ export default () => {
 
   const authCB = {
     login: (token, remember) => {
-      login(token)
+      login(token, remember)
       showInfoBar('success', 'Login Success!')
     },
     logout: () => {
@@ -114,7 +116,7 @@ export default () => {
       showInfoBar('success', 'Logged Out')
     },
     signup: (token, remember) => {
-      login(token)
+      login(token, remember)
       showInfoBar('success', 'Signed Up!')
     },
     tokenExpiry: () => {
