@@ -76,14 +76,14 @@ export default function LoginPopover(props) {
       email: email,
       password: password
     })
-    authCB.login(res, remember)
+    authCB.login(res.data.token, remember)
   }
   const handleSignup = async (event) => {
     const res = await ax.post('/signup', {
       email: email,
       password: password
     })
-    authCB.signup(res, remember)
+    authCB.signup(res.data.token, remember)
   }
 
   return (

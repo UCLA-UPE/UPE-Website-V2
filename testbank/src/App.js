@@ -36,20 +36,23 @@ export default () => {
 
   const match = useRoutes(routes)
 
+  const [authInterceptor, setAuthInterceptor] = React.useState(null)
   const login = (token) => {
-    ax.interceptors.request.use(config => {
-      config.headers = { 'Authorization': `Bearer ${token}` }
-      return config
-    }, error => Promise.reject(error))
+    if (!authInterceptor) {
+      const int = ax.interceptors.request.use(config => {
+        config.headers = { 'Authorization': `Bearer ${token}` }
+        return config
+      }, error => Promise.reject(error))
+      setAuthInterceptor(int)
+    }
     localStorage.setItem('token', token)
     setIsLoggedIn(true)
   }
-
   const logout = () => {
-    ax.interceptors.request.use(config => {
-      delete config.headers.Authorization
-      return config
-    }, error => Promise.reject(error))
+    if (authInterceptor) {
+      axios.interceptors.request.eject(authInterceptor)
+      setAuthInterceptor(null)
+    }
     localStorage.removeItem('token')
     setIsLoggedIn(false)
     navigate('/')
@@ -66,15 +69,18 @@ export default () => {
       (response) => response, // Do nothing to success (2xx) responses
       (error) => {
         // Intercept error (300+) responses
+        console.log('ERROR INTERCEPTED')
         if (error.response.status === 401 && error.response.data.reason === 'Authorization header missing') {
-          // TODO
           console.log('Authorization header missing.')
+          // TODO?
         }
         else if (error.response.status === 401 && error.response.data.reason === 'JWT verification failed') {
           authCB.tokenExpiry()
         }
+        // TODO: handle other failures, like failed signup due to existing email
         else {
           console.log(error)
+          console.log(error.response)
         }
         return Promise.reject(error)
       }
@@ -94,42 +100,29 @@ export default () => {
     // many of the showInfoBar() calls are disabled because of this
     setSbOpen(true)
   }
+
   const authCB = {
-    login: (res, remember) => {
-      if (res.status === 200) {
-        login(res.data.token)
-        showInfoBar('success', 'Login Success!')
-      }
-      else {
-        showInfoBar('error', 'Login Failed')
-      }
+    login: (token, remember) => {
+      login(token)
+      showInfoBar('success', 'Login Success!')
     },
-    logout: (res) => {
-      if (res.status === 200) {
-        logout()
-        showInfoBar('success', 'Logged Out')
-      }
-      else {
-        showInfoBar('error', 'Logout Failed')
-      }
+    logout: () => {
+      logout()
+      showInfoBar('success', 'Logged Out')
     },
-    signup: (res, remember) => {
-      if (res.status === 200) {
-        login(res.data.token)
-        showInfoBar('success', 'Signed Up!')
-      }
-      else {
-        showInfoBar('error', 'Email Address Exists')
-      }
+    signup: (token, remember) => {
+      login(token)
+      showInfoBar('success', 'Signed Up!')
     },
     tokenExpiry: () => {
-      console.log('Token invalid.')
       logout()
-      // showInfoBar('error', 'Token Invalid')
+      showInfoBar('error', 'Token Invalid')
+      navigate('/')
     },
     tokenDNE: () => {
-      // navigate('/')
-      // showInfoBar('error', 'Unauthorized')
+      logout()
+      showInfoBar('error', 'Unauthorized')
+      navigate('/')
     },
     isLoggedIn: () => { return isLoggedIn },
   }

@@ -35,7 +35,7 @@ export default React.memo((props) => {
 
   const handleLogout = async (event) => {
     const res = await ax.post('/logout')
-    authCB.logout(res)
+    authCB.logout()
   }
 
   return (

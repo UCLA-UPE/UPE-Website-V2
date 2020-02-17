@@ -192,7 +192,7 @@ export default React.memo((props) => {
   }
 
   const handleOpenFilterBar = () => {
-    if (filterOptions.length === 0) {
+    if (filterOptions.length === 0 && authCB.isLoggedIn()) {
       loadFilterOptions()
     }
   }
