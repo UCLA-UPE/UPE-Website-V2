@@ -73,16 +73,17 @@ export default () => {
         if (error.response.status === 401 && error.response.data.reason === 'Authorization header missing') {
           console.log('Authorization header missing.')
           // TODO?
+          return Promise.reject(error)
         }
         else if (error.response.status === 401 && error.response.data.reason === 'JWT verification failed') {
           authCB.tokenExpiry()
+          return Promise.reject(error)
         }
         // TODO: handle other failures, like failed signup due to existing email
         else {
-          console.log(error)
           console.log(error.response)
+          throw error
         }
-        return Promise.reject(error)
       }
     )
   }, [])
