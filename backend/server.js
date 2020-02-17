@@ -80,8 +80,7 @@ const upload = multer({
   }
 })
 const saveTestFile = upload.fields([
-  { name: 'file', maxCount: 1 },
-  // { name: 'meta', maxCount: 10 },
+  { name: 'testFile', maxCount: 1 }
 ])
 
 const logger = (req, res, next) => {
@@ -215,33 +214,33 @@ app.post('/get-filter-options', verifyToken, async (req, res) => {
 })
 
 app.post('/upload-test-file', verifyToken, saveTestFile, async (req, res) => {
-  // if (!req.files) {
-  //   res.sendStatus(400)
-  //   return
-  // }
-  console.log(req.body)
-  console.log(req.files)
-  console.log('good')
-  // await Test.create({
-  //   user_email: {
-  // course: {
-  //   subject: {
-  //   number: {
-  // kind: {
-  //   name: {
-  //   number: {
-  // term: {
-  //   quarter: {
-  //   year: {
-  // professor: {
-  //   email: {
-  //   name: {
-  // test_file: {
-  // upload_time: {
-  // verified: {
-  // })
-  // const test = await Test.findOne({ '_id': req.body._id }, 'test_file')
-  // res.sendFile(path.join(TEST_FILES_DIR, test.test_file))
+  if (!req.files) {
+    res.sendStatus(400)
+    return
+  }
+  const test = await Test.create({
+    user_email: req.tokenPayload.email,
+    course: {
+      subject: req.body.courseSubject,
+      number: req.body.courseNumber,
+    },
+    kind: {
+      name: req.body.kindName,
+      number: req.body.kindNumber !== 'undefined' ? req.body.kindNumber : null,
+    },
+    term: {
+      quarter: req.body.termQuarter,
+      year: req.body.termYear,
+    },
+    professor: {
+      email: null,
+      name: req.body.professorName,
+    },
+    test_file: req.files.testFile[0].filename,
+    upload_time: Date.now(),
+    verified: false,
+  })
+  res.status(200).json({ test_id: test._id })
 })
 
 

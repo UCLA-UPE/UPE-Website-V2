@@ -12,9 +12,9 @@ import MenuIcon from '@material-ui/icons/Menu'
 import PublishIcon from '@material-ui/icons/Publish'
 import NavigateNextIcon from '@material-ui/icons/NavigateNext'
 
-import UploadTestButton from './UploadTestButton'
 import LoginPopover from './LoginPopover'
 import ProfilePopover from './ProfilePopover'
+import UploadTestDialog from './UploadTestDialog'
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -122,9 +122,7 @@ export default React.memo((props) => {
           {authCB.isLoggedIn() ?
             <>
               <Box className={classes.navItem}><Typography variant="button">Credits: {credits}</Typography></Box>
-              <div className={classes.navItem}>
-                <UploadTestButton ax={ax} />
-              </div>
+              <UploadTestDialog ax={ax} authCB={authCB} className={classes.navItem} />
               <ProfilePopover ax={ax} authCB={authCB} className={classes.navItem} />
             </>
           :

@@ -24,16 +24,16 @@ const TestSchema = new mongoose.Schema({
     },
     number: {
       type: Number,
-      required: true
+      required: false
     }
   },
   term: {
-    quarter: {
-      type: String,
-      required: true
-    },
     year: {
       type: Number,
+      required: true
+    },
+    quarter: {
+      type: String,
       required: true
     }
   },
@@ -137,7 +137,7 @@ TestSchema.statics.getFilterOptions = async function(course) {
       ],
       terms: [
         { '$group': { _id: '$term' }},
-        { '$project': { _id: 0, quarter: '$_id.quarter', year: '$_id.year' }}
+        { '$project': { _id: 0, year: '$_id.year', quarter: '$_id.quarter'}}
       ],
     }}
   ])
