@@ -112,7 +112,7 @@ app.get('/', (req, res) => {
 app.post('/login', async (req, res) => {
   const user = await User.findOne({ email: req.body.email })
   if (!user || ! await user.isValidPassword(req.body.password)) {
-    res.sendStatus(401)
+    res.status(401).json({ reason: 'Email does not exist, or password is wrong' })
     return
   }
   const token = await signUserToken(user._id, user.email)
@@ -121,11 +121,15 @@ app.post('/login', async (req, res) => {
 })
 
 app.post('/signup', async (req, res) => {
-  const exists = await User.findOne({ email: req.body.email })
-  if (exists) {
-    res.sendStatus(400)
+  if (await User.findOne({ email: req.body.email })) {
+    res.status(400).json({ reason: 'Email address exists' })
     return
   }
+  else if (!req.body.email.match(/@(.+\.)*ucla\.edu/)) {
+    res.status(400).json({ reason: 'Email has to be a "ucla.edu" address' })
+    return
+  }
+  // password will be encrypted before storage
   const user = await User.create({ email: req.body.email, password: req.body.password })
   const token = await signUserToken(user._id, user.email)
   res.status(200).json({ token: token })

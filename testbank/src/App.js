@@ -84,10 +84,7 @@ export default () => {
           }
           // TODO: handle other failures, like failed signup due to existing email
         }
-        else {
-          console.log(error)
-          throw error
-        }
+        throw error
       }
     )
   }, [])

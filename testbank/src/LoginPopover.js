@@ -12,6 +12,8 @@ import Typography from '@material-ui/core/Typography'
 import { makeStyles } from '@material-ui/core/styles'
 import Container from '@material-ui/core/Container'
 import Popover from '@material-ui/core/Popover'
+import Alert from '@material-ui/lab/Alert'
+import Collapse from '@material-ui/core/Collapse'
 
 function Copyright() {
   return (
@@ -35,6 +37,9 @@ const useStyles = makeStyles(theme => ({
     flexDirection: 'column',
     alignItems: 'center',
   },
+  alert: {
+    width: '100%'
+  },
   avatar: {
     margin: theme.spacing(1),
     backgroundColor: theme.palette.secondary.main,
@@ -55,7 +60,14 @@ export default function LoginPopover(props) {
   const { ax, authCB } = props
   const classes = useStyles()
 
+  const [email, setEmail] = React.useState()
+  const [password, setPassword] = React.useState()
+  const [remember, setRemember] = React.useState(false)
+
   const [anchorEl, setAnchorEl] = React.useState(null)
+  const popoverOpen = Boolean(anchorEl)
+  const id = popoverOpen ? 'simple-popover' : undefined
+
   const handleClick = event => {
     setAnchorEl(event.currentTarget)
   }
@@ -63,27 +75,33 @@ export default function LoginPopover(props) {
     setAnchorEl(null)
   }
 
-  const open = Boolean(anchorEl)
-  const id = open ? 'simple-popover' : undefined
-
-  const [email, setEmail] = React.useState()
-  const [password, setPassword] = React.useState()
-  const [remember, setRemember] = React.useState(false)
+  const [alert , setAlert] = React.useState()
+  const alertOpen = Boolean(alert)
 
   const handleLogin = async (event) => {
     event.preventDefault() // prevent form submit from refreshing page
-    const res = await ax.post('/login', {
-      email: email,
-      password: password
-    })
-    authCB.login(res.data.token, remember)
+    try {
+      const res = await ax.post('/login', {
+        email: email,
+        password: password
+      })
+      authCB.login(res.data.token, remember)
+    }
+    catch(error) {
+      setAlert(error.response.data.reason)
+    }
   }
   const handleSignup = async (event) => {
-    const res = await ax.post('/signup', {
-      email: email,
-      password: password
-    })
-    authCB.signup(res.data.token, remember)
+    try {
+      const res = await ax.post('/signup', {
+        email: email,
+        password: password
+      })
+      authCB.signup(res.data.token, remember)
+    }
+    catch(error) {
+      setAlert(error.response.data.reason)
+    }
   }
 
   return (
@@ -93,7 +111,7 @@ export default function LoginPopover(props) {
       </Button>
       <Popover
         id={id}
-        open={open}
+        open={popoverOpen}
         anchorEl={anchorEl}
         onClose={handleClose}
         anchorOrigin={{
@@ -107,6 +125,11 @@ export default function LoginPopover(props) {
       >
         <Container component="main" maxWidth="xs">
           <div className={classes.paper}>
+            <Collapse className={classes.alert} in={alertOpen}>
+              <Alert severity='error'>
+                {alert}
+              </Alert>
+            </Collapse>
             <form className={classes.form} onSubmit={handleLogin} noValidate>
               <TextField
                 variant="outlined"
