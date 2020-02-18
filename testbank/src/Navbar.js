@@ -122,8 +122,8 @@ export default React.memo((props) => {
           {authCB.isLoggedIn() ?
             <>
               <Box className={classes.navItem}><Typography variant="button">Credits: {credits}</Typography></Box>
-              <UploadTestDialog ax={ax} authCB={authCB} className={classes.navItem} />
-              <ProfilePopover ax={ax} authCB={authCB} className={classes.navItem} />
+              <Box className={classes.navItem}><UploadTestDialog ax={ax} authCB={authCB} /></Box>
+              <Box><ProfilePopover ax={ax} authCB={authCB} /></Box>
             </>
           :
             <LoginPopover ax={ax} authCB={authCB} className={classes.navItem} />
