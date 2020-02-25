@@ -12,6 +12,7 @@ console.log('API server connecting to ' + connection)
 mongoose.set('useNewUrlParser', true)
 mongoose.set('useUnifiedTopology', true)
 mongoose.set('useCreateIndex', true)
+mongoose.set('useFindAndModify', false)
 
 const connectDb = () => {
   return mongoose.connect(connection)

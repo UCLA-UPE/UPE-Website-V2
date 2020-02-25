@@ -76,6 +76,7 @@ export default function LoginPopover(props) {
   }
 
   const [alert , setAlert] = React.useState()
+  const [alertSeverity , setAlertSeverity] = React.useState()
   const alertOpen = Boolean(alert)
 
   const handleLogin = async (event) => {
@@ -88,6 +89,7 @@ export default function LoginPopover(props) {
       authCB.login(res.data.token, remember)
     }
     catch(error) {
+      setAlertSeverity('error')
       setAlert(error.response.data.reason)
     }
   }
@@ -97,9 +99,12 @@ export default function LoginPopover(props) {
         email: email,
         password: password
       })
-      authCB.signup(res.data.token, remember)
+      // authCB.signup(res.data.token, remember)
+      setAlertSeverity('info')
+      setAlert('Check your email for a verification link')
     }
     catch(error) {
+      setAlertSeverity('error')
       setAlert(error.response.data.reason)
     }
   }
@@ -126,7 +131,7 @@ export default function LoginPopover(props) {
         <Container component="main" maxWidth="xs">
           <div className={classes.paper}>
             <Collapse className={classes.alert} in={alertOpen}>
-              <Alert severity='error'>
+              <Alert severity={alertSeverity}>
                 {alert}
               </Alert>
             </Collapse>

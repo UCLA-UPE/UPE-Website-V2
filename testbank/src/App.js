@@ -112,9 +112,8 @@ export default () => {
       logout()
       showInfoBar('success', 'Logged Out')
     },
-    signup: (token, remember) => {
-      login(token, remember)
-      showInfoBar('success', 'Signed Up!')
+    signup: () => {
+      
     },
     tokenExpiry: () => {
       logout()

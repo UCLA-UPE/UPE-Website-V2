@@ -1,6 +1,6 @@
 const express = require('express')
 const bodyParser = require('body-parser')
-const connectDb = require('./src/connection')
+const connectDb = require('./connection')
 const cors = require('cors')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
@@ -8,6 +8,8 @@ const path = require('path')
 const mongoSanitize = require('express-mongo-sanitize')
 const multer = require('multer')
 const util = require('util')
+const Mailer = require('./mailer')
+const os = require('os')
 
 // constants
 // TODO: use envvars for these
@@ -16,7 +18,11 @@ const HOST = '0.0.0.0'
 const TOKEN_EXPIRY_PERIOD = '10d'
 const TEST_FILE_UPLOAD_MAX_SIZE = 10 * 1024 * 1024 // in bytes
 
-// envvars
+// env
+const apiUrl = (process.env.PRODUCTION === 'false') ? 
+  'http://localhost:' + PORT :             // dev
+  'http://' + os.hostname() + ':' + PORT   // prod
+console.log('api url is set to ' + apiUrl)
 const TEST_FILES_DIR = (process.env.PRODUCTION === 'false') ? 
   path.join(__dirname, '/../data/tests') : // dev: put test files in UPE-Website-V2/data/tests
   path.join(process.env.DATA_DIR, 'tests') // prod: pass in env var DATA_DIR where the "tests" folder lives
@@ -25,13 +31,14 @@ const JWT_SECRET = process.env.JWT_SECRET
 console.log("TEST_FILES_DIR is set to " + TEST_FILES_DIR)
 
 // mongoose models
-const User = require('./src/User.model')
-const Test = require('./src/Test.model')
+const User = require('./User.model')
+const Test = require('./Test.model')
 
 
 
 // instantiate app and others
 const app = express()
+const mailer = new Mailer(apiUrl)
 
 ///////////////////////
 // middleware config //
@@ -115,6 +122,10 @@ app.post('/login', async (req, res) => {
     res.status(401).json({ reason: 'Email does not exist, or password is wrong' })
     return
   }
+  if (!user.isVerified()) {
+    res.status(401).json({ reason: 'Please verify your email' })
+    return
+  }
   const token = await signUserToken(user._id, user.email)
   console.log(token)
   res.status(200).json({ token: token })
@@ -131,8 +142,13 @@ app.post('/signup', async (req, res) => {
   }
   // password will be encrypted before storage
   const user = await User.create({ email: req.body.email, password: req.body.password })
-  const token = await signUserToken(user._id, user.email)
-  res.status(200).json({ token: token })
+  mailer.sendEmailVerification(user.email, user.emailVerification.verificationString)
+  res.sendStatus(200)
+})
+
+app.get('/verify-email/:verificationString', async (req, res) => {
+  if (await User.verifyEmail(req.params.verificationString)) res.status(200).send('Email verified!')
+  else res.sendStatus(401)
 })
 
 app.get('/summary', async (req, res) => {
@@ -147,7 +163,7 @@ app.get('/summary', async (req, res) => {
 ////////////////////////
 
 app.post('/get-profile', verifyToken, async (req, res) => {
-  const profile = await User.getProfile(req.tokenPayload)
+  const profile = await User.getProfile(req.tokenPayload._id)
   res.status(200).json(profile)
 })
 
@@ -249,15 +265,18 @@ app.post('/upload-test-file', verifyToken, saveTestFile, async (req, res) => {
 
 
 
-
-
 ///////////////
 // serve api //
 ///////////////
 
-app.listen(PORT, HOST, () => {
+async function start() {
+  await mailer.init()
+  app.listen(PORT, HOST, () => {
     console.log(`Running on http://${HOST}:${PORT}`)
     connectDb().then(() => {
       console.log('MongoDb connected')
     })
-})
+  })
+}
+
+start()
