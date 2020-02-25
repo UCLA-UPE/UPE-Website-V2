@@ -44,7 +44,7 @@ const Row = (props) => {
     <>
       <Grid container item xs={3}>
         <Typography className={classes.leftCol} component='div'>
-          <Box fontWeight="fontWeightMedium">
+          <Box fontWeight='fontWeightMedium'>
             {props.title}
           </Box>
         </Typography>
@@ -94,25 +94,25 @@ export default React.memo((props) => {
   const [uploadButtonName, setUploadButtonName] = React.useState('Select file...')
   return (
     <div>
-      <WhiteButton variant="outlined" startIcon={<PublishIcon />} onClick={handleClickOpen}>
+      <WhiteButton variant='outlined' startIcon={<PublishIcon />} onClick={handleClickOpen}>
         Upload
       </WhiteButton>
-      <Dialog onClose={handleClose} aria-labelledby="dialog-title" open={open}>
-        <DialogTitle id="dialog-title">Upload Test</DialogTitle>
+      <Dialog onClose={handleClose} aria-labelledby='dialog-title' open={open}>
+        <DialogTitle id='dialog-title'>Upload Test</DialogTitle>
         <DialogContent>
           <Grid container spacing={2} className={classes.grid}>
             <Row title='File' content={
               <>
                 <input
-                  accept="application/pdf,image/jpeg,image/png"
+                  accept='application/pdf,image/jpeg,image/png'
                   className={classes.input}
-                  id="file-upload-input"
-                  type="file"
+                  id='file-upload-input'
+                  type='file'
                   ref={ref}
                   onChange={() => setUploadButtonName(ref.current.files[0].name)}
                 />
-                <label htmlFor="file-upload-input">
-                  <Button component="span" variant='contained' size='small'>
+                <label htmlFor='file-upload-input'>
+                  <Button component='span' variant='contained' size='small'>
                     {uploadButtonName}
                   </Button>
                 </label>
@@ -122,17 +122,17 @@ export default React.memo((props) => {
               <>
                 <Grid item xs={6}>
                   <TextField
-                    id="course-subject"
-                    label="Subject"
-                    placeholder="MATH"
+                    id='course-subject'
+                    label='Subject'
+                    placeholder='MATH'
                     onChange={event => { setCourseSubject(event.target.value) }}
                   />
                 </Grid>
                 <Grid item xs={6}>
                   <TextField
-                    id="course-number"
-                    label="Number"
-                    placeholder="31A"
+                    id='course-number'
+                    label='Number'
+                    placeholder='31A'
                     onChange={event => { setCourseNumber(event.target.value) }}
                   />
                 </Grid>
@@ -142,17 +142,17 @@ export default React.memo((props) => {
               <>
                 <Grid item xs={6}>
                   <TextField
-                    id="kind-name"
-                    label="Name"
-                    placeholder="Midterm"
+                    id='kind-name'
+                    label='Name'
+                    placeholder='Midterm'
                     onChange={event => { setKindName(event.target.value) }}
                   />
                 </Grid>
                 <Grid item xs={6}>
                   <TextField
-                    id="kind-number"
-                    label="Number"
-                    placeholder="2"
+                    id='kind-number'
+                    label='Number'
+                    placeholder='2'
                     onChange={event => { setKindNumber(event.target.value) }}
                   />
                 </Grid>
@@ -162,17 +162,17 @@ export default React.memo((props) => {
               <>
                 <Grid item xs={6}>
                   <TextField
-                    id="term-year"
-                    label="Year"
-                    placeholder="2020"
+                    id='term-year'
+                    label='Year'
+                    placeholder='2020'
                     onChange={event => { setTermYear(event.target.value) }}
                   />
                 </Grid>
                 <Grid item xs={6}>
                   <TextField
-                    id="term-quarter"
-                    label="Quarter"
-                    placeholder="Fall"
+                    id='term-quarter'
+                    label='Quarter'
+                    placeholder='Fall'
                     onChange={event => { setTermQuarter(event.target.value) }}
                   />
                 </Grid>
@@ -180,9 +180,9 @@ export default React.memo((props) => {
             } />
             <Row title='Professor' content={
               <TextField
-                id="professor-name"
-                label="Name"
-                placeholder="Terence Tao"
+                id='professor-name'
+                label='Name'
+                placeholder='Terence Tao'
                 onChange={event => { setProfessorName(event.target.value) }}
                 fullWidth
               />
@@ -190,10 +190,10 @@ export default React.memo((props) => {
           </Grid>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose} color="secondary">
+          <Button onClick={handleClose} color='secondary'>
             Cancel
           </Button>
-          <Button onClick={handleSubmit} color="primary">
+          <Button onClick={handleSubmit} color='primary'>
             Upload
           </Button>
         </DialogActions>

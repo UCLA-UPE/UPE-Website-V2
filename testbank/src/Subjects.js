@@ -33,7 +33,7 @@ export default React.memo((props) => {
 
   return (
     <>
-      <Typography variant="h2" component="h2">
+      <Typography variant='h2' component='h2'>
         
       </Typography>
       <Grid container spacing={2} className={classes.grid}>

@@ -25,7 +25,7 @@ const Row = (props) => {
     <>
       <Grid container item xs={3}>
         <Typography className={classes.leftCol} component='div'>
-          <Box fontWeight="fontWeightMedium">
+          <Box fontWeight='fontWeightMedium'>
             {props.title}
           </Box>
         </Typography>
@@ -70,7 +70,7 @@ export default React.memo((props) => {
 
   return (
     <>
-      <Typography variant="h2" component="h2">
+      <Typography variant='h2' component='h2'>
         Profile
       </Typography>
       <Grid container spacing={2} className={classes.grid}>

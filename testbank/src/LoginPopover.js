@@ -17,8 +17,8 @@ import Collapse from '@material-ui/core/Collapse'
 
 function Copyright() {
   return (
-    <Typography variant="body2" color="textSecondary" align="center">
-      <Link color="inherit" href="https://upe.seas.ucla.edu/">
+    <Typography variant='body2' color='textSecondary' align='center'>
+      <Link color='inherit' href='https://upe.seas.ucla.edu/'>
         UCLA UPE
       </Link>{' '}
       {' © '}
@@ -111,7 +111,7 @@ export default function LoginPopover(props) {
 
   return (
     <div>
-      <Button aria-describedby={id} color="inherit" onClick={handleClick}>
+      <Button aria-describedby={id} color='inherit' onClick={handleClick}>
         Log In
       </Button>
       <Popover
@@ -128,7 +128,7 @@ export default function LoginPopover(props) {
           horizontal: 'center',
         }}
       >
-        <Container component="main" maxWidth="xs">
+        <Container component='main' maxWidth='xs'>
           <div className={classes.paper}>
             <Collapse className={classes.alert} in={alertOpen}>
               <Alert severity={alertSeverity}>
@@ -137,44 +137,44 @@ export default function LoginPopover(props) {
             </Collapse>
             <form className={classes.form} onSubmit={handleLogin} noValidate>
               <TextField
-                variant="outlined"
-                margin="normal"
+                variant='outlined'
+                margin='normal'
                 required
                 fullWidth
-                id="email"
-                label="Email Address"
-                name="email"
+                id='email'
+                label='Email Address'
+                name='email'
                 onChange={e => setEmail(e.target.value)}
-                autoComplete="email"
+                autoComplete='email'
                 autoFocus
               />
               <TextField
-                variant="outlined"
-                margin="normal"
+                variant='outlined'
+                margin='normal'
                 required
                 fullWidth
-                name="password"
-                label="Password"
-                type="password"
-                id="password"
+                name='password'
+                label='Password'
+                type='password'
+                id='password'
                 onChange={e => setPassword(e.target.value)}
-                autoComplete="current-password"
+                autoComplete='current-password'
               />
               <FormControlLabel
-                control={<Checkbox value="remember" color="primary" onChange={e => setRemember(e.target.value)} />}
-                label="Remember me"
+                control={<Checkbox value='remember' color='primary' onChange={e => setRemember(e.target.value)} />}
+                label='Remember me'
               />
               <Grid
                 container
-                direction="row"
-                justify="flex-start"
-                alignItems="center"
+                direction='row'
+                justify='flex-start'
+                alignItems='center'
               >
                 <Grid item xs>
                   <Button
-                    type="submit"
-                    variant="contained"
-                    color="primary"
+                    type='submit'
+                    variant='contained'
+                    color='primary'
                     className={classes.popover_button}
                   >
                     Log In
@@ -183,8 +183,8 @@ export default function LoginPopover(props) {
                 <Grid item>
                   <Button
                     onClick={handleSignup}
-                    variant="contained"
-                    color="secondary"
+                    variant='contained'
+                    color='secondary'
                     className={classes.popover_button}
                   >
                     Sign Up
@@ -192,7 +192,7 @@ export default function LoginPopover(props) {
                 </Grid>
               </Grid>
               
-              <Link href="#" variant="body2">
+              <Link href='#' variant='body2'>
                 Forgot password?
               </Link>
             </form>

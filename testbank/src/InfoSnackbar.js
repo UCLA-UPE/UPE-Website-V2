@@ -3,7 +3,7 @@ import Snackbar from '@material-ui/core/Snackbar'
 import MuiAlert from '@material-ui/lab/Alert'
 
 function Alert(props) {
-  return <MuiAlert elevation={6} variant="filled" {...props} />
+  return <MuiAlert elevation={6} variant='filled' {...props} />
 }
 
 export default React.memo((props) => {

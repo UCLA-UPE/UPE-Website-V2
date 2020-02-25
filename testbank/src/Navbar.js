@@ -27,7 +27,7 @@ const useStyles = makeStyles(theme => ({
 
 const Rarr = () => <span>&ensp;&rarr;&ensp;</span>
 const Breadcrumb = (props) => (
-  <Typography variant="h6" style={{ flexGrow: 1 }}>
+  <Typography variant='h6' style={{ flexGrow: 1 }}>
     <A href='/' style={{ textDecoration: 'none', color: 'inherit' }}>
       Home
     </A>
@@ -116,12 +116,12 @@ export default React.memo((props) => {
 
   return (
     <div className={classes.root}>
-      <AppBar position="static">
+      <AppBar position='static'>
         <Toolbar>
           {match}
           {authCB.isLoggedIn() ?
             <>
-              <Box className={classes.navItem}><Typography variant="button">Credits: {credits}</Typography></Box>
+              <Box className={classes.navItem}><Typography variant='button'>Credits: {credits}</Typography></Box>
               <Box className={classes.navItem}><UploadTestDialog ax={ax} authCB={authCB} /></Box>
               <Box><ProfilePopover ax={ax} authCB={authCB} /></Box>
             </>

@@ -43,13 +43,13 @@ export default function GridCard(props) {
     <Card className={classes.root}>
       <CardActionArea>
         <CardContent>
-          <Typography variant="h5" component="h2">
+          <Typography variant='h5' component='h2'>
             {props.title}
           </Typography>
-          <Typography className={classes.pos} color="textSecondary">
+          <Typography className={classes.pos} color='textSecondary'>
             {listBulleted(8)}
           </Typography>
-          <Typography variant="body2" component="p">
+          <Typography variant='body2' component='p'>
             {props.documentCount} Documents
           </Typography>
         </CardContent>
