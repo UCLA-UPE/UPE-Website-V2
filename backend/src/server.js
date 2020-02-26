@@ -102,8 +102,8 @@ app.use(logger)
 // utility //
 /////////////
 
-const signUserToken = async (_id, email) => await jwt.sign(
-  { _id: _id, email: email }, 
+const signUserToken = async (user) => await jwt.sign(
+  { _id: user._id, email: user.email, isUpeMember: user.isUpeMember, professor: await user.getProfessor() }, 
   JWT_SECRET,
   { expiresIn: TOKEN_EXPIRY_PERIOD }
 )
@@ -122,11 +122,11 @@ app.post('/login', async (req, res) => {
     res.status(401).json({ reason: 'Email does not exist, or password is wrong' })
     return
   }
-  if (!user.isVerified()) {
+  if (!user.emailVerification.isVerified) {
     res.status(401).json({ reason: 'Please verify your email' })
     return
   }
-  const token = await signUserToken(user._id, user.email)
+  const token = await signUserToken(user)
   console.log(token)
   res.status(200).json({ token: token })
 })

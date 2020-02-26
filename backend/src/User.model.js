@@ -2,6 +2,7 @@ const mongoose = require('mongoose')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const crypto = require('crypto')
+const Professor = require('./Professor.model')
 
 SALT_ROUNDS = 12
 
@@ -31,11 +32,6 @@ const UserSchema = new mongoose.Schema({
     required: true,
     default: false
   },
-  isProfessor: {
-    type: Boolean,
-    required: true,
-    default: false
-  },
   testbankCredits: {
     type: Number,
     required: true,
@@ -59,12 +55,14 @@ UserSchema.methods.isValidPassword = async function(password) {
   return await bcrypt.compare(password, this.password)
 }
 
-UserSchema.methods.isVerified = function() {
-  return this.emailVerification.isVerified
+UserSchema.methods.getProfessor = async function() {
+  return await Professor.findOne({ email: this.email }, 'name department')
 }
 
 UserSchema.statics.getProfile = async function(id) {
-  return await this.findOne({ _id: id }, 'email isUpeMember isProfessor testbankCredits testbankUploadedTests')
+  let profile = await this.findOne({ _id: id }, 'email isUpeMember testbankCredits testbankUploadedTests')
+  profile = { ...profile.toObject(), professor: await profile.getProfessor() }
+  return profile
 }
 
 UserSchema.statics.verifyEmail = async function(verificationString) {

@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom'
 import { useRoutes, navigate, } from 'hookrouter'
 import os from 'os'
 import axios from 'axios'
+import jwt from 'jsonwebtoken'
 
 import CssBaseline from '@material-ui/core/CssBaseline'
 import Button from '@material-ui/core/Button'
@@ -37,6 +38,7 @@ export default () => {
   const match = useRoutes(routes)
 
   const [authInterceptor, setAuthInterceptor] = React.useState(null)
+  const [tokenFields, setTokenFields] = React.useState()
   const login = (token, remember) => {
     if (!authInterceptor) {
       const int = ax.interceptors.request.use(config => {
@@ -48,6 +50,7 @@ export default () => {
     if (remember) {
       localStorage.setItem('token', token)
     }
+    setTokenFields(jwt.decode(token))
     setIsLoggedIn(true)
   }
   const logout = () => {
@@ -126,6 +129,7 @@ export default () => {
       navigate('/')
     },
     isLoggedIn: () => { return isLoggedIn },
+    tokenFields: () => { return tokenFields },
   }
   
   return (

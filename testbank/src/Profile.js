@@ -49,7 +49,7 @@ export default React.memo((props) => {
   // is there a better way?
   const [email, setEmail] = React.useState()
   const [isUpeMember, setIsUpeMember] = React.useState()
-  const [isProfessor, setIsProfessor] = React.useState()
+  const [professor, setProfessor] = React.useState()
   const [testbankCredits, setTestbankCredits] = React.useState()
   const [testbankUploadedTests, setTestbankUploadedTests] = React.useState()
 
@@ -57,7 +57,7 @@ export default React.memo((props) => {
     const res = await ax.post('/get-profile')
     setEmail(res.data.email)
     setIsUpeMember(res.data.isUpeMember)
-    setIsProfessor(res.data.isProfessor)
+    setProfessor(res.data.professor)
     setTestbankCredits(res.data.testbankCredits)
     setTestbankUploadedTests(res.data.testbankUploadedTests)
   }
@@ -77,7 +77,7 @@ export default React.memo((props) => {
         <Row title='Email' content={email} />
         <Row title='Password' content='[encrypted]' />
         <Row title='UPE Status' content={isUpeMember ? 'Yes' : 'No'} />
-        <Row title='Professor Status' content={isProfessor ? 'Yes' : 'No'} />
+        <Row title='Professor Status' content={professor ? 'Yes' : 'No'} />
         <Row title={<span>&nbsp;</span>} content='' />
         <Row title='Download Credits' content={testbankCredits} />
         <Row title='Uploaded Tests' content={testbankUploadedTests} />
