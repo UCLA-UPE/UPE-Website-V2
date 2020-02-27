@@ -39,7 +39,7 @@ const routes = {
   ),
   '/profile': () => (p) => (
     <Profile
-      ax={p.ax} authCB={p.authCB}
+      ax={p.ax} authCB={p.authCB} handleClickTestInfo={p.handleClickTestInfo}
     />
   ),
 }

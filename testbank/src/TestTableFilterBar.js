@@ -59,28 +59,45 @@ export default React.memo((props) => {
       '/get-filter-options', { preFilters: preFilters }
     )
 
-    const professorsSorted = res.data.professors.map( professor => ({
-      field: 'professor', 
-      fieldDisplay: 'Professor', 
-      data: professor, 
-      display: professor.name ? professor.name : '(None)', 
-    })).sort( (a, b) => (a.display === null ? -1 : a.display.localeCompare(b.display)))
+    let filterOptionsSorted = []
 
-    const kindsSorted = res.data.kinds.map( kind => ({
-      field: 'kind', 
-      fieldDisplay: 'Kind', 
-      data: kind, 
-      display: kind.name + ' ' + (kind.number ? kind.number : '')
-    })).sort(kindCompare)
+    if (res.data.professors) {
+      filterOptionsSorted.push(...res.data.professors.map( professor => ({
+        field: 'professor', 
+        fieldDisplay: 'Professor', 
+        data: professor, 
+        display: professor.name ? professor.name : '(None)', 
+      })).sort( (a, b) => (a.display === null ? -1 : a.display.localeCompare(b.display))))
+    }
 
-    const termsSorted = res.data.terms.map( term => ({
-      field: 'term', 
-      fieldDisplay: 'Term', 
-      data: term, 
-      display: term.year.toString() + ' ' + term.quarter,
-    })).sort(termCompare)
+    if (res.data.courses) {
+      filterOptionsSorted.push(...res.data.courses.map( course => ({
+        field: 'course', 
+        fieldDisplay: 'Course', 
+        data: course, 
+        display: course.subject + ' ' + course.number, 
+      })).sort())
+    }
 
-    const filterOptionsSorted = [].concat.apply([], [professorsSorted, kindsSorted, termsSorted])
+    if (res.data.kinds) {
+      filterOptionsSorted.push(...res.data.kinds.map( kind => ({
+        field: 'kind', 
+        fieldDisplay: 'Kind', 
+        data: kind, 
+        display: kind.name + ' ' + (kind.number ? kind.number : '')
+      })).sort(kindCompare))
+    }
+
+    if (res.data.terms) {
+      filterOptionsSorted.push(...res.data.terms.map( term => ({
+        field: 'term', 
+        fieldDisplay: 'Term', 
+        data: term, 
+        display: term.year.toString() + ' ' + term.quarter,
+      })).sort(termCompare))
+    }
+
+    console.log(filterOptionsSorted)
     setFilterOptions(filterOptionsSorted)
   }
 

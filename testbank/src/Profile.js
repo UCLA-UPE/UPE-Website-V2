@@ -5,6 +5,8 @@ import Typography from '@material-ui/core/Typography'
 import Grid from '@material-ui/core/Grid'
 import Box from '@material-ui/core/Box'
 
+import TestTable from './TestTable'
+
 const useStyles = makeStyles(theme => ({
   grid: {
     padding: theme.spacing(4)
@@ -41,9 +43,26 @@ const Row = (props) => {
   )
 }
 
+const ProfessorRowContent = (props) => {
+  if (!props.professor) return 'No'
+  else return (
+    <>
+      You are verified as <span style={{ color: 'fuchsia' }}>{props.professor.name}</span>. Your tests:
+      <Box mt={3}>
+        <TestTable 
+          ax={props.ax} 
+          authCB={props.authCB} 
+          handleClickTestInfo={props.handleClickTestInfo} 
+          preFilters={{ professor: { email: null, name: props.professor.name } }} 
+        />
+      </Box>
+    </>
+  )
+}
+
 export default React.memo((props) => {
   
-  const { ax, authCB } = props
+  const { ax, authCB, handleClickTestInfo } = props
   const classes = useStyles()
 
   // is there a better way?
@@ -62,6 +81,25 @@ export default React.memo((props) => {
     setTestbankUploadedTests(res.data.testbankUploadedTests)
   }
 
+  const loadProfessorTests = async (opts) => {
+    const res = await ax.post('/get-tests', {
+      course: {
+        subject: courseSubject,
+        number: courseNumber
+      },
+      filters: {
+        professor: {
+          email: authCB.tokenFields()['']
+        }
+      },
+      sort: opts?.sort,
+      order: opts?.order,
+      page: page,
+      limit: rowsPerPage,
+    })
+    setTestData(res.data)
+  }
+
   React.useEffect(() => {
     if (authCB.isLoggedIn()) {
       loadProfile()
@@ -77,7 +115,15 @@ export default React.memo((props) => {
         <Row title='Email' content={email} />
         <Row title='Password' content='[encrypted]' />
         <Row title='UPE Status' content={isUpeMember ? 'Yes' : 'No'} />
-        <Row title='Professor Status' content={professor ? 'Yes' : 'No'} />
+        <Row 
+          title='Professor Status' 
+          content={<ProfessorRowContent 
+            ax={ax} 
+            authCB={authCB} 
+            handleClickTestInfo={handleClickTestInfo}
+            professor={professor}
+          />} 
+        />
         <Row title={<span>&nbsp;</span>} content='' />
         <Row title='Download Credits' content={testbankCredits} />
         <Row title='Uploaded Tests' content={testbankUploadedTests} />

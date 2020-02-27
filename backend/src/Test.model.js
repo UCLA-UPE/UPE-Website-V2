@@ -103,10 +103,10 @@ TestSchema.statics.getSubjectNumberTests = async function(subject, number) {
 TestSchema.statics.getTests = async function(filters, sort, order, skip, limit) {
   const testsAgg = await this.aggregate([
     { '$match': { 
-       ...(filters.course && {course: filters.course }),
-       ...(filters.professor && {'professor.name': { '$in': filters.professor.map(p => p.name) }}),
+       ...(filters.course && {course: { '$in': filters.course } }),
        ...(filters.kind && {kind: { '$in': filters.kind }}),
-       ...(filters.term && {term: { '$in': filters.term }})
+       ...(filters.term && {term: { '$in': filters.term }}),
+       ...(filters.professor && {'professor.name': { '$in': filters.professor.map(p => p.name) }}),
     }},
     { '$facet': {
       data: [
@@ -127,9 +127,9 @@ TestSchema.statics.getFilterOptions = async function(preFilters) {
   const filtersAgg = await this.aggregate([
     { '$match': { ...preFilters }},
     { '$facet': {
-      professors: [
-        { '$group': { _id: '$professor.name' }},
-         { '$project': { _id: 0, name: '$_id' }}
+      courses: [
+        { '$group': { _id: '$course' }},
+        { '$project': { _id: 0, subject: '$_id.subject', number: '$_id.number' }}
       ],
       kinds: [
         { '$group': { _id: '$kind' }},
@@ -139,9 +139,17 @@ TestSchema.statics.getFilterOptions = async function(preFilters) {
         { '$group': { _id: '$term' }},
         { '$project': { _id: 0, year: '$_id.year', quarter: '$_id.quarter'}}
       ],
+      professors: [
+        { '$group': { _id: '$professor.name' }},
+        { '$project': { _id: 0, name: '$_id' }}
+      ],
     }}
   ])
-  const filterOptions = filtersAgg[0]
+  let filterOptions = filtersAgg[0]
+  for (const [key, val] of Object.entries(preFilters)) {
+    console.log('deleting key ' + key + 's')
+    delete filterOptions[key + 's']
+  }
   return filterOptions
 }
 

@@ -50,22 +50,32 @@ const emojiTooltip = (season) => (
   </Tooltip>
 )
 
-const aggregateFilters = (filterItems) => {
-  const professorArr = filterItems.filter(item => item.field === 'professor')
+// preFilters is a dictionary, ex: { course: { name: 'COM SCI', number: 33 } }
+// filterItems is an array of the elements present in the filter bar
+const aggregateFilters = (preFilters, filterItems) => {
+  const courseArr = filterItems.filter(item => item.field === 'course')
   const kindArr = filterItems.filter(item => item.field === 'kind')
   const termArr = filterItems.filter(item => item.field === 'term')
-  return {
-    ...(professorArr.length > 0 && { professor: professorArr.map(item => item.data)}),
+  const professorArr = filterItems.filter(item => item.field === 'professor')
+  let filters = {
+    ...(courseArr.length > 0 && { course: courseArr.map(item => item.data)}),
     ...(kindArr.length > 0 && { kind: kindArr.map(item => item.data)}),
-    ...(termArr.length > 0 && { term: termArr.map(item => item.data)})
+    ...(termArr.length > 0 && { term: termArr.map(item => item.data)}),
+    ...(professorArr.length > 0 && { professor: professorArr.map(item => item.data)}),
   }
+  for (const [key, val] of Object.entries(preFilters)) {
+    if (filters[key]) {
+      filters[key] = [ ...filters[key], val ]
+    }
+    else {
+      filters[key] = [ val ]
+    }
+  }
+  return filters
 }
 
 const useStyles = makeStyles(theme => ({
-  root: {
-    width: '100%',
-    padding: theme.spacing(4)
-  }
+
 }))
 
 export default React.memo((props) => {
@@ -76,10 +86,7 @@ export default React.memo((props) => {
   const [testData, setTestData] = React.useState({ tests: [], count: 0 })
   const loadTests = async (opts) => {
     const res = await ax.post('/get-tests', {
-      filters: {
-        ...preFilters,
-        ...opts?.filters
-      },
+      filters: opts.filters,
       sort: opts?.sort,
       order: opts?.order,
       page: page,
@@ -116,72 +123,72 @@ export default React.memo((props) => {
 
   React.useEffect(() => {
     if (authCB.isLoggedIn()) {
-      loadTests({ filters: aggregateFilters(filterItems) })
+      loadTests({ filters: aggregateFilters(preFilters, filterItems) })
     }
   }, [page, rowsPerPage, filterItems.length])
 
   return (
-    <Box className={classes.root}>
-      <Paper>
-        <TestTableFilterBar ax={ax} authCB={authCB} preFilters={preFilters} handleFilterItemsChange={handleFilterItemsChange} />
-        <TableContainer>
-          <Table className={classes.table} aria-label='test table' aria-labelledby='tableTitle' size='small'>
-            <TableHead>
-              <TableRow>
-                <TableCell component='th' scope='row'>Identifier</TableCell>
-                <TableCell>Professor</TableCell>
-                <TableCell>Kind</TableCell>
-                <TableCell>Term</TableCell>
-                <TableCell align='right'>Size</TableCell>
-                <TableCell padding='none'></TableCell>
+    <Paper>
+      <TestTableFilterBar ax={ax} authCB={authCB} preFilters={preFilters} handleFilterItemsChange={handleFilterItemsChange} />
+      <TableContainer>
+        <Table className={classes.table} aria-label='test table' aria-labelledby='tableTitle' size='small'>
+          <TableHead>
+            <TableRow>
+              <TableCell component='th' scope='row'>Identifier</TableCell>
+              {preFilters.professor ? null : <TableCell>Professor</TableCell>}
+              {preFilters.course ? null : <TableCell>Course</TableCell>}
+              <TableCell>Kind</TableCell>
+              <TableCell>Term</TableCell>
+              <TableCell align='right'>Size</TableCell>
+              <TableCell padding='none'></TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {testData.tests.map(test => (
+              <TableRow key={test._id}>
+                <TableCell component='th' scope='row'>
+                  <Chip 
+                    label={test._id.slice(-6)} 
+                    variant='outlined' 
+                    size='small' 
+                    style={{ color: colorHash.hex(test._id), fontFamily: 'Monospace' }} 
+                    onClick={handleClickTestInfo(test._id)}
+                  />
+                </TableCell>
+                {preFilters.professor ? null : <TableCell>{test.professor.name || '-'}</TableCell>}
+                {preFilters.course ? null : <TableCell>{test.course.subject} {test.course.number}</TableCell>}
+                <TableCell>{test.kind.name + (test.kind.number ? ' ' + test.kind.number : '')}</TableCell>
+                <TableCell>
+                  {test.term.year}<span>&ensp;</span>{emojiTooltip(test.term.quarter)}</TableCell>
+                <TableCell align='right'>{test.filesize || '-'}</TableCell>
+                <TableCell padding='none'>
+                  <IconButton onClick={downloadFile(test._id)}>
+                    <GetAppIcon style={{ fontSize: '18px' }} />
+                  </IconButton>
+                </TableCell>
               </TableRow>
-            </TableHead>
-            <TableBody>
-              {testData.tests.map(test => (
-                <TableRow key={test._id}>
-                  <TableCell component='th' scope='row'>
-                    <Chip 
-                      label={test._id.slice(-6)} 
-                      variant='outlined' 
-                      size='small' 
-                      style={{ color: colorHash.hex(test._id), fontFamily: 'Monospace' }} 
-                      onClick={handleClickTestInfo(test._id)}
-                    />
-                  </TableCell>
-                  <TableCell>{test.professor.name || '-'}</TableCell>
-                  <TableCell>{test.kind.name + (test.kind.number ? ' ' + test.kind.number : '')}</TableCell>
-                  <TableCell>
-                    {test.term.year}<span>&ensp;</span>{emojiTooltip(test.term.quarter)}</TableCell>
-                  <TableCell align='right'>{test.filesize || '-'}</TableCell>
-                  <TableCell padding='none'>
-                    <IconButton onClick={downloadFile(test._id)}>
-                      <GetAppIcon style={{ fontSize: '18px' }} />
-                    </IconButton>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-            <TableFooter>
-              <TableRow>
-                <TablePagination 
-                  rowsPerPageOptions={[5, 10, 25]}
-                  colSpan={3}
-                  count={testData.count}
-                  rowsPerPage={rowsPerPage}
-                  page={page}
-                  SelectProps={{
-                    inputProps: { 'aria-label': 'rows per page' },
-                    native: true,
-                  }}
-                  onChangePage={handleChangePage}
-                  onChangeRowsPerPage={handleChangeRowsPerPage}
-                  ActionsComponent={TestTablePagination}
-                />
-              </TableRow>
-            </TableFooter>
-          </Table>
-        </TableContainer>
-      </Paper>
-    </Box>
+            ))}
+          </TableBody>
+          <TableFooter>
+            <TableRow>
+              <TablePagination 
+                rowsPerPageOptions={[5, 10, 25]}
+                colSpan={3}
+                count={testData.count}
+                rowsPerPage={rowsPerPage}
+                page={page}
+                SelectProps={{
+                  inputProps: { 'aria-label': 'rows per page' },
+                  native: true,
+                }}
+                onChangePage={handleChangePage}
+                onChangeRowsPerPage={handleChangeRowsPerPage}
+                ActionsComponent={TestTablePagination}
+              />
+            </TableRow>
+          </TableFooter>
+        </Table>
+      </TableContainer>
+    </Paper>
   )
 })
