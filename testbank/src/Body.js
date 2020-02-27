@@ -8,7 +8,7 @@ import Typography from '@material-ui/core/Typography'
 import Home from './Home'
 import Subjects from './Subjects'
 import SubjectNumbers from './SubjectNumbers'
-import SubjectNumberCourses from './SubjectNumberCourses'
+import CourseTests from './CourseTests'
 import Profile from './Profile'
 
 const routes = {
@@ -28,7 +28,7 @@ const routes = {
     />
   ),
   '/peruse/:courseSubject/:courseNumber': ({ courseSubject, courseNumber }) => (p) => (
-    <SubjectNumberCourses
+    <CourseTests
       ax={p.ax} authCB={p.authCB} handleClickTestInfo={p.handleClickTestInfo}
       course={{ subject: decodeURIComponent(courseSubject), number: decodeURIComponent(courseNumber) }}
     />
