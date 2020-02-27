@@ -14,7 +14,7 @@ export default React.memo((props) => {
       <Typography variant='h2' component='h2'>
         {course.subject} {course.number}
       </Typography>
-      <TestTable ax={ax} handleClickTestInfo={handleClickTestInfo} authCB={authCB} course={course} />
+      <TestTable ax={ax} handleClickTestInfo={handleClickTestInfo} authCB={authCB} preFilters={{ course: course }} />
     </>
   )
 })

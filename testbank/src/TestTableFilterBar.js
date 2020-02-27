@@ -50,13 +50,13 @@ const useStyles = makeStyles(theme => ({
 
 export default React.memo((props) => {
 
-  const { ax, authCB, course, handleFilterItemsChange } = props
+  const { ax, authCB, preFilters, handleFilterItemsChange } = props
   const classes = useStyles()
 
   const [filterOptions, setFilterOptions] = React.useState([])
   const loadFilterOptions = async () => {
     const res = await ax.post(
-      '/get-filter-options', { course: course }
+      '/get-filter-options', { preFilters: preFilters }
     )
 
     const professorsSorted = res.data.professors.map( professor => ({

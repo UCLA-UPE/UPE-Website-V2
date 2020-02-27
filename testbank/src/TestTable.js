@@ -70,14 +70,14 @@ const useStyles = makeStyles(theme => ({
 
 export default React.memo((props) => {
 
-  const { ax, handleClickTestInfo, authCB, course } = props
+  const { ax, handleClickTestInfo, authCB, preFilters } = props
   const classes = useStyles()
 
   const [testData, setTestData] = React.useState({ tests: [], count: 0 })
   const loadTests = async (opts) => {
     const res = await ax.post('/get-tests', {
-      course: course,
       filters: {
+        ...preFilters,
         ...opts?.filters
       },
       sort: opts?.sort,
@@ -123,7 +123,7 @@ export default React.memo((props) => {
   return (
     <Box className={classes.root}>
       <Paper>
-        <TestTableFilterBar ax={ax} authCB={authCB} course={course} handleFilterItemsChange={handleFilterItemsChange} />
+        <TestTableFilterBar ax={ax} authCB={authCB} preFilters={preFilters} handleFilterItemsChange={handleFilterItemsChange} />
         <TableContainer>
           <Table className={classes.table} aria-label='test table' aria-labelledby='tableTitle' size='small'>
             <TableHead>

@@ -100,10 +100,10 @@ TestSchema.statics.getSubjectNumberTests = async function(subject, number) {
   return tests
 }
 
-TestSchema.statics.getTests = async function(course, filters, sort, order, skip, limit) {
+TestSchema.statics.getTests = async function(filters, sort, order, skip, limit) {
   const testsAgg = await this.aggregate([
     { '$match': { 
-       course: course, 
+       ...(filters.course && {course: filters.course }),
        ...(filters.professor && {'professor.name': { '$in': filters.professor.map(p => p.name) }}),
        ...(filters.kind && {kind: { '$in': filters.kind }}),
        ...(filters.term && {term: { '$in': filters.term }})
@@ -122,10 +122,10 @@ TestSchema.statics.getTests = async function(course, filters, sort, order, skip,
   return [tests.data, tests.count[0] ? tests.count[0].count : 0]
 }
 
-TestSchema.statics.getFilterOptions = async function(course) {
+TestSchema.statics.getFilterOptions = async function(preFilters) {
 
   const filtersAgg = await this.aggregate([
-    { '$match': { course: course }},
+    { '$match': { ...preFilters }},
     { '$facet': {
       professors: [
         { '$group': { _id: '$professor.name' }},
@@ -141,8 +141,8 @@ TestSchema.statics.getFilterOptions = async function(course) {
       ],
     }}
   ])
-  const filters = filtersAgg[0]
-  return filters
+  const filterOptions = filtersAgg[0]
+  return filterOptions
 }
 
 const Test = mongoose.model('Test', TestSchema)

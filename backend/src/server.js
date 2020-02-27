@@ -208,7 +208,7 @@ app.post('/get-tests', verifyToken, async (req, res) => {
   }
   const skip = req.body.page * req.body.limit
   const limit = req.body.limit <= 25 ? req.body.limit : 25
-  const [tests, count] = await Test.getTests(req.body.course, req.body.filters, req.body.sort, req.body.order, skip, limit)
+  const [tests, count] = await Test.getTests(req.body.filters, req.body.sort, req.body.order, skip, limit)
   res.status(200).json({ 
     tests: tests,
     count: count
@@ -225,11 +225,11 @@ app.post('/get-test-file', verifyToken, async (req, res) => {
 })
 
 app.post('/get-filter-options', verifyToken, async (req, res) => {
-  if (!req.body.course) {
+  if (!req.body.preFilters) { // require a prefilter for performance
     res.sendStatus(400)
     return
   }
-  const options = await Test.getFilterOptions(req.body.course)
+  const options = await Test.getFilterOptions(req.body.preFilters)
   res.status(200).json(options)
 })
 
