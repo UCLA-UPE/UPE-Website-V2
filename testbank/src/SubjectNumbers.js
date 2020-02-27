@@ -14,8 +14,7 @@ const useStyles = makeStyles(theme => ({
 
 export default React.memo((props) => {
 
-  const { ax, authCB, handleClick } = props
-  const courseSubject = decodeURIComponent(props.courseSubject)
+  const { ax, authCB, handleClick, courseSubject } = props
   
   const classes = useStyles()
 

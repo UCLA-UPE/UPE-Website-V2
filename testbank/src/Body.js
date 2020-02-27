@@ -23,15 +23,14 @@ const routes = {
   ),
   '/peruse/:courseSubject': ({ courseSubject }) => (p) => (
     <SubjectNumbers 
-      ax={p.ax} courseSubject={courseSubject} 
+      ax={p.ax} courseSubject={decodeURIComponent(courseSubject)} 
       handleClick={p.handleClickNumber} authCB={p.authCB}
     />
   ),
   '/peruse/:courseSubject/:courseNumber': ({ courseSubject, courseNumber }) => (p) => (
     <SubjectNumberCourses
-      ax={p.ax} courseSubject={courseSubject}
-      courseNumber={courseNumber} handleClickTestInfo={p.handleClickTestInfo}
-      authCB={p.authCB}
+      ax={p.ax} authCB={p.authCB} handleClickTestInfo={p.handleClickTestInfo}
+      course={{ subject: decodeURIComponent(courseSubject), number: decodeURIComponent(courseNumber) }}
     />
   ),
   '/test/:id': ({ id }) => (p) => (

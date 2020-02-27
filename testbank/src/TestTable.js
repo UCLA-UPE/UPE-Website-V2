@@ -1,0 +1,187 @@
+import React from 'react'
+import ColorHash from 'color-hash'
+import saveBlob from 'downloadjs'
+
+import { makeStyles } from '@material-ui/core/styles'
+import Box from '@material-ui/core/Box'
+import Paper from '@material-ui/core/Paper'
+import Table from '@material-ui/core/Table'
+import TableBody from '@material-ui/core/TableBody'
+import TableCell from '@material-ui/core/TableCell'
+import TableContainer from '@material-ui/core/TableContainer'
+import TableFooter from '@material-ui/core/TableFooter'
+import TableHead from '@material-ui/core/TableHead'
+import TablePagination from '@material-ui/core/TablePagination'
+import TableRow from '@material-ui/core/TableRow'
+import IconButton from '@material-ui/core/IconButton'
+import Tooltip from '@material-ui/core/Tooltip'
+import Chip from '@material-ui/core/Chip'
+import Zoom from '@material-ui/core/Zoom'
+import GetAppIcon from '@material-ui/icons/GetApp'
+
+import TestTableFilterBar from './TestTableFilterBar'
+import TestTablePagination from './TestTablePagination'
+
+const colorHash = new ColorHash({ hash: (s) => {
+  // from npm string-hash
+  let hash = 5381, i = s.length
+  while (i) {
+    hash = (hash * 33) ^ s.charCodeAt(--i)
+  }
+  return hash >>> 0
+}})
+
+const seasonsEmoji = (season) => {
+  if (season === 'Fall') return '🍁'
+  else if (season === 'Winter') return '❄️'
+  else if (season === 'Spring') return '🌼'
+  else if (season === 'Summer') return '☀️'
+  return '[ Not a valid season :( ]'
+}
+
+const emojiTooltip = (season) => (
+  <Tooltip 
+    arrow 
+    TransitionComponent={Zoom} 
+    placement='right' 
+    title={season}
+  >
+    <span>{seasonsEmoji(season)}</span>
+  </Tooltip>
+)
+
+const aggregateFilters = (filterItems) => {
+  const professorArr = filterItems.filter(item => item.field === 'professor')
+  const kindArr = filterItems.filter(item => item.field === 'kind')
+  const termArr = filterItems.filter(item => item.field === 'term')
+  return {
+    ...(professorArr.length > 0 && { professor: professorArr.map(item => item.data)}),
+    ...(kindArr.length > 0 && { kind: kindArr.map(item => item.data)}),
+    ...(termArr.length > 0 && { term: termArr.map(item => item.data)})
+  }
+}
+
+const useStyles = makeStyles(theme => ({
+  root: {
+    width: '100%',
+    padding: theme.spacing(4)
+  }
+}))
+
+export default React.memo((props) => {
+
+  const { ax, handleClickTestInfo, authCB, course } = props
+  const classes = useStyles()
+
+  const [testData, setTestData] = React.useState({ tests: [], count: 0 })
+  const loadTests = async (opts) => {
+    const res = await ax.post('/get-tests', {
+      course: course,
+      filters: {
+        ...opts?.filters
+      },
+      sort: opts?.sort,
+      order: opts?.order,
+      page: page,
+      limit: rowsPerPage,
+    })
+    setTestData(res.data)
+  }
+
+  const [filterItems, setFilterItems] = React.useState([])
+  const handleFilterItemsChange = (event, values) => {
+    setPage(0)
+    setFilterItems(values)
+  }
+
+  const downloadFile = (_id) => async () => {
+    const res = await ax.post(
+      '/get-test-file', 
+      { _id: _id }, 
+      { responseType: 'blob' }
+    )
+    const contentType = res.headers['content-type']
+    saveBlob(res.data, _id + '.pdf', contentType)
+  }
+
+  const [page, setPage] = React.useState(0)
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage)
+  }
+  const [rowsPerPage, setRowsPerPage] = React.useState(5)
+  const handleChangeRowsPerPage = event => {
+    setRowsPerPage(parseInt(event.target.value, 10))
+    setPage(0)
+  }
+
+  React.useEffect(() => {
+    if (authCB.isLoggedIn()) {
+      loadTests({ filters: aggregateFilters(filterItems) })
+    }
+  }, [page, rowsPerPage, filterItems.length])
+
+  return (
+    <Box className={classes.root}>
+      <Paper>
+        <TestTableFilterBar ax={ax} authCB={authCB} course={course} handleFilterItemsChange={handleFilterItemsChange} />
+        <TableContainer>
+          <Table className={classes.table} aria-label='test table' aria-labelledby='tableTitle' size='small'>
+            <TableHead>
+              <TableRow>
+                <TableCell component='th' scope='row'>Identifier</TableCell>
+                <TableCell>Professor</TableCell>
+                <TableCell>Kind</TableCell>
+                <TableCell>Term</TableCell>
+                <TableCell align='right'>Size</TableCell>
+                <TableCell padding='none'></TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {testData.tests.map(test => (
+                <TableRow key={test._id}>
+                  <TableCell component='th' scope='row'>
+                    <Chip 
+                      label={test._id.slice(-6)} 
+                      variant='outlined' 
+                      size='small' 
+                      style={{ color: colorHash.hex(test._id), fontFamily: 'Monospace' }} 
+                      onClick={handleClickTestInfo(test._id)}
+                    />
+                  </TableCell>
+                  <TableCell>{test.professor.name || '-'}</TableCell>
+                  <TableCell>{test.kind.name + (test.kind.number ? ' ' + test.kind.number : '')}</TableCell>
+                  <TableCell>
+                    {test.term.year}<span>&ensp;</span>{emojiTooltip(test.term.quarter)}</TableCell>
+                  <TableCell align='right'>{test.filesize || '-'}</TableCell>
+                  <TableCell padding='none'>
+                    <IconButton onClick={downloadFile(test._id)}>
+                      <GetAppIcon style={{ fontSize: '18px' }} />
+                    </IconButton>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+            <TableFooter>
+              <TableRow>
+                <TablePagination 
+                  rowsPerPageOptions={[5, 10, 25]}
+                  colSpan={3}
+                  count={testData.count}
+                  rowsPerPage={rowsPerPage}
+                  page={page}
+                  SelectProps={{
+                    inputProps: { 'aria-label': 'rows per page' },
+                    native: true,
+                  }}
+                  onChangePage={handleChangePage}
+                  onChangeRowsPerPage={handleChangeRowsPerPage}
+                  ActionsComponent={TestTablePagination}
+                />
+              </TableRow>
+            </TableFooter>
+          </Table>
+        </TableContainer>
+      </Paper>
+    </Box>
+  )
+})
