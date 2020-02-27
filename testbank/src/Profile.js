@@ -54,6 +54,7 @@ const ProfessorRowContent = (props) => {
           authCB={props.authCB} 
           handleClickTestInfo={props.handleClickTestInfo} 
           preFilters={{ professor: { email: null, name: props.professor.name } }} 
+          getHidden={true}
         />
       </Box>
     </>
@@ -79,25 +80,6 @@ export default React.memo((props) => {
     setProfessor(res.data.professor)
     setTestbankCredits(res.data.testbankCredits)
     setTestbankUploadedTests(res.data.testbankUploadedTests)
-  }
-
-  const loadProfessorTests = async (opts) => {
-    const res = await ax.post('/get-tests', {
-      course: {
-        subject: courseSubject,
-        number: courseNumber
-      },
-      filters: {
-        professor: {
-          email: authCB.tokenFields()['']
-        }
-      },
-      sort: opts?.sort,
-      order: opts?.order,
-      page: page,
-      limit: rowsPerPage,
-    })
-    setTestData(res.data)
   }
 
   React.useEffect(() => {

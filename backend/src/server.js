@@ -60,6 +60,7 @@ const verifyToken = (req, res, next) => {
     jwt.verify(token, JWT_SECRET, { expiresIn: TOKEN_EXPIRY_PERIOD })
     req.tokenPayload = jwt.decode(token)
     console.log('JWT verified')
+    // console.log(req.tokenPayload)
     next()
   } catch(e) {
     console.log('JWT verification failed')
@@ -186,15 +187,6 @@ app.post('/get-subject-numbers', verifyToken, async (req, res) => {
   res.status(200).json(subject_numbers)
 })
 
-app.post('/get-subject-number-tests', verifyToken, async (req, res) => {
-  if (!req.body.subject || !req.body.number) {
-    res.sendStatus(400)
-    return
-  }
-  const tests = await Test.getSubjectNumberTests(req.body.subject, req.body.number)
-  res.status(200).json(tests)
-})
-
 app.post('/get-tests', verifyToken, async (req, res) => {
   // check filters valid
   if (!
@@ -208,7 +200,30 @@ app.post('/get-tests', verifyToken, async (req, res) => {
   }
   const skip = req.body.page * req.body.limit
   const limit = req.body.limit <= 25 ? req.body.limit : 25
-  const [tests, count] = await Test.getTests(req.body.filters, req.body.sort, req.body.order, skip, limit)
+  const filters = req.body.filters
+
+  // req.body.getHidden returns as many hidden tests as authorized
+  // 1. professors can always see their own hidden tests
+  // 2. users can always see hidden tests which they personally uploaded
+  // TODO: in ignoreHiddenIf, somehow only include filters passed in req.body.filters
+
+  let ignoreHiddenIf = {
+    ...(req.body.getHidden && req.tokenPayload.email && { user_email: [req.tokenPayload.email] }),
+    ...(req.body.getHidden && req.tokenPayload.professor && { professor: [req.tokenPayload.professor] }),
+  }
+  if (Object.keys(ignoreHiddenIf).length === 0) {
+    ignoreHiddenIf = null
+  }
+
+  const [tests, count] = await Test.getTests(
+    filters,
+    req.body.sort,
+    req.body.order,
+    skip,
+    limit,
+    ignoreHiddenIf,
+  )
+  console.log(tests)
   res.status(200).json({ 
     tests: tests,
     count: count

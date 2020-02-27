@@ -18,6 +18,8 @@ import Tooltip from '@material-ui/core/Tooltip'
 import Chip from '@material-ui/core/Chip'
 import Zoom from '@material-ui/core/Zoom'
 import GetAppIcon from '@material-ui/icons/GetApp'
+import VisibilityIcon from '@material-ui/icons/Visibility'
+import VisibilityOffIcon from '@material-ui/icons/VisibilityOff'
 
 import TestTableFilterBar from './TestTableFilterBar'
 import TestTablePagination from './TestTablePagination'
@@ -80,7 +82,16 @@ const useStyles = makeStyles(theme => ({
 
 export default React.memo((props) => {
 
-  const { ax, handleClickTestInfo, authCB, preFilters } = props
+  // you can pass in prefilters to TestTable.
+  //   for example, when looking for "all tests for MATH 32A",
+  //   the prefilter would be { course: { subject: 'MATH', number: '32A' } }.
+  //   this automatically hides the "course" column from the table,
+  //   and also hides the single "MATH 32A" course filter from the filter bar.
+  // getHidden is a Boolean prop that bypasses the 'visible' attribute on tests.
+  //   the API server checks the provided credentials and gives back 
+  //   as many tests as the user is authorized to view.
+  const { ax, authCB, handleClickTestInfo, preFilters } = props
+  const getHidden = props.getHidden || false
   const classes = useStyles()
 
   const [testData, setTestData] = React.useState({ tests: [], count: 0 })
@@ -91,6 +102,7 @@ export default React.memo((props) => {
       order: opts?.order,
       page: page,
       limit: rowsPerPage,
+      getHidden: getHidden
     })
     setTestData(res.data)
   }
@@ -140,6 +152,7 @@ export default React.memo((props) => {
               <TableCell>Kind</TableCell>
               <TableCell>Term</TableCell>
               <TableCell align='right'>Size</TableCell>
+              {getHidden ? <TableCell>Visible</TableCell> : null}
               <TableCell padding='none'></TableCell>
             </TableRow>
           </TableHead>
@@ -161,6 +174,7 @@ export default React.memo((props) => {
                 <TableCell>
                   {test.term.year}<span>&ensp;</span>{emojiTooltip(test.term.quarter)}</TableCell>
                 <TableCell align='right'>{test.filesize || '-'}</TableCell>
+                {getHidden ? <TableCell>{test.visible ? <VisibilityIcon /> : <VisibilityOffIcon />}</TableCell> : null}
                 <TableCell padding='none'>
                   <IconButton onClick={downloadFile(test._id)}>
                     <GetAppIcon style={{ fontSize: '18px' }} />

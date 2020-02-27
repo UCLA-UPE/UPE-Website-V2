@@ -58,6 +58,11 @@ const TestSchema = new mongoose.Schema({
   verified: {
     type: Boolean,
     required: true
+  },
+  visible: {
+    type: Boolean,
+    required: true,
+    default: true
   }
 })
 
@@ -95,29 +100,58 @@ TestSchema.statics.getSubjectNumbers = async function(subject) {
   return ret
 }
 
-TestSchema.statics.getSubjectNumberTests = async function(subject, number) {
-  const tests = await this.find({ 'course.subject': subject, 'course.number': number }, PUBLIC_FIELDS)
-  return tests
-}
+TestSchema.statics.getTests = async function(filters, sort, order, skip, limit, ignoreHiddenIf) {
+  let testsAgg
+  if (!ignoreHiddenIf) {
+    // only get visible tests
+    testsAgg = await this.aggregate([
+      { '$match': {
+        ...(filters.course && { course: { '$in': filters.course } }),
+        ...(filters.kind && { kind: { '$in': filters.kind } }),
+        ...(filters.term && { term: { '$in': filters.term } }),
+        ...(filters.professor && { 'professor.name': { '$in': filters.professor.map(p => p.name) } }),
+        visible: true
+      }},
+      { '$facet': {
+        data: [
+          { '$skip': skip },
+          { '$limit': limit },
+        ],
+        count: [
+          { '$count': 'count' }
+        ]
+      }}
+    ])
+  }
+  else {
+    // some hidden tests should be returned
+    testsAgg = await this.aggregate([
+      { '$match': {
+        '$or': [{
+          ...(filters.course && { course: { '$in': filters.course } }),
+          ...(filters.kind && { kind: { '$in': filters.kind } }),
+          ...(filters.term && { term: { '$in': filters.term } }),
+          ...(filters.professor && { 'professor.name': { '$in': filters.professor.map(p => p.name) } }),
+          visible: true
+        }, {
+          ...(ignoreHiddenIf.course && { course: { '$in': ignoreHiddenIf.course } }),
+          ...(ignoreHiddenIf.kind && { kind: { '$in': ignoreHiddenIf.kind } }),
+          ...(ignoreHiddenIf.term && { term: { '$in': ignoreHiddenIf.term } }),
+          ...(ignoreHiddenIf.professor && { 'professor.name': { '$in': ignoreHiddenIf.professor.map(p => p.name) } }),
+        }]
+      }},
+      { '$facet': {
+        data: [
+          { '$skip': skip },
+          { '$limit': limit },
+        ],
+        count: [
+          { '$count': 'count' }
+        ]
+      }}
+    ])
+  }
 
-TestSchema.statics.getTests = async function(filters, sort, order, skip, limit) {
-  const testsAgg = await this.aggregate([
-    { '$match': { 
-       ...(filters.course && {course: { '$in': filters.course } }),
-       ...(filters.kind && {kind: { '$in': filters.kind }}),
-       ...(filters.term && {term: { '$in': filters.term }}),
-       ...(filters.professor && {'professor.name': { '$in': filters.professor.map(p => p.name) }}),
-    }},
-    { '$facet': {
-      data: [
-        { '$skip': skip },
-        { '$limit': limit },
-      ],
-      count: [
-        { '$count': 'count' }
-      ]
-    }}
-  ])
   const tests = testsAgg[0]
   return [tests.data, tests.count[0] ? tests.count[0].count : 0]
 }
