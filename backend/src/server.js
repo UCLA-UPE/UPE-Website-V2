@@ -202,28 +202,24 @@ app.post('/get-tests', verifyToken, async (req, res) => {
   const limit = req.body.limit <= 25 ? req.body.limit : 25
   const filters = req.body.filters
 
-  // req.body.getHidden returns as many hidden tests as authorized
-  // 1. professors can always see their own hidden tests
-  // 2. users can always see hidden tests which they personally uploaded
+  // returns as many hidden tests as authorized
+  // 1. users can always see hidden tests which they personally uploaded
+  // 2. professors can always see their own hidden tests
   // TODO: in ignoreHiddenIf, somehow only include filters passed in req.body.filters
 
-  let ignoreHiddenIf = {
+  const ignoreHiddenIf = {
     ...(req.body.getHidden && req.tokenPayload.email && { user_email: [req.tokenPayload.email] }),
     ...(req.body.getHidden && req.tokenPayload.professor && { professor: [req.tokenPayload.professor] }),
-  }
-  if (Object.keys(ignoreHiddenIf).length === 0) {
-    ignoreHiddenIf = null
   }
 
   const [tests, count] = await Test.getTests(
     filters,
+    ignoreHiddenIf,
     req.body.sort,
     req.body.order,
     skip,
     limit,
-    ignoreHiddenIf,
   )
-  console.log(tests)
   res.status(200).json({ 
     tests: tests,
     count: count

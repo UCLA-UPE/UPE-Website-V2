@@ -37,11 +37,7 @@ const TestSchema = new mongoose.Schema({
       required: true
     }
   },
-  professor: {
-    email: {
-      type: String,
-      required: false
-    },
+  professor: { // later on, might need a unique identifier for professor name collisions
     name: {
       type: String,
       required: true
@@ -100,57 +96,38 @@ TestSchema.statics.getSubjectNumbers = async function(subject) {
   return ret
 }
 
-TestSchema.statics.getTests = async function(filters, sort, order, skip, limit, ignoreHiddenIf) {
-  let testsAgg
-  if (!ignoreHiddenIf) {
-    // only get visible tests
-    testsAgg = await this.aggregate([
-      { '$match': {
-        ...(filters.course && { course: { '$in': filters.course } }),
-        ...(filters.kind && { kind: { '$in': filters.kind } }),
-        ...(filters.term && { term: { '$in': filters.term } }),
-        ...(filters.professor && { 'professor.name': { '$in': filters.professor.map(p => p.name) } }),
-        visible: true
-      }},
-      { '$facet': {
-        data: [
-          { '$skip': skip },
-          { '$limit': limit },
-        ],
-        count: [
-          { '$count': 'count' }
+TestSchema.statics.getTests = async function(filters, ignoreHiddenIf, sort, order, skip, limit) {
+
+  console.log(filters)
+  console.log(ignoreHiddenIf)
+
+  const testsAgg = await this.aggregate([
+    { 
+      '$match': {
+        '$and': [
+          ...Object.entries(filters).map(([filterKey, filterItems]) => (
+            { [filterKey]: { '$in': filterItems } }
+          )),
+          { '$or': [
+            { visible: true },
+            ...Object.entries(ignoreHiddenIf).map(([filterKey, filterItems]) => (
+              { [filterKey]: { '$in': filterItems } }
+            ))
+          ]}
         ]
-      }}
-    ])
-  }
-  else {
-    // some hidden tests should be returned
-    testsAgg = await this.aggregate([
-      { '$match': {
-        '$or': [{
-          ...(filters.course && { course: { '$in': filters.course } }),
-          ...(filters.kind && { kind: { '$in': filters.kind } }),
-          ...(filters.term && { term: { '$in': filters.term } }),
-          ...(filters.professor && { 'professor.name': { '$in': filters.professor.map(p => p.name) } }),
-          visible: true
-        }, {
-          ...(ignoreHiddenIf.course && { course: { '$in': ignoreHiddenIf.course } }),
-          ...(ignoreHiddenIf.kind && { kind: { '$in': ignoreHiddenIf.kind } }),
-          ...(ignoreHiddenIf.term && { term: { '$in': ignoreHiddenIf.term } }),
-          ...(ignoreHiddenIf.professor && { 'professor.name': { '$in': ignoreHiddenIf.professor.map(p => p.name) } }),
-        }]
-      }},
-      { '$facet': {
-        data: [
-          { '$skip': skip },
-          { '$limit': limit },
-        ],
-        count: [
-          { '$count': 'count' }
-        ]
-      }}
-    ])
-  }
+      }
+    },
+    { '$facet': {
+      data: [
+        { '$skip': skip },
+        { '$limit': limit },
+      ],
+      count: [
+        { '$count': 'count' }
+      ]
+    }}
+  ])
+
 
   const tests = testsAgg[0]
   return [tests.data, tests.count[0] ? tests.count[0].count : 0]
@@ -158,8 +135,10 @@ TestSchema.statics.getTests = async function(filters, sort, order, skip, limit, 
 
 TestSchema.statics.getFilterOptions = async function(preFilters) {
 
+  console.log(preFilters)
+
   const filtersAgg = await this.aggregate([
-    { '$match': { ...preFilters }},
+    { '$match': preFilters},
     { '$facet': {
       courses: [
         { '$group': { _id: '$course' }},

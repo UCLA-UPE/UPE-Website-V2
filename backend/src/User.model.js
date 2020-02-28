@@ -60,9 +60,9 @@ UserSchema.methods.getProfessor = async function() {
 }
 
 UserSchema.statics.getProfile = async function(id) {
-  let profile = await this.findOne({ _id: id }, 'email isUpeMember testbankCredits testbankUploadedTests')
-  profile = { ...profile.toObject(), professor: await profile.getProfessor() }
-  return profile
+  const user = await this.findOne({ _id: id }, 'email isUpeMember testbankCredits testbankUploadedTests')
+  const professor = await user.getProfessor()
+  return { ...user.toObject(), professor: professor }
 }
 
 UserSchema.statics.verifyEmail = async function(verificationString) {
