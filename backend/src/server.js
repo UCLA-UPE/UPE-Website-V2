@@ -187,6 +187,16 @@ app.post('/get-subject-numbers', verifyToken, async (req, res) => {
   res.status(200).json(subject_numbers)
 })
 
+// returns a list of filters which ignore test visibility, based on several authorizations:
+// 1. users can always see hidden tests which they personally uploaded
+// 2. professors can always see their own hidden tests
+// TODO: somehow only include filters passed in req.body.filters
+
+const getBypassVisibility = (tokenPayload) => ({
+  ...(tokenPayload.email && { user_email: [tokenPayload.email] }),
+  ...(tokenPayload.professor && { professor: [{ name: tokenPayload.professor.name }] }),
+})
+
 app.post('/get-tests', verifyToken, async (req, res) => {
   // check filters valid
   if (!
@@ -201,20 +211,11 @@ app.post('/get-tests', verifyToken, async (req, res) => {
   const skip = req.body.page * req.body.limit
   const limit = req.body.limit <= 25 ? req.body.limit : 25
   const filters = req.body.filters
-
-  // returns as many hidden tests as authorized
-  // 1. users can always see hidden tests which they personally uploaded
-  // 2. professors can always see their own hidden tests
-  // TODO: in ignoreHiddenIf, somehow only include filters passed in req.body.filters
-
-  const ignoreHiddenIf = {
-    ...(req.body.getHidden && req.tokenPayload.email && { user_email: [req.tokenPayload.email] }),
-    ...(req.body.getHidden && req.tokenPayload.professor && { professor: [req.tokenPayload.professor] }),
-  }
+  const bypassVisibility = req.body.getHidden ? getBypassVisibility(req.tokenPayload) : {}
 
   const [tests, count] = await Test.getTests(
     filters,
-    ignoreHiddenIf,
+    bypassVisibility,
     req.body.sort,
     req.body.order,
     skip,
@@ -240,7 +241,11 @@ app.post('/get-filter-options', verifyToken, async (req, res) => {
     res.sendStatus(400)
     return
   }
-  const options = await Test.getFilterOptions(req.body.preFilters)
+
+  const filters = req.body.preFilters
+  const bypassVisibility = req.body.getHidden ? getBypassVisibility(req.tokenPayload) : {}
+
+  const options = await Test.getFilterOptions(filters, bypassVisibility)
   res.status(200).json(options)
 })
 

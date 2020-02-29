@@ -65,12 +65,12 @@ const aggregateFilters = (preFilters, filterItems) => {
     ...(termArr.length > 0 && { term: termArr.map(item => item.data)}),
     ...(professorArr.length > 0 && { professor: professorArr.map(item => item.data)}),
   }
-  for (const [key, val] of Object.entries(preFilters)) {
-    if (filters[key]) {
-      filters[key] = [ ...filters[key], val ]
+  for (const [filterKey, filterValues] of Object.entries(preFilters)) {
+    if (filters[filterKey]) {
+      filters[filterKey] = [ ...filters[filterKey], ...filterValues ]
     }
     else {
-      filters[key] = [ val ]
+      filters[filterKey] = filterValues
     }
   }
   return filters
@@ -84,7 +84,7 @@ export default React.memo((props) => {
 
   // you can pass in prefilters to TestTable.
   //   for example, when looking for "all tests for MATH 32A",
-  //   the prefilter would be { course: { subject: 'MATH', number: '32A' } }.
+  //   the prefilter would be { course: [{ subject: 'MATH', number: '32A' }] }.
   //   this automatically hides the "course" column from the table,
   //   and also hides the single "MATH 32A" course filter from the filter bar.
   // getHidden is a Boolean prop that bypasses the 'visible' attribute on tests.

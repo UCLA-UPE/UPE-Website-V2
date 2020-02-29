@@ -53,7 +53,7 @@ const ProfessorRowContent = (props) => {
           ax={props.ax} 
           authCB={props.authCB} 
           handleClickTestInfo={props.handleClickTestInfo} 
-          preFilters={{ professor: { name: props.professor.name } }} 
+          preFilters={{ professor: [{ name: props.professor.name }] }} 
           getHidden={true}
         />
       </Box>

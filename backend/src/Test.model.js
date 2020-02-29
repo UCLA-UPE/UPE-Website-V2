@@ -65,17 +65,20 @@ const TestSchema = new mongoose.Schema({
 const PUBLIC_FIELDS = '_id term.quarter term.year professor.name course.subject course.number kind.name kind.number'
 
 TestSchema.methods.toString = function() {
-  return `[${this.term.quarter} ${this.term.year}] (${this.professor.name}) ${this.course.subject} ${this.course.number} - ${this.kind.name} ${this.kind.number}`
+  return `[${this.term.quarter} ${this.term.year}] \
+          (${this.professor.name}) \
+          ${this.course.subject} ${this.course.number} - \
+          ${this.kind.name} ${this.kind.number}`
 }
 
 TestSchema.statics.getSubjects = async function() {
-  const uniqueSubjects = await this.distinct('course.subject')
+  const uniqueSubjects = await this.find({ 'visible': true }).distinct('course.subject')
   let ret = []
   for (subject of uniqueSubjects) {
     ret.push({
       'course_subject': subject,
-      'course_numbers': await this.find({ 'course.subject': subject }).distinct('course.number'),
-      'count': await this.find({ 'course.subject': subject }).countDocuments()
+      'course_numbers': await this.find({ 'course.subject': subject, 'visible': true }).distinct('course.number'),
+      'count': await this.find({ 'course.subject': subject, 'visible': true }).countDocuments()
     })
   }
   ret.sort((a, b) => b['count'] - a['count'])
@@ -83,7 +86,7 @@ TestSchema.statics.getSubjects = async function() {
 }
 
 TestSchema.statics.getSubjectNumbers = async function(subject) {
-  const thisSubject = this.find({ 'course.subject': subject })
+  const thisSubject = this.find({ 'course.subject': subject, 'visible': true })
   const uniqueNumbers = await thisSubject.distinct('course.number')
   let ret = []
   for (number of uniqueNumbers) {
@@ -96,21 +99,22 @@ TestSchema.statics.getSubjectNumbers = async function(subject) {
   return ret
 }
 
-TestSchema.statics.getTests = async function(filters, ignoreHiddenIf, sort, order, skip, limit) {
+TestSchema.statics.getTests = async function(filters, 
+                                             bypassVisibility, 
+                                             sort, order, skip, limit) {
 
   console.log(filters)
-  console.log(ignoreHiddenIf)
+  console.log(bypassVisibility)
 
   const testsAgg = await this.aggregate([
-    { 
-      '$match': {
+    { '$match': {
         '$and': [
           ...Object.entries(filters).map(([filterKey, filterItems]) => (
             { [filterKey]: { '$in': filterItems } }
           )),
           { '$or': [
             { visible: true },
-            ...Object.entries(ignoreHiddenIf).map(([filterKey, filterItems]) => (
+            ...Object.entries(bypassVisibility).map(([filterKey, filterItems]) => (
               { [filterKey]: { '$in': filterItems } }
             ))
           ]}
@@ -133,35 +137,48 @@ TestSchema.statics.getTests = async function(filters, ignoreHiddenIf, sort, orde
   return [tests.data, tests.count[0] ? tests.count[0].count : 0]
 }
 
-TestSchema.statics.getFilterOptions = async function(preFilters) {
+TestSchema.statics.getFilterOptions = async function(filters, bypassVisibility) {
 
-  console.log(preFilters)
+  console.log(filters)
 
   const filtersAgg = await this.aggregate([
-    { '$match': preFilters},
+    { '$match': {
+        '$and': [
+          ...Object.entries(filters).map(([filterKey, filterItems]) => (
+            { [filterKey]: { '$in': filterItems } }
+          )),
+          { '$or': [
+            { visible: true },
+            ...Object.entries(bypassVisibility).map(([filterKey, filterItems]) => (
+              { [filterKey]: { '$in': filterItems } }
+            ))
+          ]}
+        ]
+      }
+    },
     { '$facet': {
-      courses: [
+      course: [
         { '$group': { _id: '$course' }},
         { '$project': { _id: 0, subject: '$_id.subject', number: '$_id.number' }}
       ],
-      kinds: [
+      kind: [
         { '$group': { _id: '$kind' }},
         { '$project': { _id: 0, name: '$_id.name', number: '$_id.number' }}
       ],
-      terms: [
+      term: [
         { '$group': { _id: '$term' }},
         { '$project': { _id: 0, year: '$_id.year', quarter: '$_id.quarter'}}
       ],
-      professors: [
+      professor: [
         { '$group': { _id: '$professor.name' }},
         { '$project': { _id: 0, name: '$_id' }}
       ],
     }}
   ])
   let filterOptions = filtersAgg[0]
-  for (const [key, val] of Object.entries(preFilters)) {
-    console.log('deleting key ' + key + 's')
-    delete filterOptions[key + 's']
+  for (const [filterKey, _] of Object.entries(filters)) {
+    // console.log('deleting filterKey ' + filterKey)
+    delete filterOptions[filterKey]
   }
   return filterOptions
 }

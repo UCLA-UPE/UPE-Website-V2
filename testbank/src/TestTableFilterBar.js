@@ -61,8 +61,8 @@ export default React.memo((props) => {
 
     let filterOptionsSorted = []
 
-    if (res.data.professors) {
-      filterOptionsSorted.push(...res.data.professors.map( professor => ({
+    if (res.data.professor) {
+      filterOptionsSorted.push(...res.data.professor.map( professor => ({
         field: 'professor', 
         fieldDisplay: 'Professor', 
         data: professor, 
@@ -70,8 +70,8 @@ export default React.memo((props) => {
       })).sort( (a, b) => (a.display === null ? -1 : a.display.localeCompare(b.display))))
     }
 
-    if (res.data.courses) {
-      filterOptionsSorted.push(...res.data.courses.map( course => ({
+    if (res.data.course) {
+      filterOptionsSorted.push(...res.data.course.map( course => ({
         field: 'course', 
         fieldDisplay: 'Course', 
         data: course, 
@@ -79,8 +79,8 @@ export default React.memo((props) => {
       })).sort())
     }
 
-    if (res.data.kinds) {
-      filterOptionsSorted.push(...res.data.kinds.map( kind => ({
+    if (res.data.kind) {
+      filterOptionsSorted.push(...res.data.kind.map( kind => ({
         field: 'kind', 
         fieldDisplay: 'Kind', 
         data: kind, 
@@ -88,8 +88,8 @@ export default React.memo((props) => {
       })).sort(kindCompare))
     }
 
-    if (res.data.terms) {
-      filterOptionsSorted.push(...res.data.terms.map( term => ({
+    if (res.data.term) {
+      filterOptionsSorted.push(...res.data.term.map( term => ({
         field: 'term', 
         fieldDisplay: 'Term', 
         data: term, 
