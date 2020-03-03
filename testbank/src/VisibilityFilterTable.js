@@ -1,4 +1,5 @@
 import React from 'react'
+import ColorHash from 'color-hash'
 
 import { makeStyles } from '@material-ui/core/styles'
 import Box from '@material-ui/core/Box'
@@ -24,6 +25,15 @@ import DeleteIcon from '@material-ui/icons/Delete'
 
 import AddVisibilityFilterDialog from './AddVisibilityFilterDialog'
 
+const colorHash = new ColorHash({ hash: (s) => {
+  // from npm string-hash
+  let hash = 5381, i = s.length
+  while (i) {
+    hash = (hash * 33) ^ s.charCodeAt(--i)
+  }
+  return hash >>> 0
+}})
+
 const useStyles = makeStyles(theme => ({
   formControl: {
     margin: theme.spacing(1),
@@ -31,23 +41,31 @@ const useStyles = makeStyles(theme => ({
   },
 }))
 
-const displayFilterData = (field, name) => {
-  switch (name) {
-    case 'test_id':
-      return field.comparator === '*' ? '*' : field.value
-    case 'course':
-      return field.comparator === '*' ? '*' : field.value.subject + ' ' + field.value.number
-    case 'kind':
-      return field.comparator === '*' ? '*' : field.value.name + ' ' + field.value.number
-    case 'term':
-      return field.comparator === '*' ? '*' : field.comparator + ' ' + field.value.year + ' ' + field.value.quarter
-  }
-}
-
 export default React.memo((props) => {
 
-  const { ax, authCB, professor } = props
+  const { ax, authCB, handleClickTestInfo, professor } = props
   const classes = useStyles()
+
+  const displayFilterData = (field, name) => {
+    switch (name) {
+      case 'test_id':
+        return field.comparator === '*' ? '*' : (
+          <Chip 
+            label={field.value.slice(-6)} 
+            variant='outlined' 
+            size='small' 
+            style={{ color: colorHash.hex(field.value), fontFamily: 'Monospace' }} 
+            onClick={handleClickTestInfo(field.value)}
+          />
+        )
+      case 'course':
+        return field.comparator === '*' ? '*' : field.value.subject + ' ' + field.value.number
+      case 'kind':
+        return field.comparator === '*' ? '*' : field.value.name + ' ' + field.value.number
+      case 'term':
+        return field.comparator === '*' ? '*' : field.comparator + ' ' + field.value.year + ' ' + field.value.quarter
+    }
+  }
 
   const [filterData, setFilterData] = React.useState([])
   const loadFilters = async () => {
@@ -76,7 +94,6 @@ export default React.memo((props) => {
         <Table className={classes.table} aria-label='test visibility filter table' size='small'>
           <TableHead>
             <TableRow>
-              <TableCell padding='none'></TableCell>
               <TableCell>Test ID</TableCell>
               <TableCell>Course</TableCell>
               <TableCell>Kind</TableCell>
@@ -88,7 +105,6 @@ export default React.memo((props) => {
             {filterData.length > 0 ? 
               filterData.map(filter => (
                 <TableRow key={filter._id}>
-                  <TableCell></TableCell>
                   <TableCell>{displayFilterData(filter.test_id, 'test_id')}</TableCell>
                   <TableCell>{displayFilterData(filter.course, 'course')}</TableCell>
                   <TableCell>{displayFilterData(filter.kind, 'kind')}</TableCell>

@@ -54,6 +54,7 @@ const ProfessorRowContent = (props) => {
         <VisibilityFilterTable
           ax={props.ax} 
           authCB={props.authCB} 
+          handleClickTestInfo={props.handleClickTestInfo} 
           professor={props.professor.name} 
         />
       </Box>
