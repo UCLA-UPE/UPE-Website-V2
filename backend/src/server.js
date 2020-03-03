@@ -10,6 +10,7 @@ const multer = require('multer')
 const util = require('util')
 const Mailer = require('./mailer')
 const os = require('os')
+const assert = require('assert').strict
 
 // constants
 // TODO: use environment variables for these
@@ -33,7 +34,7 @@ console.log('TEST_FILES_DIR is set to ' + TEST_FILES_DIR)
 // mongoose models
 const User = require('./User.model')
 const Test = require('./Test.model')
-const Professor = require('./Professor.model')
+const { VisibilityFilter, Professor } = require('./Professor.model')
 
 
 
@@ -294,14 +295,32 @@ app.post('/upload-test-file', verifyToken, saveTestFile, async (req, res) => {
 })
 
 app.post('/get-test-visibility-filters', verifyToken, verifyProfessor, async (req, res) => {
-  const professor = await Professor.findOne({ '_id': req.tokenPayload.professor._id }, 'testFilters')
-  res.status(200).json(professor.testFilters)
+  const professor = await Professor.findOne({ '_id': req.tokenPayload.professor._id }, 'visibilityFilters')
+  res.status(200).json(professor.visibilityFilters)
 })
 
 app.post('/append-test-visibility-filters', verifyToken, verifyProfessor, async (req, res) => {
+  try {
+    const { test_id, course, kind, term } = req.body.visibilityFilter
+    assert(['*', '=='].includes(test_id.comparator))
+    assert(['*', '=='].includes(course.comparator))
+    assert(['*', '=='].includes(kind.comparator))
+    assert(['*', '==', '<=', '>='].includes(term.comparator))
+    if (test_id.comparator !== '*') { assert(typeof(test_id.value) === 'string') }
+    if (course.comparator !== '*') { assert(typeof(course.value.subject) === 'string' && typeof(course.value.number) === 'string') }
+    if (kind.comparator !== '*') { assert(typeof(kind.value.name) === 'string' && typeof(kind.value.number) === 'string') }
+    if (term.comparator !== '*') { assert(typeof(term.value.year) === 'string' && typeof(term.value.quarter) === 'string') }
+  } catch(e) {
+    console.log(req.body.visibilityFilter)
+    console.log(e)
+    res.status(400).json({ reason: 'Malformed request' })
+    return
+  }
+  
+  const filter = await VisibilityFilter.create(req.body.visibilityFilter)
   await Professor.findOneAndUpdate(
     { '_id': req.tokenPayload.professor._id }, 
-    { '$push': { 'testFilters': req.body.visibilityFilter } }
+    { '$push': { 'visibilityFilters': filter } }
   )
   res.sendStatus(200)
 })
@@ -309,15 +328,16 @@ app.post('/append-test-visibility-filters', verifyToken, verifyProfessor, async 
 app.post('/remove-test-visibility-filters', verifyToken, verifyProfessor, async (req, res) => {
   await Professor.findOneAndUpdate(
     { '_id': req.tokenPayload.professor._id }, 
-    { '$pullAll': { 'testFilters': [req.body.visibilityFilter] } }
+    { '$pullAll': { 'visibilityFilters': [req.body.visibilityFilter] } }
   )
   res.sendStatus(200)
 })
 
 app.post('/apply-test-visibility-filters', verifyToken, verifyProfessor, async (req, res) => {
+  const professor = await Professor.findOne({ '_id': req.tokenPayload.professor._id }, 'visibilityFilters')
   const tests = await Test.find({ 'professor.name': req.tokenPayload.professor.name })
   for (test of tests) {
-    test.updateVisibility(req.body.visibilityFilters)
+    test.updateVisibility(professor.visibilityFilters)
   }
   res.sendStatus(200)
 })

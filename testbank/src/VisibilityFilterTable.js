@@ -24,30 +24,6 @@ import DeleteIcon from '@material-ui/icons/Delete'
 
 import AddVisibilityFilterDialog from './AddVisibilityFilterDialog'
 
-// preFilters is a dictionary, ex: { course: { name: 'COM SCI', number: 33 } }
-// filterItems is an array of the elements present in the filter bar
-const aggregateFilters = (preFilters, filterItems) => {
-  const courseArr = filterItems.filter(item => item.field === 'course')
-  const kindArr = filterItems.filter(item => item.field === 'kind')
-  const termArr = filterItems.filter(item => item.field === 'term')
-  const professorArr = filterItems.filter(item => item.field === 'professor')
-  let filters = {
-    ...(courseArr.length > 0 && { course: courseArr.map(item => item.data)}),
-    ...(kindArr.length > 0 && { kind: kindArr.map(item => item.data)}),
-    ...(termArr.length > 0 && { term: termArr.map(item => item.data)}),
-    ...(professorArr.length > 0 && { professor: professorArr.map(item => item.data)}),
-  }
-  for (const [filterKey, filterValues] of Object.entries(preFilters)) {
-    if (filters[filterKey]) {
-      filters[filterKey] = [ ...filters[filterKey], ...filterValues ]
-    }
-    else {
-      filters[filterKey] = filterValues
-    }
-  }
-  return filters
-}
-
 const useStyles = makeStyles(theme => ({
   formControl: {
     margin: theme.spacing(1),
@@ -58,13 +34,13 @@ const useStyles = makeStyles(theme => ({
 const displayFilterData = (field, name) => {
   switch (name) {
     case 'test_id':
-      return field.comparator === '*' ? '*' : filter.value
+      return field.comparator === '*' ? '*' : field.value
     case 'course':
-      return field.comparator === '*' ? '*' : filter.value.subject + ' ' + filter.value.number
+      return field.comparator === '*' ? '*' : field.value.subject + ' ' + field.value.number
     case 'kind':
-      return field.comparator === '*' ? '*' : filter.value.name + ' ' + filter.value.number
+      return field.comparator === '*' ? '*' : field.value.name + ' ' + field.value.number
     case 'term':
-      return field.comparator === '*' ? '*' : field.comparator + ' ' + filter.value.year + ' ' + filter.value.quarter
+      return field.comparator === '*' ? '*' : field.comparator + ' ' + field.value.year + ' ' + field.value.quarter
   }
 }
 
@@ -114,12 +90,12 @@ export default React.memo((props) => {
                 <TableRow key={filter._id}>
                   <TableCell></TableCell>
                   <TableCell>{displayFilterData(filter.test_id, 'test_id')}</TableCell>
-                  <TableCell>{displayFilterData(filter.test_id, 'course')}</TableCell>
-                  <TableCell>{displayFilterData(filter.test_id, 'kind')}</TableCell>
-                  <TableCell>{displayFilterData(filter.test_id, 'term')}</TableCell>
+                  <TableCell>{displayFilterData(filter.course, 'course')}</TableCell>
+                  <TableCell>{displayFilterData(filter.kind, 'kind')}</TableCell>
+                  <TableCell>{displayFilterData(filter.term, 'term')}</TableCell>
                   <TableCell>
-                    <IconButton onClick={removeFilter(filter._id)}>
-                      <RemoveIcon style={{ fontSize: '18px' }} />
+                    <IconButton onClick={() => removeFilter(filter._id)}>
+                      <DeleteIcon style={{ fontSize: '18px' }} />
                     </IconButton>
                   </TableCell>
                 </TableRow>
@@ -134,9 +110,6 @@ export default React.memo((props) => {
             <TableRow>
               <TableCell colSpan={5} align='center' onClick={() => setDialogOpen(true)}>
                 <Button
-                  // variant='contained'
-                  // color='secondary'
-                  // className={classes.button}
                   startIcon={<AddIcon />}
                   fullWidth={true}
                 >
@@ -151,21 +124,3 @@ export default React.memo((props) => {
     </Paper>
   )
 })
-
-// 
-//               <TableCell>
-//                 <FormControl className={classes.formControl}>
-//                   <InputLabel id='field-select-label'>Field</InputLabel>
-//                   <Select
-//                     labelId='field-select-label'
-//                     id='field-select'
-//                     value={field}
-//                     onChange={handleChangeField}
-//                   >
-//                     <MenuItem value='_id'>Test ID</MenuItem>
-//                     <MenuItem value='course'>Course</MenuItem>
-//                     <MenuItem value='kind'>Kind</MenuItem>
-//                     <MenuItem value='term'>Term</MenuItem>
-//                   </Select>
-//                 </FormControl>
-//               </TableCell>

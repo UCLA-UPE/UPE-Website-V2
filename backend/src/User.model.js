@@ -2,7 +2,7 @@ const mongoose = require('mongoose')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const crypto = require('crypto')
-const Professor = require('./Professor.model')
+const { Professor } = require('./Professor.model')
 
 SALT_ROUNDS = 12
 

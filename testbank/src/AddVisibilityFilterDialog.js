@@ -13,16 +13,17 @@ import DialogTitle from '@material-ui/core/DialogTitle'
 import Dialog from '@material-ui/core/Dialog'
 import TextField from '@material-ui/core/TextField'
 import IconButton from '@material-ui/core/IconButton'
+import FormControl from '@material-ui/core/FormControl'
+import InputLabel from '@material-ui/core/InputLabel'
+import Select from '@material-ui/core/Select'
+import MenuItem from '@material-ui/core/MenuItem'
 import AddIcon from '@material-ui/icons/Add'
 
-const WhiteButton = withStyles({
-  root: {
-    color: '#fff',
-    borderColor: '#fff',
-  },
-})(Button)
-
 const useStyles = makeStyles(theme => ({
+  formControl: {
+    margin: theme.spacing(1),
+    minWidth: 80,
+  },
   input: {
     display: 'none'
   },
@@ -51,8 +52,32 @@ const Row = (props) => {
           </Box>
         </Typography>
       </Grid>
-      <Grid container item xs={9}>
-        {props.content}
+      <Grid container item xs={3}>
+        <FormControl fullWidth>
+          <InputLabel id={'select-label-' + props.title}>Comparator</InputLabel>
+          <Select
+            labelId={'select-label-' + props.title}
+            id={'select-' + props.title}
+            onChange={event => props.handleCmpChange(event.target.value)}
+            value={props.cmpValue}
+          >
+            {props.cmpMenuItems.map(item => (
+              <MenuItem key={item} value={item}>{item}</MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      </Grid>
+      <Grid container item xs={6}>
+        {props.valueFormFields.map(item => (
+          <Grid key={item.label} item xs={12 / props.valueFormFields.length}>
+            <TextField
+              id={props.title + '-' + item.label + '-filter'}
+              label={item.label}
+              onChange={event => { item.onChange(event.target.value) }}
+              disabled={props.cmpValue === '*' ? true : false}
+            />
+          </Grid>  
+        ))}
       </Grid>
     </>
   )
@@ -62,136 +87,98 @@ export default React.memo((props) => {
   const { ax, open, handleClose } = props
   const classes = useStyles()
 
-  const ref = React.useRef(null) // ref is needed for file upload
-  const [courseSubject, setCourseSubject] = React.useState()
-  const [courseNumber, setCourseNumber] = React.useState()
-  const [kindName, setKindName] = React.useState()
-  const [kindNumber, setKindNumber] = React.useState()
-  const [termYear, setTermYear] = React.useState()
-  const [termQuarter, setTermQuarter] = React.useState()
-  const [professorName, setProfessorName] = React.useState()
 
-  const uploadFile = async () => {
-    let formData = new FormData()
-    formData.append('testFile', ref.current.files[0])
-    formData.append('courseSubject', courseSubject)
-    formData.append('courseNumber', courseNumber)
-    formData.append('kindName', kindName)
-    formData.append('kindNumber', kindNumber)
-    formData.append('termYear', termYear)
-    formData.append('termQuarter', termQuarter)
-    formData.append('professorName', professorName)
-    const res = await ax.post('/upload-test-file', 
-      formData,
-      { headers: { 'Content-Type': 'multipart/form-data' }}
-    )
-    navigate('/test/' + res.data.test_id)
-  }  
-  const handleSubmit = () => { uploadFile() }
+  const [testIdCmp,     setTestIdCmp] =     React.useState('*')
+  const [testId,        setTestId] =        React.useState(null)
+  const [courseCmp,     setCourseCmp] =     React.useState('*')
+  const [courseSubject, setCourseSubject] = React.useState(null)
+  const [courseNumber,  setCourseNumber] =  React.useState(null)
+  const [kindCmp,       setKindCmp] =       React.useState('*')
+  const [kindName,      setKindName] =      React.useState(null)
+  const [kindNumber,    setKindNumber] =    React.useState(null)
+  const [termCmp,       setTermCmp] =       React.useState('*')
+  const [termYear,      setTermYear] =      React.useState(null)
+  const [termQuarter,   setTermQuarter] =   React.useState(null)
+
+  const appendFilter = async () => {
+    const res = await ax.post('/append-test-visibility-filters', {
+      visibilityFilter: {
+        test_id: {
+          comparator: testIdCmp,
+          value: testId
+        },
+        course: {
+          comparator: courseCmp,
+          value: { subject: courseSubject, number: courseNumber }
+        },
+        kind: {
+          comparator: kindCmp,
+          value: { name: kindName, number: kindNumber }
+        },
+        term: {
+          comparator: termCmp,
+          value: { year: termYear, quarter: termQuarter }
+        }
+      }
+    })
+  }
 
   const [uploadButtonName, setUploadButtonName] = React.useState('Select file...')
   return (
-      <Dialog onClose={handleClose} aria-labelledby='dialog-title' open={open}>
-        <DialogTitle id='dialog-title'>Upload Test</DialogTitle>
-        <DialogContent>
-          <Grid container spacing={2} className={classes.grid}>
-            <Row title='File' content={
-              <>
-                <input
-                  accept='application/pdf,image/jpeg,image/png'
-                  className={classes.input}
-                  id='file-upload-input'
-                  type='file'
-                  ref={ref}
-                  onChange={() => setUploadButtonName(ref.current.files[0].name)}
-                />
-                <label htmlFor='file-upload-input'>
-                  <Button component='span' variant='contained' size='small'>
-                    {uploadButtonName}
-                  </Button>
-                </label>
-              </>
-            } />
-            <Row title='Course' content={
-              <>
-                <Grid item xs={6}>
-                  <TextField
-                    id='course-subject'
-                    label='Subject'
-                    placeholder='MATH'
-                    onChange={event => { setCourseSubject(event.target.value) }}
-                  />
-                </Grid>
-                <Grid item xs={6}>
-                  <TextField
-                    id='course-number'
-                    label='Number'
-                    placeholder='31A'
-                    onChange={event => { setCourseNumber(event.target.value) }}
-                  />
-                </Grid>
-              </>
-            } />
-            <Row title='Kind' content={
-              <>
-                <Grid item xs={6}>
-                  <TextField
-                    id='kind-name'
-                    label='Name'
-                    placeholder='Midterm'
-                    onChange={event => { setKindName(event.target.value) }}
-                  />
-                </Grid>
-                <Grid item xs={6}>
-                  <TextField
-                    id='kind-number'
-                    label='Number'
-                    placeholder='2'
-                    onChange={event => { setKindNumber(event.target.value) }}
-                  />
-                </Grid>
-              </>
-            } />
-            <Row title='Term' content={
-              <>
-                <Grid item xs={6}>
-                  <TextField
-                    id='term-year'
-                    label='Year'
-                    placeholder='2020'
-                    onChange={event => { setTermYear(event.target.value) }}
-                  />
-                </Grid>
-                <Grid item xs={6}>
-                  <TextField
-                    id='term-quarter'
-                    label='Quarter'
-                    placeholder='Fall'
-                    onChange={event => { setTermQuarter(event.target.value) }}
-                  />
-                </Grid>
-              </>
-            } />
-            <Row title='Professor' content={
-              <TextField
-                id='professor-name'
-                label='Name'
-                placeholder='Terence Tao'
-                onChange={event => { setProfessorName(event.target.value) }}
-                fullWidth
-              />
-            } />
-          </Grid>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleClose} color='secondary'>
-            Cancel
-          </Button>
-          <Button onClick={handleSubmit} color='primary'>
-            Upload
-          </Button>
-        </DialogActions>
-      </Dialog>
+    <Dialog onClose={handleClose} aria-labelledby='dialog-title' open={open} fullWidth>
+      <DialogTitle id='dialog-title'>Add Visibility Filter</DialogTitle>
+      <DialogContent>
+        <Grid container spacing={2} className={classes.grid}>
+          <Row
+            title='Test ID' 
+            cmpMenuItems={['*', '==']} 
+            cmpValue={testIdCmp} 
+            handleCmpChange={setTestIdCmp} 
+            valueFormFields={[
+              { label: 'Test ID Number', onChange: setTestId }, 
+            ]}
+          />
+          <Row
+            title='Course' 
+            cmpMenuItems={['*', '==']} 
+            cmpValue={courseCmp} 
+            handleCmpChange={setCourseCmp} 
+            valueFormFields={[
+              { label: 'Subject', onChange: setCourseSubject }, 
+              { label: 'Number', onChange: setCourseNumber }, 
+            ]}
+          />
+          <Row
+            title='Kind' 
+            cmpMenuItems={['*', '==']} 
+            cmpValue={kindCmp} 
+            handleCmpChange={setKindCmp} 
+            valueFormFields={[
+              { label: 'Name', onChange: setKindName }, 
+              { label: 'Number', onChange: setKindNumber }, 
+            ]}
+          />
+          <Row
+            title='Term' 
+            cmpMenuItems={['*', '==', '<=', '>=']} 
+            cmpValue={termCmp} 
+            handleCmpChange={setTermCmp} 
+            valueFormFields={[
+              { label: 'Year', onChange: setTermYear }, 
+              { label: 'Quarter', onChange: setTermQuarter }, 
+            ]}
+          />
+        </Grid>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={handleClose} color='secondary'>
+          Cancel
+        </Button>
+        <Button onClick={appendFilter} color='primary'>
+          Add Filter
+        </Button>
+      </DialogActions>
+    </Dialog>
   )
 })
 

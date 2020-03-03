@@ -1,6 +1,6 @@
 const mongoose = require('mongoose')
 
-const TestFilterSchema = new mongoose.Schema({
+const VisibilityFilterSchema = new mongoose.Schema({
   // if ({test.value} {comparator} {value}) then { visibility = false }
   test_id: {
     comparator: String, //  '==', '*'
@@ -8,15 +8,24 @@ const TestFilterSchema = new mongoose.Schema({
   },
   course: {
     comparator: String, //  '==', '*'
-    value: String
+    value: {
+      subject: String, // MATH
+      number: String,  // 32A
+    }
   },
   kind: {
     comparator: String, //  '==', '*'
-    value: String
+    value: {
+      name: String,   // Midterm
+      number: Number, // 2
+    }
   },
   term: {
     comparator: String, //  '<=', '==', '>=', '*'
-    value: String
+    value: {
+      year: Number,    // 2019
+      quarter: String, // Fall
+    }
   }
 })
 
@@ -32,9 +41,10 @@ const ProfessorSchema = new mongoose.Schema({
     index: true
   },
   department: String,
-  testFilters: [TestFilterSchema]
+  visibilityFilters: [VisibilityFilterSchema]
 })
 
+const VisibilityFilter = mongoose.model('VisibilityFilter', VisibilityFilterSchema)
 const Professor = mongoose.model('Professor', ProfessorSchema)
 
-module.exports = Professor
+module.exports = { VisibilityFilter, Professor }
