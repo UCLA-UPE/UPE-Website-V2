@@ -39,6 +39,7 @@ const TestSchema = new mongoose.Schema({
   },
   professor: { // later on, might need a unique identifier for professor name collisions
     name: {
+      index: true,
       type: String,
       required: true
     }
@@ -69,6 +70,59 @@ TestSchema.methods.toString = function() {
           (${this.professor.name}) \
           ${this.course.subject} ${this.course.number} - \
           ${this.kind.name} ${this.kind.number}`
+}
+
+const termQuarterCompare = (a, b) => {
+  if (a.data.quarter === b.data.quarter) return 0
+  else if (a.data.quarter === 'Fall') return -1
+  else if (b.data.quarter === 'Fall') return 1
+  else if (a.data.quarter === 'Winter') return -1
+  else if (b.data.quarter === 'Winter') return 1
+  else if (a.data.quarter === 'Spring') return -1
+  else if (b.data.quarter === 'Spring') return 1
+  else if (a.data.quarter === 'Summer') return -1
+  else if (b.data.quarter === 'Summer') return 1
+  else return a.data.quarter.localeCompare(b.data.quarter)
+}
+
+const termCompare = (a, b) => {
+  if (a.data.year !== b.data.year) return a.data.year - b.data.year
+  else return termQuarterCompare(a, b)
+}
+
+const visibilityFilterMatch = (field, lval, comparator, rval) => {
+  if (field === 'term') {
+    if (comparator === '>=' && termCompare(lval, rval) < 0) {
+      return false
+    }
+    else if (comparator === '<=' && termCompare(lval, rval) > 0) {
+      return false
+    }
+  }
+  if (comparator === '*') {
+    return true
+  }
+  else if (comparator === '==' && lval != rval) {
+    return false
+  }
+  else {
+    return true
+  }
+}
+
+TestSchema.methods.updateVisibility = async function(testVisibilityFilters) {
+  for (let filter of testVisibilityFilters) {
+    for (let [filterField, filterValue] of Object.entries(filter)) {
+      const lval = filterField === 'test_id' ? this['_id'] : this[filterField]
+      if (visibilityFilterMatch(filterField, lval, filter.comparator, filter.value)) {
+        this.visible = false
+        this.save()
+        return
+      }
+    }
+  }
+  this.visible = true
+  this.save()
 }
 
 TestSchema.statics.getSubjects = async function() {

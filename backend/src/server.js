@@ -12,13 +12,13 @@ const Mailer = require('./mailer')
 const os = require('os')
 
 // constants
-// TODO: use envvars for these
+// TODO: use environment variables for these
 const PORT = 8080
 const HOST = '0.0.0.0'
 const TOKEN_EXPIRY_PERIOD = '10d'
 const TEST_FILE_UPLOAD_MAX_SIZE = 10 * 1024 * 1024 // in bytes
 
-// env
+// from environment variables (process.env)
 const apiUrl = (process.env.PRODUCTION === 'false') ? 
   'http://localhost:' + PORT :             // dev
   'http://' + os.hostname() + ':' + PORT   // prod
@@ -33,6 +33,7 @@ console.log('TEST_FILES_DIR is set to ' + TEST_FILES_DIR)
 // mongoose models
 const User = require('./User.model')
 const Test = require('./Test.model')
+const Professor = require('./Professor.model')
 
 
 
@@ -66,6 +67,14 @@ const verifyToken = (req, res, next) => {
     console.log('JWT verification failed')
     res.status(401).json({ reason: 'JWT verification failed' })
   }
+}
+
+const verifyProfessor = (req, res, next) => {
+  if (!req.tokenPayload.professor) {
+    res.status(401).json({ reason: 'Not a professor' })
+    return
+  }
+  next()
 }
 
 const upload = multer({
@@ -104,7 +113,12 @@ app.use(logger)
 /////////////
 
 const signUserToken = async (user) => await jwt.sign(
-  { _id: user._id, email: user.email, isUpeMember: user.isUpeMember, professor: await user.getProfessor() }, 
+  { 
+    _id: user._id, 
+    email: user.email, 
+    isUpeMember: user.isUpeMember, 
+    professor: await user.getProfessor() 
+  }, 
   JWT_SECRET,
   { expiresIn: TOKEN_EXPIRY_PERIOD }
 )
@@ -277,6 +291,35 @@ app.post('/upload-test-file', verifyToken, saveTestFile, async (req, res) => {
     verified: false,
   })
   res.status(200).json({ test_id: test._id })
+})
+
+app.post('/get-test-visibility-filters', verifyToken, verifyProfessor, async (req, res) => {
+  const professor = await Professor.findOne({ '_id': req.tokenPayload.professor._id }, 'testFilters')
+  res.status(200).json(professor.testFilters)
+})
+
+app.post('/append-test-visibility-filters', verifyToken, verifyProfessor, async (req, res) => {
+  await Professor.findOneAndUpdate(
+    { '_id': req.tokenPayload.professor._id }, 
+    { '$push': { 'testFilters': req.body.visibilityFilter } }
+  )
+  res.sendStatus(200)
+})
+
+app.post('/remove-test-visibility-filters', verifyToken, verifyProfessor, async (req, res) => {
+  await Professor.findOneAndUpdate(
+    { '_id': req.tokenPayload.professor._id }, 
+    { '$pullAll': { 'testFilters': [req.body.visibilityFilter] } }
+  )
+  res.sendStatus(200)
+})
+
+app.post('/apply-test-visibility-filters', verifyToken, verifyProfessor, async (req, res) => {
+  const tests = await Test.find({ 'professor.name': req.tokenPayload.professor.name })
+  for (test of tests) {
+    test.updateVisibility(req.body.visibilityFilters)
+  }
+  res.sendStatus(200)
 })
 
 

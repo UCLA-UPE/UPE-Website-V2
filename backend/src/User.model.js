@@ -56,7 +56,7 @@ UserSchema.methods.isValidPassword = async function(password) {
 }
 
 UserSchema.methods.getProfessor = async function() {
-  return await Professor.findOne({ email: this.email }, 'name department')
+  return await Professor.findOne({ email: this.email }, '_id name department')
 }
 
 UserSchema.statics.getProfile = async function(id) {

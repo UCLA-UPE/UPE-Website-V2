@@ -143,10 +143,10 @@ export default React.memo((props) => {
     <Paper>
       <TestTableFilterBar ax={ax} authCB={authCB} preFilters={preFilters} handleFilterItemsChange={handleFilterItemsChange} />
       <TableContainer>
-        <Table className={classes.table} aria-label='test table' aria-labelledby='tableTitle' size='small'>
+        <Table className={classes.table} aria-label='test table' size='small'>
           <TableHead>
             <TableRow>
-              <TableCell component='th' scope='row'>Identifier</TableCell>
+              <TableCell>Identifier</TableCell>
               {preFilters.professor ? null : <TableCell>Professor</TableCell>}
               {preFilters.course ? null : <TableCell>Course</TableCell>}
               <TableCell>Kind</TableCell>
@@ -159,7 +159,7 @@ export default React.memo((props) => {
           <TableBody>
             {testData.tests.map(test => (
               <TableRow key={test._id}>
-                <TableCell component='th' scope='row'>
+                <TableCell>
                   <Chip 
                     label={test._id.slice(-6)} 
                     variant='outlined' 

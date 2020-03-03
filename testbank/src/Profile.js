@@ -5,6 +5,7 @@ import Typography from '@material-ui/core/Typography'
 import Grid from '@material-ui/core/Grid'
 import Box from '@material-ui/core/Box'
 
+import VisibilityFilterTable from './VisibilityFilterTable'
 import TestTable from './TestTable'
 
 const useStyles = makeStyles(theme => ({
@@ -47,7 +48,16 @@ const ProfessorRowContent = (props) => {
   if (!props.professor) return 'No'
   else return (
     <>
-      You are verified as <span style={{ color: 'fuchsia' }}>{props.professor.name}</span>. Your tests:
+      You are verified as <span style={{ color: 'fuchsia' }}>{props.professor.name}</span>.<br />
+      Your visibility filters:
+      <Box mt={3} mb={3}>
+        <VisibilityFilterTable
+          ax={props.ax} 
+          authCB={props.authCB} 
+          professor={props.professor.name} 
+        />
+      </Box>
+      Your tests:
       <Box mt={3}>
         <TestTable 
           ax={props.ax} 
@@ -97,8 +107,7 @@ export default React.memo((props) => {
         <Row title='Email' content={email} />
         <Row title='Password' content='[encrypted]' />
         <Row title='UPE Status' content={isUpeMember ? 'Yes' : 'No'} />
-        <Row 
-          title='Professor Status' 
+        <Row title='Professor Status' 
           content={<ProfessorRowContent 
             ax={ax} 
             authCB={authCB} 
