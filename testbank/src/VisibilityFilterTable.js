@@ -61,26 +61,36 @@ export default React.memo((props) => {
       case 'course':
         return field.comparator === '*' ? '*' : field.value.subject + ' ' + field.value.number
       case 'kind':
-        return field.comparator === '*' ? '*' : field.value.name + ' ' + field.value.number
+        return field.comparator === '*' ? '*' : field.value.name + (field.value.number ? ' ' + field.value.number : '')
       case 'term':
-        return field.comparator === '*' ? '*' : field.comparator + ' ' + field.value.year + ' ' + field.value.quarter
+        return field.comparator === '*' ? '*' : <span>{field.comparator}&emsp;{field.value.year} {field.value.quarter}</span>
     }
   }
 
   const [filterData, setFilterData] = React.useState([])
   const loadFilters = async () => {
     const res = await ax.post('/get-test-visibility-filters')
-    console.log(res)
     setFilterData(res.data)
   }
 
-  const [field, setField] = React.useState([])
-  const handleChangeField = () => {}
-
-  const addFilter = async () => {}
-  const removeFilter = async (filter_id) => {}
+  const applyFilters = async () => {
+    const res = await ax.post('/apply-test-visibility-filters')
+  }
+  
+  const removeFilter = async (filter_id) => {
+    const res = await ax.post('/remove-test-visibility-filters', { 
+      filterId: filter_id 
+    })
+    applyFilters()
+    loadFilters()
+  }
 
   const [dialogOpen, setDialogOpen] = React.useState(false)
+  const handleDialogClose = () => {
+    setDialogOpen(false)
+    applyFilters()
+    loadFilters()
+  }
 
   React.useEffect(() => {
     if (authCB.isLoggedIn()) {
@@ -132,7 +142,7 @@ export default React.memo((props) => {
                   Add Filter
                 </Button>
               </TableCell>
-              <AddVisibilityFilterDialog ax={ax} open={dialogOpen} handleClose={() => setDialogOpen(false)} />
+              <AddVisibilityFilterDialog ax={ax} open={dialogOpen} handleClose={handleDialogClose} />
             </TableRow>
           </TableBody>
         </Table>

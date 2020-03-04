@@ -73,54 +73,71 @@ TestSchema.methods.toString = function() {
 }
 
 const termQuarterCompare = (a, b) => {
-  if (a.data.quarter === b.data.quarter) return 0
-  else if (a.data.quarter === 'Fall') return -1
-  else if (b.data.quarter === 'Fall') return 1
-  else if (a.data.quarter === 'Winter') return -1
-  else if (b.data.quarter === 'Winter') return 1
-  else if (a.data.quarter === 'Spring') return -1
-  else if (b.data.quarter === 'Spring') return 1
-  else if (a.data.quarter === 'Summer') return -1
-  else if (b.data.quarter === 'Summer') return 1
-  else return a.data.quarter.localeCompare(b.data.quarter)
+  if (a.quarter === b.quarter) return 0
+  else if (a.quarter === 'Fall') return -1
+  else if (b.quarter === 'Fall') return 1
+  else if (a.quarter === 'Winter') return -1
+  else if (b.quarter === 'Winter') return 1
+  else if (a.quarter === 'Spring') return -1
+  else if (b.quarter === 'Spring') return 1
+  else if (a.quarter === 'Summer') return -1
+  else if (b.quarter === 'Summer') return 1
+  else return a.quarter.localeCompare(b.quarter)
 }
 
 const termCompare = (a, b) => {
-  if (a.data.year !== b.data.year) return a.data.year - b.data.year
+  if (a.year !== b.year) return a.year - b.year
   else return termQuarterCompare(a, b)
 }
 
-const visibilityFilterMatch = (field, lval, comparator, rval) => {
-  if (field === 'term') {
-    if (comparator === '>=' && termCompare(lval, rval) < 0) {
-      return false
-    }
-    else if (comparator === '<=' && termCompare(lval, rval) > 0) {
+const objectEqualDepth1 = (a, b) => {
+  const ak = Object.keys(a)
+  const bk = Object.keys(b)
+  if (ak.length !== bk.length) {
+    return false
+  }
+  for (let k of ak) {
+    if (a[k] !== b[k]) {
       return false
     }
   }
+  return true
+}
+
+const visibilityFilterMatch = (field, lval, comparator, rval) => {
+  console.log('checking field ' + field + ': (' + lval + ' ' + comparator + ' ' + rval + ')')
+  if (field === 'term') {
+    console.log(termCompare(lval, rval))
+    if (comparator === '>=' && termCompare(lval, rval) >= 0 || 
+        comparator === '<=' && termCompare(lval, rval) <= 0) {
+      return true
+    }
+  }
+
   if (comparator === '*') {
     return true
   }
-  else if (comparator === '==' && lval != rval) {
-    return false
-  }
-  else {
+  else if (comparator === '==' && objectEqualDepth1(lval, rval)) {
     return true
   }
+  return false
 }
 
-TestSchema.methods.updateVisibility = async function(testVisibilityFilters) {
-  for (let filter of testVisibilityFilters) {
-    for (let [filterField, filterValue] of Object.entries(filter)) {
-      const lval = filterField === 'test_id' ? this['_id'] : this[filterField]
-      if (visibilityFilterMatch(filterField, lval, filter.comparator, filter.value)) {
-        this.visible = false
-        this.save()
-        return
-      }
+TestSchema.methods.updateVisibility = function(testVisibilityFilters) {
+  console.log(this)
+  filterLoop:
+  for (const filter of testVisibilityFilters.toObject()) {
+    if (visibilityFilterMatch('test_id', this._id, filter.test_id.comparator, filter.test_id.value) &&
+        visibilityFilterMatch('course', this.course.toObject(), filter.course.comparator, filter.course.value) &&
+        visibilityFilterMatch('kind', this.kind.toObject(), filter.kind.comparator, filter.kind.value) &&
+        visibilityFilterMatch('term', this.term.toObject(), filter.term.comparator, filter.term.value)) {
+      console.log('filter match')
+      this.visible = false
+      this.save()
+      return
     }
   }
+  console.log('no match')
   this.visible = true
   this.save()
 }

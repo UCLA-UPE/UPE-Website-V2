@@ -87,7 +87,6 @@ export default React.memo((props) => {
   const { ax, open, handleClose } = props
   const classes = useStyles()
 
-
   const [testIdCmp,     setTestIdCmp] =     React.useState('*')
   const [testId,        setTestId] =        React.useState(null)
   const [courseCmp,     setCourseCmp] =     React.useState('*')
@@ -121,6 +120,7 @@ export default React.memo((props) => {
         }
       }
     })
+    handleClose()
   }
 
   const [uploadButtonName, setUploadButtonName] = React.useState('Select file...')

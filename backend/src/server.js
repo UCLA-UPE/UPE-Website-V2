@@ -308,7 +308,12 @@ app.post('/append-test-visibility-filters', verifyToken, verifyProfessor, async 
     assert(['*', '==', '<=', '>='].includes(term.comparator))
     if (test_id.comparator !== '*') { assert(typeof(test_id.value) === 'string') }
     if (course.comparator !== '*') { assert(typeof(course.value.subject) === 'string' && typeof(course.value.number) === 'string') }
-    if (kind.comparator !== '*') { assert(typeof(kind.value.name) === 'string' && typeof(kind.value.number) === 'string') }
+    if (kind.comparator !== '*') { 
+      assert(typeof(kind.value.name) === 'string')
+      if (kind.value.number) { 
+        assert(typeof(kind.value.number) === 'string')
+      }
+    }
     if (term.comparator !== '*') { assert(typeof(term.value.year) === 'string' && typeof(term.value.quarter) === 'string') }
   } catch(e) {
     console.log(req.body.visibilityFilter)
@@ -328,7 +333,7 @@ app.post('/append-test-visibility-filters', verifyToken, verifyProfessor, async 
 app.post('/remove-test-visibility-filters', verifyToken, verifyProfessor, async (req, res) => {
   await Professor.findOneAndUpdate(
     { '_id': req.tokenPayload.professor._id }, 
-    { '$pullAll': { 'visibilityFilters': [req.body.visibilityFilter] } }
+    { '$pull': { 'visibilityFilters': { '_id': req.body.filterId } } }
   )
   res.sendStatus(200)
 })

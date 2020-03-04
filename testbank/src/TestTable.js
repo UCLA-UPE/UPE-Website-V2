@@ -141,7 +141,7 @@ export default React.memo((props) => {
 
   return (
     <Paper>
-      <TestTableFilterBar ax={ax} authCB={authCB} preFilters={preFilters} handleFilterItemsChange={handleFilterItemsChange} />
+      <TestTableFilterBar ax={ax} authCB={authCB} preFilters={preFilters} handleFilterItemsChange={handleFilterItemsChange} getHidden={getHidden} />
       <TableContainer>
         <Table className={classes.table} aria-label='test table' size='small'>
           <TableHead>

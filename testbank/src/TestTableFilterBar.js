@@ -51,12 +51,13 @@ const useStyles = makeStyles(theme => ({
 export default React.memo((props) => {
 
   const { ax, authCB, preFilters, handleFilterItemsChange } = props
+  const getHidden = props.getHidden || false
   const classes = useStyles()
 
   const [filterOptions, setFilterOptions] = React.useState([])
   const loadFilterOptions = async () => {
     const res = await ax.post(
-      '/get-filter-options', { preFilters: preFilters }
+      '/get-filter-options', { preFilters: preFilters, getHidden: getHidden }
     )
 
     let filterOptionsSorted = []
