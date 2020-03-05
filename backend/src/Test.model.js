@@ -105,9 +105,7 @@ const objectEqualDepth1 = (a, b) => {
 }
 
 const visibilityFilterMatch = (field, lval, comparator, rval) => {
-  console.log('checking field ' + field + ': (' + lval + ' ' + comparator + ' ' + rval + ')')
   if (field === 'term') {
-    console.log(termCompare(lval, rval))
     if (comparator === '>=' && termCompare(lval, rval) >= 0 || 
         comparator === '<=' && termCompare(lval, rval) <= 0) {
       return true
@@ -124,20 +122,17 @@ const visibilityFilterMatch = (field, lval, comparator, rval) => {
 }
 
 TestSchema.methods.updateVisibility = function(testVisibilityFilters) {
-  console.log(this)
   filterLoop:
   for (const filter of testVisibilityFilters.toObject()) {
     if (visibilityFilterMatch('test_id', this._id, filter.test_id.comparator, filter.test_id.value) &&
         visibilityFilterMatch('course', this.course.toObject(), filter.course.comparator, filter.course.value) &&
         visibilityFilterMatch('kind', this.kind.toObject(), filter.kind.comparator, filter.kind.value) &&
         visibilityFilterMatch('term', this.term.toObject(), filter.term.comparator, filter.term.value)) {
-      console.log('filter match')
       this.visible = false
       this.save()
       return
     }
   }
-  console.log('no match')
   this.visible = true
   this.save()
 }
@@ -171,12 +166,8 @@ TestSchema.statics.getSubjectNumbers = async function(subject) {
 }
 
 TestSchema.statics.getTests = async function(filters, 
-                                             bypassVisibility, 
+                                             bypassHidden, 
                                              sort, order, skip, limit) {
-
-  console.log(filters)
-  console.log(bypassVisibility)
-
   const testsAgg = await this.aggregate([
     { '$match': {
         '$and': [
@@ -185,7 +176,7 @@ TestSchema.statics.getTests = async function(filters,
           )),
           { '$or': [
             { visible: true },
-            ...Object.entries(bypassVisibility).map(([filterKey, filterItems]) => (
+            ...Object.entries(bypassHidden).map(([filterKey, filterItems]) => (
               { [filterKey]: { '$in': filterItems } }
             ))
           ]}
@@ -208,10 +199,7 @@ TestSchema.statics.getTests = async function(filters,
   return [tests.data, tests.count[0] ? tests.count[0].count : 0]
 }
 
-TestSchema.statics.getFilterOptions = async function(filters, bypassVisibility) {
-
-  console.log(filters)
-
+TestSchema.statics.getFilterOptions = async function(filters, bypassHidden) {
   const filtersAgg = await this.aggregate([
     { '$match': {
         '$and': [
@@ -220,7 +208,7 @@ TestSchema.statics.getFilterOptions = async function(filters, bypassVisibility) 
           )),
           { '$or': [
             { visible: true },
-            ...Object.entries(bypassVisibility).map(([filterKey, filterItems]) => (
+            ...Object.entries(bypassHidden).map(([filterKey, filterItems]) => (
               { [filterKey]: { '$in': filterItems } }
             ))
           ]}
@@ -248,7 +236,6 @@ TestSchema.statics.getFilterOptions = async function(filters, bypassVisibility) 
   ])
   let filterOptions = filtersAgg[0]
   for (const [filterKey, _] of Object.entries(filters)) {
-    // console.log('deleting filterKey ' + filterKey)
     delete filterOptions[filterKey]
   }
   return filterOptions

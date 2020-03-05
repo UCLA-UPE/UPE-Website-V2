@@ -61,8 +61,7 @@ const verifyToken = (req, res, next) => {
     const [schema, token] = auth.split(' ')
     jwt.verify(token, JWT_SECRET, { expiresIn: TOKEN_EXPIRY_PERIOD })
     req.tokenPayload = jwt.decode(token)
-    console.log('JWT verified')
-    // console.log(req.tokenPayload)
+    // console.log('JWT verified')
     next()
   } catch(e) {
     console.log('JWT verification failed')
@@ -143,7 +142,6 @@ app.post('/login', async (req, res) => {
     return
   }
   const token = await signUserToken(user)
-  console.log(token)
   res.status(200).json({ token: token })
 })
 
@@ -207,7 +205,7 @@ app.post('/get-subject-numbers', verifyToken, async (req, res) => {
 // 2. professors can always see their own hidden tests
 // TODO: somehow only include filters passed in req.body.filters
 
-const getBypassVisibility = (tokenPayload) => ({
+const getBypassHidden = (tokenPayload) => ({
   ...(tokenPayload.email && { user_email: [tokenPayload.email] }),
   ...(tokenPayload.professor && { professor: [{ name: tokenPayload.professor.name }] }),
 })
@@ -226,11 +224,11 @@ app.post('/get-tests', verifyToken, async (req, res) => {
   const skip = req.body.page * req.body.limit
   const limit = req.body.limit <= 25 ? req.body.limit : 25
   const filters = req.body.filters
-  const bypassVisibility = req.body.getHidden ? getBypassVisibility(req.tokenPayload) : {}
+  const bypassHidden = req.body.getHidden ? getBypassHidden(req.tokenPayload) : {}
 
   const [tests, count] = await Test.getTests(
     filters,
-    bypassVisibility,
+    bypassHidden,
     req.body.sort,
     req.body.order,
     skip,
@@ -258,9 +256,9 @@ app.post('/get-filter-options', verifyToken, async (req, res) => {
   }
 
   const filters = req.body.preFilters
-  const bypassVisibility = req.body.getHidden ? getBypassVisibility(req.tokenPayload) : {}
+  const bypassHidden = req.body.getHidden ? getBypassHidden(req.tokenPayload) : {}
 
-  const options = await Test.getFilterOptions(filters, bypassVisibility)
+  const options = await Test.getFilterOptions(filters, bypassHidden)
   res.status(200).json(options)
 })
 
@@ -316,8 +314,6 @@ app.post('/append-test-visibility-filters', verifyToken, verifyProfessor, async 
     }
     if (term.comparator !== '*') { assert(typeof(term.value.year) === 'string' && typeof(term.value.quarter) === 'string') }
   } catch(e) {
-    console.log(req.body.visibilityFilter)
-    console.log(e)
     res.status(400).json({ reason: 'Malformed request' })
     return
   }

@@ -7,32 +7,32 @@ import Autocomplete from '@material-ui/lab/Autocomplete'
 import TextField from '@material-ui/core/TextField'
 
 const termQuarterCompare = (a, b) => {
-  if (a.data.quarter === b.data.quarter) return 0
-  else if (a.data.quarter === 'Fall') return -1
-  else if (b.data.quarter === 'Fall') return 1
-  else if (a.data.quarter === 'Winter') return -1
-  else if (b.data.quarter === 'Winter') return 1
-  else if (a.data.quarter === 'Spring') return -1
-  else if (b.data.quarter === 'Spring') return 1
-  else if (a.data.quarter === 'Summer') return -1
-  else if (b.data.quarter === 'Summer') return 1
-  else return a.data.quarter.localeCompare(b.data.quarter)
+  if (a.quarter === b.quarter) return 0
+  else if (a.quarter === 'Fall') return -1
+  else if (b.quarter === 'Fall') return 1
+  else if (a.quarter === 'Winter') return -1
+  else if (b.quarter === 'Winter') return 1
+  else if (a.quarter === 'Spring') return -1
+  else if (b.quarter === 'Spring') return 1
+  else if (a.quarter === 'Summer') return -1
+  else if (b.quarter === 'Summer') return 1
+  else return a.quarter.localeCompare(b.quarter)
 }
 
 const termCompare = (a, b) => {
-  if (a.data.year !== b.data.year) return a.data.year - b.data.year
+  if (a.year !== b.year) return a.year - b.year
   else return termQuarterCompare(a, b)
 }
 
 const kindCompare = (a, b) => {
-  if (a.data.name === b.data.name) { return a.data.number - b.data.number }
-  else if (a.data.name === 'Quiz') { return -1 }
-  else if (b.data.name === 'Quiz') { return 1 }
-  else if (a.data.name === 'Midterm') { return -1 }
-  else if (b.data.name === 'Midterm') { return 1 }
-  else if (a.data.name === 'Final') { return -1 }
-  else if (b.data.name === 'Final') { return 1  }
-  else { return a.data.name.localeCompare(b.data.name) }
+  if (a.name === b.name) { return a.number - b.number }
+  else if (a.name === 'Quiz') { return -1 }
+  else if (b.name === 'Quiz') { return 1 }
+  else if (a.name === 'Midterm') { return -1 }
+  else if (b.name === 'Midterm') { return 1 }
+  else if (a.name === 'Final') { return -1 }
+  else if (b.name === 'Final') { return 1  }
+  else { return a.name.localeCompare(b.name) }
 }
 
 const useStyles = makeStyles(theme => ({
@@ -86,7 +86,7 @@ export default React.memo((props) => {
         fieldDisplay: 'Kind', 
         data: kind, 
         display: kind.name + ' ' + (kind.number ? kind.number : '')
-      })).sort(kindCompare))
+      })).sort((a, b) => kindCompare(a.data, b.data)))
     }
 
     if (res.data.term) {
@@ -95,7 +95,7 @@ export default React.memo((props) => {
         fieldDisplay: 'Term', 
         data: term, 
         display: term.year.toString() + ' ' + term.quarter,
-      })).sort(termCompare))
+      })).sort((a, b) => termCompare(a.data, b.data)))
     }
 
     console.log(filterOptionsSorted)
