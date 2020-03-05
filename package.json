@@ -1,0 +1,26 @@
+{
+  "name": "UPE-Website-V2",
+  "version": "1.0.0",
+  "description": "Migrate the website to Mongo + Node + React",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "concurrently \"cd testbank && npm run dev\" \"cd backend && npm run dev\"",
+    "setup": "concurrently \"npm install\" \"cd testbank && npm install\" \"cd backend && npm install\"",
+    "start": "concurrently \"cd testbank && npm run start\" \"cd backend && npm run start\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/UCLA-UPE/UPE-Website-V2.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/UCLA-UPE/UPE-Website-V2/issues"
+  },
+  "homepage": "https://github.com/UCLA-UPE/UPE-Website-V2#readme",
+  "dependencies": {
+    "concurrently": "^5.1.0"
+  }
+}
