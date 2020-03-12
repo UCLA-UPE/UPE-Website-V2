@@ -1,6 +1,22 @@
 # UPE-Website-V2
 Migrate the website to Mongo + Node + React
 
+## Setting Up
+1. Clone the repo `git clone https://github.com/UCLA-UPE/UPE-Website-V2.git`
+2. $ `cd UPE-Website-V2` and go to the `backend` folder to run `npm install` to install the node packages necessary for the server. Then, go to `testbank` folder to run `npm install` to install the node packages necessary for the frontend/React. 
+3. Allow 3 tabs in your terminal. 1st tab, navigate to the `backend` folder and run `npm run dev` to start the server. This will be referred to as the "server tab" from now on. 2nd tab, navigate to thee `testbank` folder and run `npm run dev` to start the React app. Thiw will be referred to as the "React tab" from now on. The 3rd tab will be used for command line purposes.
+4. In your browser, go to `http://localhost:3000/`.
+5. You noticed there are 0 tests. We are currently developing the flow, then migrate the actual tests later. Ask for the generation script and the database JSON (in Google drive), or shared by the web directors/web chairs via the group chat.
+6. Create a folder `data` in the root level of this repo and create a `tests` folder inside that. Put the `gen.py` in there (if you did it right, the folder structure is `UPE-Website-V2/data/tests`). Put `db.json` inside `UPE-Website-V2/data`. The json file is NoSQL structured representing the tests info from MongoDB in the original V1 website. The gen.py script generates fake PDFs of tests of the corresponding names of the test names found in `db.json`. 
+7. Install mongo (see https://docs.mongodb.com/manual/administration/install-community/)
+8. Install mongo compass (https://www.mongodb.com/download-center/compass, community edition stable since that is free)
+9. Open db.json and put all the contents into Mongo Compass (add data)
+10. Run gen.py with python to generate the tests
+11. Rerun/refresh. You should see 2k or more tests!
+
+## Workflow for Testing
+Create the account. You navigate to the navbar to Log In and type in a @\*.ucla.edu email (so it could be aaa@ucla.edu, aaa@g.ucla.edu, etc) as well as a password to sign up for an account. You should get a link to confirm your email through ethereal mail in the server tab of the terminal. Log in with the credentials specified and you should have access to the test bank!
+
 ## Phase 1 (happening now)
 
 *Implement the testbank and API server.*
