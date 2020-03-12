@@ -1,6 +1,7 @@
 import React from 'react'
 import ColorHash from 'color-hash'
 import saveBlob from 'downloadjs'
+import { aggregateFilters } from './util'
 
 import { makeStyles } from '@material-ui/core/styles'
 import Box from '@material-ui/core/Box'
@@ -51,30 +52,6 @@ const emojiTooltip = (season) => (
     <span>{seasonsEmoji(season)}</span>
   </Tooltip>
 )
-
-// preFilters is a dictionary, ex: { course: { name: 'COM SCI', number: 33 } }
-// filterItems is an array of the elements present in the filter bar
-const aggregateFilters = (preFilters, filterItems) => {
-  const courseArr = filterItems.filter(item => item.field === 'course')
-  const kindArr = filterItems.filter(item => item.field === 'kind')
-  const termArr = filterItems.filter(item => item.field === 'term')
-  const professorArr = filterItems.filter(item => item.field === 'professor')
-  let filters = {
-    ...(courseArr.length > 0 && { course: courseArr.map(item => item.data)}),
-    ...(kindArr.length > 0 && { kind: kindArr.map(item => item.data)}),
-    ...(termArr.length > 0 && { term: termArr.map(item => item.data)}),
-    ...(professorArr.length > 0 && { professor: professorArr.map(item => item.data)}),
-  }
-  for (const [filterKey, filterValues] of Object.entries(preFilters)) {
-    if (filters[filterKey]) {
-      filters[filterKey] = [ ...filters[filterKey], ...filterValues ]
-    }
-    else {
-      filters[filterKey] = filterValues
-    }
-  }
-  return filters
-}
 
 const useStyles = makeStyles(theme => ({
 
@@ -139,6 +116,10 @@ export default React.memo((props) => {
     }
   }, [page, rowsPerPage, filterItems.length])
 
+  // TODO: when needed, change this to be more robust, allowing multiple prefilters and dynamically setting visibility of columns
+  const showProfessorCol = preFilters[0].field !== 'Professor'
+  const showCoursesCol = preFilters[0].field !== 'Courses'
+
   return (
     <Paper>
       <TestTableFilterBar ax={ax} authCB={authCB} preFilters={preFilters} handleFilterItemsChange={handleFilterItemsChange} getHidden={getHidden} />
@@ -147,8 +128,8 @@ export default React.memo((props) => {
           <TableHead>
             <TableRow>
               <TableCell>Identifier</TableCell>
-              {preFilters.professor ? null : <TableCell>Professor</TableCell>}
-              {preFilters.course ? null : <TableCell>Course</TableCell>}
+              {showProfessorCol ? <TableCell>Professor</TableCell> : null}
+              {showCoursesCol ? <TableCell>Course</TableCell> : null}
               <TableCell>Kind</TableCell>
               <TableCell>Term</TableCell>
               <TableCell align='right'>Size</TableCell>
@@ -168,8 +149,8 @@ export default React.memo((props) => {
                     onClick={handleClickTestInfo(test._id)}
                   />
                 </TableCell>
-                {preFilters.professor ? null : <TableCell>{test.professor.name || '-'}</TableCell>}
-                {preFilters.course ? null : <TableCell>{test.course.subject} {test.course.number}</TableCell>}
+                {showProfessorCol ? <TableCell>{test.professor.name || '-'}</TableCell> : null}
+                {showCoursesCol ? <TableCell>{test.course.subject} {test.course.number}</TableCell> : null}
                 <TableCell>{test.kind.name + (test.kind.number ? ' ' + test.kind.number : '')}</TableCell>
                 <TableCell>
                   {test.term.year}<span>&ensp;</span>{emojiTooltip(test.term.quarter)}</TableCell>

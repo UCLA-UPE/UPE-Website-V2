@@ -65,13 +65,6 @@ const TestSchema = new mongoose.Schema({
 
 const PUBLIC_FIELDS = '_id term.quarter term.year professor.name course.subject course.number kind.name kind.number'
 
-TestSchema.methods.toString = function() {
-  return `[${this.term.quarter} ${this.term.year}] \
-          (${this.professor.name}) \
-          ${this.course.subject} ${this.course.number} - \
-          ${this.kind.name} ${this.kind.number}`
-}
-
 const termQuarterCompare = (a, b) => {
   if (a.quarter === b.quarter) return 0
   else if (a.quarter === 'Fall') return -1
@@ -88,6 +81,17 @@ const termQuarterCompare = (a, b) => {
 const termCompare = (a, b) => {
   if (a.year !== b.year) return a.year - b.year
   else return termQuarterCompare(a, b)
+}
+
+const kindCompare = (a, b) => {
+  if (a.name === b.name) { return a.number - b.number }
+  else if (a.name === 'Quiz') { return -1 }
+  else if (b.name === 'Quiz') { return 1 }
+  else if (a.name === 'Midterm') { return -1 }
+  else if (b.name === 'Midterm') { return 1 }
+  else if (a.name === 'Final') { return -1 }
+  else if (b.name === 'Final') { return 1  }
+  else { return a.name.localeCompare(b.name) }
 }
 
 const objectEqualDepth1 = (a, b) => {
@@ -119,6 +123,13 @@ const visibilityFilterMatch = (field, lval, comparator, rval) => {
     return true
   }
   return false
+}
+
+TestSchema.methods.toString = function() {
+  return `[${this.term.quarter} ${this.term.year}] \
+          (${this.professor.name}) \
+          ${this.course.subject} ${this.course.number} - \
+          ${this.kind.name} ${this.kind.number}`
 }
 
 TestSchema.methods.updateVisibility = function(testVisibilityFilters) {
@@ -235,9 +246,17 @@ TestSchema.statics.getFilterOptions = async function(filters, bypassHidden) {
     }}
   ])
   let filterOptions = filtersAgg[0]
+  // don't show options that are already filtered for
   for (const [filterKey, _] of Object.entries(filters)) {
     delete filterOptions[filterKey]
   }
+  // sort
+  if (filterOptions.professor) filterOptions.professor.sort((a, b) => (
+    a.name === null ? -1 : b.name === null ? 1 : a.name.localeCompare(b.name)
+  ))
+  if (filterOptions.course) filterOptions.course.sort()
+  if (filterOptions.kind) filterOptions.kind.sort(kindCompare)
+  if (filterOptions.term) filterOptions.term.sort(termCompare)
   return filterOptions
 }
 
