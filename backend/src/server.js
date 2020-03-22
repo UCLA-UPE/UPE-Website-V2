@@ -30,7 +30,6 @@ const TEST_FILES_DIR = (process.env.PRODUCTION === 'false') ?
 const JWT_SECRET = process.env.JWT_SECRET
 
 console.log('TEST_FILES_DIR is set to ' + TEST_FILES_DIR)
-
 // mongoose models
 const User = require('./User.model')
 const Test = require('./Test.model')
@@ -137,13 +136,24 @@ app.post('/login', async (req, res) => {
     res.status(401).json({ reason: 'Email does not exist, or password is wrong' })
     return
   }
-  if (!user.emailVerification.isVerified) {
-    res.status(401).json({ reason: 'Please verify your email' })
-    return
-  }
+  // if (!user.emailVerification.isVerified) {
+  //   res.status(401).json({ reason: 'Please verify your email' })
+  //   return
+  // }
   const token = await signUserToken(user)
   res.status(200).json({ token: token })
 })
+
+app.post('/changePassword', async (req, res) => {
+  const {email, oldPassword, newPassword} = req.body;
+  const ret = await User.changePassword(email, oldPassword, newPassword)
+  if(!ret){
+    res.status(401).json({reason: 'Old password incorrect'})
+    return
+  }
+  res.sendStatus(200)
+})
+
 
 app.post('/signup', async (req, res) => {
   if (await User.findOne({ email: req.body.email })) {
@@ -169,7 +179,6 @@ app.get('/summary', async (req, res) => {
   const summary = await Test.countDocuments()
   res.status(200).json(summary)
 })
-
 
 
 ////////////////////////

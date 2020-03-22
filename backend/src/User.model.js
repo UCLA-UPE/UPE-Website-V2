@@ -50,6 +50,15 @@ UserSchema.pre('save', async function(next) {
   next()
 })
 
+UserSchema.statics.changePassword = async function(email, oldPassword, newPassword) {
+  const user = await User.findOne({email})
+  if (!user || ! await user.isValidPassword(oldPassword)) return false
+  const res = await User.findOneAndUpdate({email}, {
+    password: await bcrypt.hash(newPassword, SALT_ROUNDS)
+  })
+  return res
+}
+
 // method to validate plaintext password
 UserSchema.methods.isValidPassword = async function(password) {
   return await bcrypt.compare(password, this.password)
