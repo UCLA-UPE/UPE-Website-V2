@@ -4,3 +4,4 @@ testbank-cra
 *.gitignored
 db_webtest
 .env
+.DS_Store
